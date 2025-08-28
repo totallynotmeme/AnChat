@@ -1,7 +1,7 @@
 # /res/blueberry/f_handle_log.py
 
 
-from scene import Console
+from .scene import Console
 import pygame as pg
 
 # bootstrapping cba nonsense

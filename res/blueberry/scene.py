@@ -1,11 +1,11 @@
 # /res/blueberry/scene.py
 
 
-import os
-import utils
-import element
+from . import utils
+from . import element
 import pygame as pg
 from threading import Thread
+import os
 
 # bootstrapping cba nonsense
 def bootstrap(_globals):
@@ -136,7 +136,7 @@ class Main:
         try:
             CONFIG.OWN_NAME = Main.field_username.text or "Anon"
             CONFIG.PASSWORD = Main.field_address.text.encode()
-            fmap[F_APPLY_CONFIG]()
+            fmap["apply_config"]()
             
             bitarray = wordip.decode(Main.field_address.text)
             addr, port = connection.protocol.frombits(bitarray)
@@ -145,7 +145,7 @@ class Main:
             
             txt = VARS.lang.MESSAGE_CONNECTED.encode()
             system_join_msg = {b"author": b"~SYSTEM", b"content": txt}
-            fmap[F_RECVMSG](system_join_msg)
+            fmap["recvmsg"](system_join_msg)
             Main.connecting = False
             Main.field_status.set_text(VARS.lang.STATUS_TEXT_DEFAULT)
         except Exception as e:
@@ -237,7 +237,7 @@ class Chat:
                 if chunk == b"":
                     txt = VARS.lang.MESSAGE_STREAMING_END.encode()
                     you_msg = {b"author": b"~YOU", b"content": txt}
-                    fmap[F_RECVMSG](you_msg)
+                    fmap["recvmsg"](you_msg)
                     Chat.streaming_file.close()
                     Chat.streaming_file = None
                     public_msg = {
@@ -247,7 +247,7 @@ class Chat:
                         b"filefollowup": b".",
                         b"file-eof": b".",
                     }
-                    fmap[F_SENDMSG](public_msg)
+                    fmap["sendmsg"](public_msg)
                     return
                 public_msg = {
                     b"author": CONFIG.OWN_NAME.encode(),
@@ -258,7 +258,7 @@ class Chat:
                 if Chat.stream_followup:
                     public_msg[b"filefollowup"] = b"."
                 Chat.stream_followup = True
-                fmap[F_SENDMSG](public_msg)
+                fmap["sendmsg"](public_msg)
         else:
             if Chat.streaming_file is not None:
                 try:
@@ -287,7 +287,7 @@ class Chat:
         if prompt == "/disconnect":
             txt = VARS.lang.MESSAGE_DISCONNECTED.encode()
             sys_msg = {b"author": b"~SYSTEM", b"content": txt}
-            fmap[F_RECVMSG](sys_msg)
+            fmap["recvmsg"](sys_msg)
             connection.disconnect()
             VARS.active = Main
         
@@ -306,7 +306,7 @@ class Chat:
             
             txt = VARS.lang.MESSAGE_DUMPED.format(filename).encode()
             sys_msg = {b"author": b"~SYSTEM", b"content": txt}
-            fmap[F_RECVMSG](sys_msg)
+            fmap["recvmsg"](sys_msg)
         
         return True
     
@@ -340,8 +340,8 @@ class Chat:
             you_msg = {b"author": b"~YOU", b"content": prompt}
             public_msg = {b"author": CONFIG.OWN_NAME.encode(), b"content": prompt}
             
-            fmap[F_RECVMSG](you_msg)
-            fmap[F_SENDMSG](public_msg)
+            fmap["recvmsg"](you_msg)
+            fmap["sendmsg"](public_msg)
         else:
             any(i.event_KEYDOWN(ev) for i in Chat.elements + Chat.messages)
     
@@ -377,7 +377,7 @@ class Chat:
         name = file.replace("\\", "/").rsplit("/", 1)[1]
         txt = VARS.lang.MESSAGE_STREAMING_START.format(name).encode()
         you_msg = {b"author": b"~YOU", b"content": txt}
-        fmap[F_RECVMSG](you_msg)
+        fmap["recvmsg"](you_msg)
         Chat.streaming_file = open(file, "rb")
         Chat.streaming_name = f"{utils.random_string(4)}_{name}".encode()
         Chat.stream_followup = False

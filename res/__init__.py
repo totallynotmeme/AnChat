@@ -7,11 +7,14 @@ if __name__ == "__main__":
     exit(-1)
 
 
+client = None # default headless mode
+
+# for client developers: replace "blueberry" with the name of your client
+from . import blueberry as client
 from . import message
 from . import encryption
 from . import connection
 from . import wordip
-from importlib.machinery import SourceFileLoader
 import time
 import sys
 import os
@@ -23,7 +26,6 @@ RES_PATH = os.path.dirname(__file__).replace("\\", "/") + "/"
 DOWNLOADS_PATH = os.getcwd() + "\\downloads"
 CLIENTS_PATH = RES_PATH
 # state
-ACTIVE_CLIENT = None
 LAST_SLEEP = 0
 LOGS = []
 
@@ -35,24 +37,6 @@ class CONFIG:
     OWN_NAME = "Anon"
     PASSWORD = b""
     PROTOCOL = "Socket"
-
-# function map enum
-F_INIT = 0
-F_HANDLE_LOG = 1
-F_TICK = 2
-F_SENDMSG = 3
-F_RECVMSG = 4
-F_APPLY_CONFIG = 5
-F_SHUTDOWN = 6
-FILE_TO_FUNC_MAP = {
-    "f_init.py": F_INIT,
-    "f_handle_log.py": F_HANDLE_LOG,
-    "f_tick.py": F_TICK,
-    "f_sendmsg.py": F_SENDMSG,
-    "f_recvmsg.py": F_RECVMSG,
-    "f_apply_config.py": F_APPLY_CONFIG,
-    "f_shutdown.py": F_SHUTDOWN,
-}
 
 
 # handler functions to process things
@@ -69,7 +53,7 @@ def DEFAULT_tick():
     global LAST_SLEEP
     
     # show logs
-    fmap[F_HANDLE_LOG]()
+    fmap["handle_log"]()
     
     # handle messages
     if len(connection.PACKET_QUEUE) > 0:
@@ -83,7 +67,7 @@ def DEFAULT_tick():
                 msg = message.error_invalid_hash()
         else:
             msg = message.error_duplicate_salt()
-        fmap[F_RECVMSG](msg)
+        fmap["recvmsg"](msg)
     
     # sleep for 0.1 to maintain 10 tps
     this_time = time.time()
@@ -136,76 +120,24 @@ def log(what):
     time_str = time.strftime("%X")
     LOGS.append((time_str, what))
 
-def init():
-    global ACTIVE_CLIENT
-    global clients
-    global fmap
-    
-    if not os.path.isdir(DOWNLOADS_PATH):
-        log("Creating downloads folder at currect working dir")
-        os.mkdir(DOWNLOADS_PATH)
-    
-    log("Fetching available clients")
-    clients = [i for i in os.listdir(CLIENTS_PATH) if os.path.isdir(CLIENTS_PATH+i)]
-    #clients = []
-    if "__pycache__" in clients:
-        clients.remove("__pycache__")
-    len_clients = len(clients)
-    
-    if len_clients == 0:
-        ACTIVE_CLIENT = None
-        log("No client folders located. Running as console application")
-    elif len_clients == 1:
-        ACTIVE_CLIENT = clients[0]
-        log(f"Running as '{ACTIVE_CLIENT}' client since it's the only one found")
-    else: # 1+
-        print(f"Found {len_clients} clients. Please choose one you want to import:")
-        choices = {}
-        for ind, i in enumerate(clients, start=1):
-            choices[str(ind)] = i
-            print(f"{ind}\t- {i}")
-        print("\nType your option and press ENTER")
-        
-        # safe user input
-        while True:
-            user_choice = input(">>: ").strip()
-            if user_choice == "":
-                continue
-            if user_choice in choices:
-                break
-            print(f"Invalid option {repr(user_choice)}")
-        
-        ACTIVE_CLIENT = choices[user_choice]
-        log(f"Running as '{ACTIVE_CLIENT}' client (found {len_clients}, user picked {repr(user_choice)})")
-    
-    fmap = [
-        DEFAULT_init,
-        DEFAULT_handle_log,
-        DEFAULT_tick,
-        DEFAULT_sendmsg,
-        DEFAULT_recvmsg,
-        DEFAULT_apply_config,
-        DEFAULT_shutdown,
-    ]
-    
-    if ACTIVE_CLIENT is None:
-        log("Created default function map, leaving it as is")
-    else:
-        log(f"Importing functions from '{ACTIVE_CLIENT}' client on top of defaults")
-        client_path = CLIENTS_PATH + ACTIVE_CLIENT + "/"
-        client_files = os.listdir(client_path)
-        sys.path.append(client_path)
-        for file, val in FILE_TO_FUNC_MAP.items():
-            if file not in client_files:
-                continue
-            try:
-                a = SourceFileLoader(ACTIVE_CLIENT + "_" + file, client_path + file).load_module()
-                a.bootstrap(globals())
-                fmap[val] = a.func
-                log(f"Successfully imported and bootstrapped {file}")
-            except Exception as e:
-                log(f"Error when importing {file}: {e}")
-
 
 # initialization routine
-init()
+if not os.path.isdir(DOWNLOADS_PATH):
+    log("Creating downloads folder at currect working dir")
+    os.mkdir(DOWNLOADS_PATH)
+
+fmap = {
+    "init": DEFAULT_init,
+    "handle_log": DEFAULT_handle_log,
+    "tick": DEFAULT_tick,
+    "sendmsg": DEFAULT_sendmsg,
+    "recvmsg": DEFAULT_recvmsg,
+    "apply_config": DEFAULT_apply_config,
+    "shutdown": DEFAULT_shutdown,
+}
+
+# loading funcs and 
+if client is not None:
+    fmap.update(client.fmap)
+    for i in client.to_bootstrap:
+        i.bootstrap(globals())

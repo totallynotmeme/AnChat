@@ -1,15 +1,15 @@
 from res import *
 
 
-fmap[F_INIT]()
-fmap[F_HANDLE_LOG]()
+fmap["init"]()
+fmap["handle_log"]()
 
-headless = ACTIVE_CLIENT is None
+headless = client is None
 
 while VARS.RUNNING:
     if not headless:
         try:
-            fmap[F_TICK]()
+            fmap["tick"]()
         except Exception as e:
             print(f"Unhandled exception: {e}")
         continue
@@ -23,11 +23,11 @@ while VARS.RUNNING:
             b"author": CONFIG.OWN_NAME.encode(),
             b"content": _user_input[1:].encode(),
         }
-        fmap[F_SENDMSG](msg)
+        fmap["sendmsg"](msg)
         continue
     
     if _user_input == "shut":
-        fmap[F_SHUTDOWN]()
+        fmap["shutdown"]()
         break
     
     try:

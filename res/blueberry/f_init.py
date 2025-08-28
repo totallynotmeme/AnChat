@@ -1,11 +1,11 @@
 # /res/blueberry/f_init.py
 
 
-import lang
-import utils
-import scene
-import element
-import chat_message
+from . import lang
+from . import utils
+from . import scene
+from . import element
+from . import chat_message
 import pygame as pg
 import os
 

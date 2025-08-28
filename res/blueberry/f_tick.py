@@ -1,7 +1,7 @@
 # /res/blueberry/f_tick.py
 
 
-import utils
+from . import utils
 import pygame as pg
 
 # bootstrapping cba nonsense
@@ -46,7 +46,7 @@ def func():
             
             case pg.QUIT:
                 VARS.RUNNING = False
-                fmap[F_SHUTDOWN]()
+                fmap["shutdown"]()
     
     # handle messages (pasted from __init__.py's default)
     if len(connection.PACKET_QUEUE) > 0:
@@ -61,9 +61,9 @@ def func():
                 msg = message.error_invalid_hash()
         else:
             msg = message.error_duplicate_salt()
-        fmap[F_RECVMSG](msg)
+        fmap["recvmsg"](msg)
     
-    fmap[F_HANDLE_LOG]()
+    fmap["handle_log"]()
     VARS.active.draw(VARS.canvas)
     
     pg.display.flip()

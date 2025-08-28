@@ -1,7 +1,7 @@
 # /res/blueberry/element.py
 
 
-import utils
+from . import utils
 import pygame as pg
 
 # bootstrapping cba nonsense

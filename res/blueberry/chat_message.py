@@ -1,10 +1,10 @@
 # /res/blueberry/chat_message.py
 
 
-import os
-import utils
-import element
+from . import utils
+from . import element
 import pygame as pg
+import os
 
 
 fonts = {}

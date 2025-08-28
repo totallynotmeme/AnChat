@@ -1,8 +1,8 @@
 # /res/blueberry/f_recvmsg.py
 
 
-from chat_message import ChatMessage
-from scene import Chat
+from .chat_message import ChatMessage
+from .scene import Chat
 import pygame as pg
 
 # bootstrapping cba nonsense
