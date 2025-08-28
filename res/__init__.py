@@ -136,7 +136,7 @@ fmap = {
     "shutdown": DEFAULT_shutdown,
 }
 
-# loading funcs and 
+# loading funcs and bootstrapping the modules
 if client is not None:
     fmap.update(client.fmap)
     for i in client.to_bootstrap:
