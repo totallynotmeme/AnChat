@@ -1,19 +1,43 @@
+# /chat.py
+# Main wrapper around fmap and a fallback debug client
+# Use this if you're running the raw Python code
+
+
 from res import *
+import traceback
 
 
 fmap["init"]()
 fmap["handle_log"]()
 
 headless = client is None
+errors = 0
+
 
 while VARS.RUNNING:
     if not headless:
         try:
             fmap["tick"]()
+            errors = 0
         except Exception as e:
-            print(f"Unhandled exception: {e}")
-        continue
+            traceback.print_exception(e)
+            errors += 1
         
+        if errors == 3:
+            print("\nException loop detected. Attempting to re-initialize the client")
+            fmap["init"]()
+        
+        elif errors == 4:
+            print("That didn't seem to help. Entering recovery environment")
+            print("Run 'headless = False' to resume execution\n")
+            headless = True
+        
+        elif errors >= 4:
+            headless = True
+        
+        continue
+    
+    
     # headless cmd version for debugging
     _user_input = input(">>> ").strip()
     if _user_input == "":
