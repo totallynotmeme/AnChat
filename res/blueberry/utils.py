@@ -17,7 +17,7 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "lang": "en"
 }
 DEFAULT_CONFIG_FILE = """
-// /config.txt
+// /res/blueberry/config.txt
 
 
 // This is a standard config file for this client!

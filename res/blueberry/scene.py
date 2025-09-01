@@ -387,15 +387,21 @@ class Chat:
 class Options:
     button = None
     behind = None
+    container = None
     
     def draw(canvas):
         Main.update_surf()
         canvas.blit(Main.surf, (0, 0))
         
-        txt = VARS.fonts[30].render("Options will be here soon, but not now", True, (255, 255, 255))
+        txt = VARS.lang.OPTIONS_TITLE
+        txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
+        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, 25)))
+        
+        txt = VARS.fonts[30].render("Settings will be here soon, but not now", True, (255, 255, 255))
         canvas.blit(txt, txt.get_rect(center=VARS.window_size/2))
         
         Options.button.draw(canvas)
+        #Options.container.draw(canvas)
     
     def init():
         button = element.Button(
@@ -406,6 +412,7 @@ class Options:
             hover_scale = 0,
         )
         button.surface.fill((0, 63, 127))
+        
         # cogwheel
         center = pg.Vector2(15, 15)
         up = pg.Vector2(0, -12)
@@ -424,6 +431,33 @@ class Options:
         Options.button = button
         Main.elements.append(button)
         Chat.elements.append(button)
+        
+        # container stuff isn't finished yet :bleh:
+        Options.container = element.Container(
+            pos = (0, 50),
+            size = (VARS.window_size.x, VARS.window_size.y - 50),
+        )
+        
+        last = Options.container.push(element.Line,
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_LANGUAGE)
+        
+        last = Options.container.push(element.Button,
+            offset = (60, 20),
+            size = (90, 30),
+            align = "center",
+            callback = lambda: print("debug button hehe"),
+            hover_scale = 0.2,
+        )
+        last.surface.fill((255, 255, 255))
+        last.update_surf()
+        
+        Options.elements = (Options.button, Options.container)
     
     def toggle():
         if VARS.active == Options:
@@ -434,17 +468,24 @@ class Options:
         VARS.active = Options
     
     
-    def event_KEYDOWN(ev):
-        pass
-    
     def event_MOUSEBUTTONDOWN(ev):
-        Options.button.event_MOUSEBUTTONDOWN(ev)
+        any(i.event_MOUSEBUTTONDOWN(ev) for i in Options.elements)
     
     def event_MOUSEBUTTONUP(ev):
-        Options.button.event_MOUSEBUTTONUP(ev)
+        any(i.event_MOUSEBUTTONUP(ev) for i in Options.elements)
     
     def event_MOUSEMOTION(ev):
-        Options.button.event_MOUSEMOTION(ev)
+        pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
+        any(i.event_MOUSEMOTION(ev) for i in Options.elements)
+    
+    def event_TEXTINPUT(ev):
+        any(i.event_TEXTINPUT(ev) for i in Options.elements)
+    
+    def event_KEYDOWN(ev):
+        if ev.key == pg.K_ESCAPE:
+            Console.toggle()
+            return
+        any(i.event_KEYDOWN(ev) for i in Options.elements)
 
 
 

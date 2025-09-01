@@ -3,14 +3,18 @@
 
 if __name__ == "__main__":
     print("This module cannot be launched directly.")
-    print("Please use 'from res import *' in your script")
+    print("Please use 'from res import *' in your wrapper")
     exit(-1)
 
 
 client = None # default headless mode
 
 # for client developers: replace "blueberry" with the name of your client
-from . import blueberry as client
+try:
+    from . import blueberry as client
+except Exception as e:
+    print("Failed to import active client:", e)
+    print("Falling back to console environment")
 from . import message
 from . import encryption
 from . import connection
@@ -23,14 +27,14 @@ import os
 # standard variables that should not be overwritten
 # system
 RES_PATH = os.path.dirname(__file__).replace("\\", "/") + "/"
-DOWNLOADS_PATH = os.getcwd() + "\\downloads"
+DOWNLOADS_PATH = os.getcwd() + "/downloads"
 CLIENTS_PATH = RES_PATH
 # state
 LAST_SLEEP = 0
 LOGS = []
 
 class VARS:
-    CORE_VERSION = "0.1-BETA"
+    CORE_VERSION = "0.1.0-INDEV"
     RUNNING = False
 
 class CONFIG:
@@ -95,7 +99,7 @@ def DEFAULT_recvmsg(msg):
         for i in '\\/:*?"<>|':
             filename = filename.replace(i, "_")
         fields.insert(2, f"Attached file data of: {filename}")
-        open(DOWNLOADS_PATH + "\\" + filename, "ab").write(msg[b"filedata"])
+        open(DOWNLOADS_PATH + "/" + filename, "ab").write(msg[b"filedata"])
     
     lines = len(fields)
     fields = "\x1b[1E".join(fields) # move cursor down 1 + to the start of line
@@ -122,6 +126,7 @@ def log(what):
 
 
 # initialization routine
+log("Default functions created, initializing Core")
 if not os.path.isdir(DOWNLOADS_PATH):
     log("Creating downloads folder at currect working dir")
     os.mkdir(DOWNLOADS_PATH)
@@ -138,6 +143,7 @@ fmap = {
 
 # loading funcs and bootstrapping the modules
 if client is not None:
+    log(f"Loading and bootstrapping client {client.__name__}")
     fmap.update(client.fmap)
     for i in client.to_bootstrap:
         i.bootstrap(globals())

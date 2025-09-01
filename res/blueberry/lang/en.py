@@ -15,10 +15,13 @@ STATUS_TEXT_DEFAULT = "Fill in the fields and press Connect"
 STATUS_TEXT_TRYING = "Trying to connect, please wait..."
 STATUS_TEXT_FAILED = "Failed: {}"
 
+OPTIONS_TITLE = "Settings"
+OPTIONS_LANGUAGE = "Switch language (requires restart)"
+
 
 MESSAGE_CONNECTED = "Connected to the server, send /disconnect to get back to menu"
 MESSAGE_DISCONNECTED = "Disconnected from the server"
-MESSAGE_DUMPED = "Dumped all messages into {}"
+MESSAGE_DUMPED = "Dumped message history into {}"
 MESSAGE_STREAMING_START = "Streaming file '{}' to members of this chat"
 MESSAGE_STREAMING_END = "Streaming finished."
 

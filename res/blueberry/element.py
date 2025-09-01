@@ -95,7 +95,7 @@ class Line:
         self.scroll_pos = min(self.scroll_pos, limit)
     
     
-    def draw(self, canvas):
+    def draw(self, canvas, offset=pg.Vector2()):
         to_render = self.text or self.placeholder
         if self.text == "":
             color = self.placeholder_color
@@ -105,7 +105,7 @@ class Line:
         
         trimmed = to_render[self.scroll_pos: self.scroll_pos+self.max_chars+1]
         txt = self.font.render(trimmed, True, color)
-        rect = txt.get_rect(**{self.align: self.pos})
+        rect = txt.get_rect(**{self.align: self.pos + offset})
         
         if self.selection_start >= 0:
             x_points = (
@@ -125,7 +125,12 @@ class Line:
         
         self.true_bb = canvas.blit(txt, rect)
         if VARS.debug:
-            pg.draw.rect(canvas, (255, 0, 0), self.bounding_box, 1)
+            if offset:
+                display_bb = pg.Vector2(self.bounding_box.topleft) + offset
+                display_bb = pg.Rect(display_bb, self.bounding_box.size)
+                pg.draw.rect(canvas, (255, 127, 0), display_bb, 1)
+            else:
+                pg.draw.rect(canvas, (255, 0, 0), self.bounding_box, 1)
             pg.draw.rect(canvas, (127, 0, 0), self.true_bb, 1)
         
         if self.active and self.edit:
@@ -495,7 +500,10 @@ class Button:
         self.surface = pg.Surface(self.size)
         self.surf_hovering = self.surface.copy()
         self.surf_holding = self.surface.copy()
-        self.bounding_box = pg.Rect(0, 0, 0, 0)
+        bb = pg.Rect(self.pos, self.size)
+        true_pos = 2*self.pos - pg.Vector2(getattr(bb, align))
+        self.bounding_box = pg.Rect(true_pos, self.size)
+        self.true_bb = pg.Rect(0, 0, 0, 0)
     
     def update_surf(self):
         self.surf_hovering = self.surface.copy()
@@ -503,7 +511,7 @@ class Button:
         self.surf_holding = self.surface.copy()
         self.surf_holding.fill((25, 25, 25), special_flags=pg.BLEND_RGB_SUB)
     
-    def draw(self, canvas):
+    def draw(self, canvas, offset=pg.Vector2()):
         if self.holding:
             scale_factor_goal = 1 - self.hover_scale
             surf = self.surf_holding
@@ -518,9 +526,9 @@ class Button:
         if abs(self.scale_factor - 1) > 0.01:
             surf = pg.transform.smoothscale_by(surf, self.scale_factor)
         
-        rect = surf.get_rect(**{self.align: self.pos})
-        self.bounding_box = canvas.blit(surf, rect)
-        return self.bounding_box
+        rect = surf.get_rect(**{self.align: self.pos + offset})
+        self.true_bb = canvas.blit(surf, rect)
+        return self.true_bb
     
     
     def event_MOUSEMOTION(self, ev):
@@ -546,7 +554,7 @@ class Button:
 
 
 class Container:
-    # i don't even care about the code i just want to finish this
+    # still not finished, but we're getting closer
     def __init__(self, pos, size, align="topleft", step=50):
         self.pos = pg.Vector2(pos)
         self.size = pg.Vector2(size)
@@ -555,36 +563,61 @@ class Container:
         self.scroll = 0
         self.scroll_goal = 0
         self.scroll_step = step
+        self.rect = pg.Rect(self.pos, self.size)
+        self.last = None
     
     def draw(self, canvas):
+        self.scroll = (self.scroll * 3 + self.scroll_goal) / 4
+        scroll_offset = pg.Vector2(0, self.scroll)
         for i in self.elements:
-            i.draw(canvas)
+            i.draw(canvas, offset = self.pos - scroll_offset)
     
-    def push(self, element):
-        # double and give it to the next person
-        return
-        #self.elements.append(element())
+    def push(self, element, **kwargs):
+        if "size_y" in kwargs:
+            kwargs["size"] = (self.size.x - 10, kwargs.pop("size_y"))
+        
+        if self.elements:
+            last = self.elements[-1]
+            pos_y = last.pos.y + last.size.y + 5
+        else:
+            pos_y = 5
+        
+        pos_x = 5
+        if "offset" in kwargs:
+            offset = kwargs.pop("offset")
+            pos_x += offset[0]
+            pos_y += offset[1]
+        
+        kwargs["pos"] = (pos_x, pos_y)
+        
+        self.last = element(**kwargs)
+        self.elements.append(self.last)
+        return self.last
     
     
     def event_MOUSEMOTION(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        offset = pg.Vector2(self.rect.topleft)
+        offset.y -= self.scroll
+        ev.pos = pg.Vector2(ev.pos) - offset
         res = any(i.event_MOUSEMOTION(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
+        ev.pos += offset
         return res
     
     def event_MOUSEBUTTONDOWN(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        offset = pg.Vector2(self.rect.topleft)
+        offset.y -= self.scroll
+        ev.pos = pg.Vector2(ev.pos) - offset
         res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
+        ev.pos += offset
         if res:
             return
         
         if ev.button == pg.BUTTON_WHEELDOWN:
-            if len(self.messages) == 0:
+            if len(self.elements) == 0:
                 limit = 0
             else:
-                last = self.messages[-1]
-                limit = last.offset + last.surface.get_size()[1] - 200
+                last = self.elements[-1]
+                limit = last.pos.y + last.size.y - 200
             self.scroll_goal = min(self.scroll_goal + self.scroll_step, limit)
             self.scroll += self.scroll_step / 2
         elif ev.button == pg.BUTTON_WHEELUP:
@@ -592,20 +625,15 @@ class Container:
             self.scroll -= self.scroll_step / 2
     
     def event_MOUSEBUTTONUP(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        offset = pg.Vector2(self.rect.topleft)
+        offset.y -= self.scroll
+        ev.pos = pg.Vector2(ev.pos) - offset
         res = any(i.event_MOUSEBUTTONUP(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
+        ev.pos += offset
         return res
     
     def event_KEYDOWN(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
-        res = any(i.event_KEYDOWN(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
-        return res
+        return any(i.event_KEYDOWN(ev) for i in self.elements)
     
     def event_TEXTINPUT(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
-        res = any(i.event_TEXTINPUT(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
-        return res
-    
+        return any(i.event_TEXTINPUT(ev) for i in self.elements)
