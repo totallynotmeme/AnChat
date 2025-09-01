@@ -17,7 +17,7 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "lang": "en"
 }
 DEFAULT_CONFIG_FILE = """
-// /res/blueberry/config.txt
+// /config.txt
 
 
 // This is a standard config file for this client!
@@ -113,3 +113,4 @@ def text_to_lines(text, max_length):
                 lines.append(chunk)
     
     return lines
+
