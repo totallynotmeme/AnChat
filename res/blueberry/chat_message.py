@@ -66,7 +66,7 @@ class ChatMessage:
                 self.show = False
             else:
                 if self.filename not in writing_files:
-                    handler = open(downloads_path + "\\" + self.filename, "ab")
+                    handler = open(downloads_path + "/" + self.filename, "ab")
                     writing_files[self.filename] = handler
                     print("FILE OPENED")
                 writing_files[self.filename].write(raw[b"filedata"])
@@ -160,3 +160,4 @@ class ChatMessage:
     
     def event_TEXTINPUT(self, ev):
         return any(i.event_TEXTINPUT(ev) for i in self.elements)
+
