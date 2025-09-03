@@ -90,7 +90,7 @@ while VARS.RUNNING:
             errors = 69
             reinit_err = e
     
-    elif errors >= 4:
+    if errors >= 4:
         time_when = time.strftime("[%c]")
         with open(crash_log_name, "w") as crash_dump:
             crash_dump.write(crash_message_at_runtime.format(time_when))
