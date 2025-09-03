@@ -15,38 +15,20 @@ def bootstrap(_globals):
 def func():
     # parse events
     for ev in pg.event.get():
-        match ev.type:
-            case pg.MOUSEMOTION:
-                VARS.mousepos = pg.Vector2(pg.mouse.get_pos())
-                if "event_MOUSEMOTION" in dir(VARS.active):
-                    VARS.active.event_MOUSEMOTION(ev)
-            
-            case pg.MOUSEBUTTONDOWN:
-                if "event_MOUSEBUTTONDOWN" in dir(VARS.active):
-                    VARS.active.event_MOUSEBUTTONDOWN(ev)
-            
-            case pg.MOUSEBUTTONUP:
-                if "event_MOUSEBUTTONUP" in dir(VARS.active):
-                    VARS.active.event_MOUSEBUTTONUP(ev)
-            
-            case pg.KEYDOWN:
-                mods = pg.key.get_mods()
-                VARS.holding_ctrl = bool(mods & pg.KMOD_CTRL)
-                VARS.holding_shift = bool(mods & pg.KMOD_SHIFT)
-                if "event_KEYDOWN" in dir(VARS.active):
-                    VARS.active.event_KEYDOWN(ev)
-            
-            case pg.TEXTINPUT:
-                if "event_TEXTINPUT" in dir(VARS.active):
-                    VARS.active.event_TEXTINPUT(ev)
-            
-            case pg.DROPFILE:
-                if "event_DROPFILE" in dir(VARS.active):
-                    VARS.active.event_DROPFILE(ev)
-            
-            case pg.QUIT:
-                VARS.RUNNING = False
-                fmap["shutdown"]()
+        if ev.type == pg.MOUSEMOTION:
+            VARS.mousepos = pg.Vector2(pg.mouse.get_pos())
+        
+        if ev.type == pg.KEYDOWN:
+            mods = pg.key.get_mods()
+            VARS.holding_ctrl = bool(mods & pg.KMOD_CTRL)
+            VARS.holding_shift = bool(mods & pg.KMOD_SHIFT)
+        
+        if ev.type == pg.QUIT:
+            VARS.RUNNING = False
+            fmap["shutdown"]()
+            return
+        
+        VARS.active.handle_event(ev)
     
     # handle messages (pasted from __init__.py's default)
     if len(connection.PACKET_QUEUE) > 0:

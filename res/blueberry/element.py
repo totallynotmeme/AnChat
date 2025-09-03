@@ -11,6 +11,13 @@ def bootstrap(_globals):
     globals().update(orig_globals)
 
 
+event_null = lambda *a: False
+
+def handle_event(self, ev):
+    func = self.evmap.get(ev.type, event_null)
+    return func(self, ev)
+
+
 ctrl_a = "\x01"
 ctrl_c = "\x03"
 ctrl_v = "\x16"
@@ -313,6 +320,16 @@ class Line:
         self.text = left + ev.text + right
         self.set_cursor(self.cursor_pos + 1, no_select=True)
         return True
+    
+    
+    handle_event = handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+        pg.KEYDOWN: event_KEYDOWN,
+        pg.TEXTINPUT: event_TEXTINPUT,
+    }
 
 
 class Multiline:
@@ -483,6 +500,16 @@ class Multiline:
         if self.selection_start != (-1, -1):
             self.selection_start = (-1, -1)
             self.selection_end = (-1, -1)
+    
+    
+    handle_event = handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+        pg.KEYDOWN: event_KEYDOWN,
+        pg.TEXTINPUT: event_TEXTINPUT,
+    }
 
 
 class Button:
@@ -546,11 +573,12 @@ class Button:
         self.holding = False
     
     
-    def event_KEYDOWN(self, ev):
-        pass
-    
-    def event_TEXTINPUT(self, ev):
-        pass
+    handle_event = handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+    }
 
 
 class Container:
@@ -637,3 +665,13 @@ class Container:
     
     def event_TEXTINPUT(self, ev):
         return any(i.event_TEXTINPUT(ev) for i in self.elements)
+    
+    
+    handle_event = handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+        pg.KEYDOWN: event_KEYDOWN,
+        pg.TEXTINPUT: event_TEXTINPUT,
+    }

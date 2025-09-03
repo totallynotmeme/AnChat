@@ -104,7 +104,7 @@ class Main:
             color = (255, 255, 255),
             font = VARS.fonts[25],
             align = "center",
-            edit = False,
+            edit = True,
             placeholder = VARS.lang.FIELD_USERNAME,
         )
         Main.elements.append(Main.field_username)
@@ -114,7 +114,7 @@ class Main:
             color = (255, 255, 255),
             font = VARS.fonts[25],
             align = "center",
-            edit = False,
+            edit = True,
             placeholder = VARS.lang.FIELD_ADDRESS,
         )
         Main.elements.append(Main.field_address)
@@ -172,35 +172,20 @@ class Main:
         Main.protocol_button.update_surf()
     
     
-    def event_KEYDOWN(ev):
-        if ev.key == pg.K_ESCAPE:
-            Console.toggle()
-        elif not Main.connecting:
-            any(i.event_KEYDOWN(ev) for i in Main.elements)
-    
-    def event_MOUSEBUTTONDOWN(ev):
-        if Main.connecting:
-            return
-        cursor_y = ev.pos[1]
-        if ev.button == pg.BUTTON_LEFT:
-            for i in Main.elements:
-                if i.type == "line" and i != Main.field_status:
-                    i.edit = abs(cursor_y - i.pos.y) < i.size.y / 2
-        any(i.event_MOUSEBUTTONDOWN(ev) for i in Main.elements)
-    
-    def event_MOUSEBUTTONUP(ev):
-        if Main.connecting:
-            return
-        any(i.event_MOUSEBUTTONUP(ev) for i in Main.elements)
-    
-    def event_MOUSEMOTION(ev):
-        pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        any(i.event_MOUSEMOTION(ev) for i in Main.elements)
-    
-    def event_TEXTINPUT(ev):
-        if Main.connecting:
-            return
-        any(i.event_TEXTINPUT(ev) for i in Main.elements)
+    def handle_event(ev):
+        if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                Console.toggle()
+            elif Main.connecting:
+                return
+        
+        if ev.type == pg.MOUSEBUTTONDOWN:
+            cursor_y = ev.pos[1]
+        
+        if ev.type == pg.MOUSEMOTION:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
+        
+        any(i.handle_event(ev) for i in Main.elements)
 
 
 
@@ -327,60 +312,59 @@ class Chat:
         Chat.elements.append(Chat.input_box)
     
     
-    def event_KEYDOWN(ev):
-        if ev.key == pg.K_ESCAPE:
-            Console.toggle()
-        elif ev.key == pg.K_RETURN and Chat.input_box.text:
-            prompt = Chat.input_box.text
-            Chat.input_box.set_text("")
-            if Chat.parse_command(prompt.strip()):
+    def parse_event(ev):
+        if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                Console.toggle()
                 return
+            elif ev.key == pg.K_RETURN and Chat.input_box.text:
+                prompt = Chat.input_box.text
+                Chat.input_box.set_text("")
+                if Chat.parse_command(prompt.strip()):
+                    return
             
-            prompt = prompt.encode()
-            you_msg = {b"author": b"~YOU", b"content": prompt}
-            public_msg = {b"author": CONFIG.OWN_NAME.encode(), b"content": prompt}
-            
-            fmap["recvmsg"](you_msg)
-            fmap["sendmsg"](public_msg)
-        else:
-            any(i.event_KEYDOWN(ev) for i in Chat.elements + Chat.messages)
-    
-    def event_MOUSEBUTTONDOWN(ev):
-        if ev.button == pg.BUTTON_WHEELDOWN:
-            if len(Chat.messages) == 0:
-                limit = 0
-            else:
-                last = Chat.messages[-1]
-                limit = last.offset + last.size[1] - 200
-            Chat.scroll_goal = min(Chat.scroll_goal + Chat.scroll_step, limit)
-            Chat.scroll += Chat.scroll_step / 5
-        elif ev.button == pg.BUTTON_WHEELUP:
-            Chat.scroll_goal = max(Chat.scroll_goal - Chat.scroll_step, -200)
-            Chat.scroll -= Chat.scroll_step / 5
-        else:
-            any(i.event_MOUSEBUTTONDOWN(ev) for i in Chat.elements + Chat.messages)
-    
-    def event_MOUSEBUTTONUP(ev):
-        any(i.event_MOUSEBUTTONUP(ev) for i in Chat.elements + Chat.messages)
-    
-    def event_MOUSEMOTION(ev):
-        pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        any(i.event_MOUSEMOTION(ev) for i in Chat.elements + Chat.messages)
-    
-    def event_TEXTINPUT(ev):
-        Chat.input_box.event_TEXTINPUT(ev)
-    
-    def event_DROPFILE(ev):
-        file = ev.file
-        if not os.path.isfile(file):
+                prompt = prompt.encode()
+                you_msg = {b"author": b"~YOU", b"content": prompt}
+                public_msg = {b"author": CONFIG.OWN_NAME.encode(), b"content": prompt}
+                
+                fmap["recvmsg"](you_msg)
+                fmap["sendmsg"](public_msg)
+                return
+        
+        if ev.type == pg.MOUSEBUTTONDOWN:
+            if ev.button == pg.BUTTON_WHEELDOWN:
+                if len(Chat.messages) == 0:
+                    limit = 0
+                else:
+                    last = Chat.messages[-1]
+                    limit = last.offset + last.size[1] - 200
+                Chat.scroll_goal = min(Chat.scroll_goal + Chat.scroll_step, limit)
+                Chat.scroll += Chat.scroll_step / 5
+            elif ev.button == pg.BUTTON_WHEELUP:
+                Chat.scroll_goal = max(Chat.scroll_goal - Chat.scroll_step, -200)
+                Chat.scroll -= Chat.scroll_step / 5
+        
+        if ev.type == pg.MOUSEMOTION:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
+        
+        if ev.type == pg.TEXTINPUT:
+            Chat.input_box.event_TEXTINPUT(ev)
             return
-        name = file.replace("\\", "/").rsplit("/", 1)[1]
-        txt = VARS.lang.MESSAGE_STREAMING_START.format(name).encode()
-        you_msg = {b"author": b"~YOU", b"content": txt}
-        fmap["recvmsg"](you_msg)
-        Chat.streaming_file = open(file, "rb")
-        Chat.streaming_name = f"{utils.random_string(4)}_{name}".encode()
-        Chat.stream_followup = False
+    
+        if ev.type == pg.DROPFILE:
+            file = ev.file
+            if not os.path.isfile(file):
+                return
+            name = file.replace("\\", "/").rsplit("/", 1)[1]
+            txt = VARS.lang.MESSAGE_STREAMING_START.format(name).encode()
+            you_msg = {b"author": b"~YOU", b"content": txt}
+            fmap["recvmsg"](you_msg)
+            Chat.streaming_file = open(file, "rb")
+            Chat.streaming_name = f"{utils.random_string(4)}_{name}".encode()
+            Chat.stream_followup = False
+            return
+        
+        any(i.handle_event(ev) for i in Chat.elements + Chat.messages)
 
 
 
@@ -468,24 +452,16 @@ class Options:
         VARS.active = Options
     
     
-    def event_MOUSEBUTTONDOWN(ev):
-        any(i.event_MOUSEBUTTONDOWN(ev) for i in Options.elements)
+    def handle_event(ev):
+        if ev.type == pg.MOUSEMOTION:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
     
-    def event_MOUSEBUTTONUP(ev):
-        any(i.event_MOUSEBUTTONUP(ev) for i in Options.elements)
-    
-    def event_MOUSEMOTION(ev):
-        pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        any(i.event_MOUSEMOTION(ev) for i in Options.elements)
-    
-    def event_TEXTINPUT(ev):
-        any(i.event_TEXTINPUT(ev) for i in Options.elements)
-    
-    def event_KEYDOWN(ev):
-        if ev.key == pg.K_ESCAPE:
-            Console.toggle()
-            return
-        any(i.event_KEYDOWN(ev) for i in Options.elements)
+        if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                Console.toggle()
+                return
+        
+        any(i.handle_event(ev) for i in Options.elements)
 
 
 
@@ -589,51 +565,44 @@ clearhistory - erase command history
             log(f"Error: {e}. Run '?' for help")
     
     
-    def event_MOUSEBUTTONDOWN(ev):
-        any(i.event_MOUSEBUTTONDOWN(ev) for i in Console.elements)
-    
-    def event_MOUSEBUTTONUP(ev):
-        any(i.event_MOUSEBUTTONUP(ev) for i in Console.elements)
-    
-    def event_MOUSEMOTION(ev):
-        pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        any(i.event_MOUSEMOTION(ev) for i in Console.elements)
-    
-    def event_TEXTINPUT(ev):
-        any(i.event_TEXTINPUT(ev) for i in Console.elements)
-    
-    def event_KEYDOWN(ev):
-        history = Console.history or [""]
-        if ev.key == pg.K_ESCAPE:
-            Console.toggle()
+    def handle_event(ev):
+        if ev.type == pg.MOUSEMOTION:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         
-        elif ev.key == pg.K_RETURN:
-            Console.prompt_line.active = True
-            Console.logs_multiline.active = False
-            if not Console.prompt_line.text:
+        if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                Console.toggle()
+                return
+            history = Console.history or [""]
+            
+            if ev.key == pg.K_RETURN:
+                Console.prompt_line.active = True
+                Console.logs_multiline.active = False
+                if not Console.prompt_line.text:
+                    return
+                
+                Console.run(Console.prompt_line.text)
+                if history and Console.prompt_line.text != history[-1]:
+                    Console.history.append(Console.prompt_line.text)
+                
+                Console.history_ind = len(Console.history)
+                Console.logs_multiline.append_text(">>> " + Console.prompt_line.text)
+                Console.prompt_line.set_text("")
                 return
             
-            Console.run(Console.prompt_line.text)
-            if history and Console.prompt_line.text != history[-1]:
-                Console.history.append(Console.prompt_line.text)
-            
-            Console.history_ind = len(Console.history)
-            Console.logs_multiline.append_text(">>> " + Console.prompt_line.text)
-            Console.prompt_line.set_text("")
-        
-        elif ev.key == pg.K_UP:
-            Console.history_ind = max(Console.history_ind - 1, 0)
-            Console.prompt_line.set_text(history[Console.history_ind])
-        elif ev.key == pg.K_DOWN:
-            Console.history_ind = min(Console.history_ind + 1, len(history))
-            if Console.history_ind == len(history):
-                Console.prompt_line.set_text("")
-            else:
+            if ev.key == pg.K_UP:
+                Console.history_ind = max(Console.history_ind - 1, 0)
                 Console.prompt_line.set_text(history[Console.history_ind])
-        else:
-            any(i.event_KEYDOWN(ev) for i in Console.elements)
-    
-
+                return
+            if ev.key == pg.K_DOWN:
+                Console.history_ind = min(Console.history_ind + 1, len(history))
+                if Console.history_ind == len(history):
+                    Console.prompt_line.set_text("")
+                else:
+                   Console.prompt_line.set_text(history[Console.history_ind])
+                return
+        
+        any(i.handle_event(ev) for i in Console.elements)
 
 
 to_init = (Main, Chat, Options, Console)
