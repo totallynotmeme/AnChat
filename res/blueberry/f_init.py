@@ -43,6 +43,9 @@ def func():
     scene.bootstrap(globals())
     element.bootstrap(globals())
     
+    log("Initializing Pygame")
+    pg.init() # yes that's it
+    
     log("Reading config and language files")
     
     # initializing some variables
@@ -55,10 +58,13 @@ def func():
         log(i)
     
     # getting screen resolution from config (or default)
-    window_size = utils.parse_screen_res(CONFIG.CLIENT["window_size"])
+    display_data = pg.display.Info()
+    max_res = display_data.current_w, display_data.current_h
+    window_size = utils.parse_screen_res(CONFIG.CLIENT["window_size"], max_res)
     if window_size is None:
         log("Couldn't parse 'window_size' parameter, will use default")
-        window_size = utils.parse_screen_res(CONFIG.DEFAULTS["window_size"])
+        window_size = utils.parse_screen_res(CONFIG.DEFAULTS["window_size"], max_res)
+    
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
     VARS.lang = lang.langmap[CONFIG.CLIENT["lang"]]
@@ -66,7 +72,6 @@ def func():
     
     # that log() explains what this block does lol
     log("Creating pygame window")
-    pg.init()
     pg.display.set_caption(VARS.lang.WINDOW_TITLE)
     VARS.canvas = pg.display.set_mode(window_size)
     VARS.clock = pg.time.Clock()

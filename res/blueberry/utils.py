@@ -13,7 +13,7 @@ def bootstrap(_globals):
 # some constants and default stuff
 GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "seen_intro": "0",
-    "window_size": "900x500",
+    "window_size": "1400x800",
     "lang": "en"
 }
 DEFAULT_CONFIG_FILE = """
@@ -59,10 +59,10 @@ def parse_config_file(current_config):
         open(CONFIG_FILE_PATH, "w").write(DEFAULT_CONFIG_FILE)
     return verbals
 
-def parse_screen_res(raw):
+def parse_screen_res(raw, max_res):
     try:
         res = tuple(map(int, raw.split("x", 1)))
-        return res
+        return min(res[0], max_res[0]), min(res[1], max_res[1])
     except Exception:
         return None
 
@@ -113,4 +113,3 @@ def text_to_lines(text, max_length):
                 lines.append(chunk)
     
     return lines
-
