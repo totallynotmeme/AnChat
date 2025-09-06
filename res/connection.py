@@ -6,6 +6,7 @@ import socket as sock
 from threading import Thread
 
 
+# todo: nuke this nonsense code and refactor everything
 ADDR = ""
 SOCKET = None
 PACKET = bytearray()
@@ -13,6 +14,7 @@ PACKET_EXPECTED_LEN = -1
 PACKET_QUEUE = []
 OVERFLOW = b""
 ALIVE = False
+THIS_STATE = ""
 EXIT_CODE = "Not connected to the server"
 
 
@@ -180,7 +182,7 @@ class Protocol_http:
         if not 0x0000 <= port <= 0xFFFF:
             raise ValueError("Invalid port format")
         
-        addr = addr.replace(".", "{").replace("/", "|")
+        addr = addr
         raw_bytes = addr.encode()
         raw_bytes += port.to_bytes(2, "big")
         raw_bytes += random.randbytes(1)
@@ -193,7 +195,7 @@ class Protocol_http:
         raw_addr = raw_bytes[0:-3]
         raw_port = raw_bytes[-3:-1]
         
-        addr = raw_addr.decode().replace("|", "/").replace("{", ".")
+        addr = raw_addr.decode()
         port = int.from_bytes(raw_port, "big")
         return addr, port
 

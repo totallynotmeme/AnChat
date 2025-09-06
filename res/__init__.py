@@ -26,9 +26,7 @@ import os
 
 # standard variables that should not be overwritten
 # system
-RES_PATH = os.path.dirname(__file__).replace("\\", "/") + "/"
 DOWNLOADS_PATH = os.getcwd() + "/downloads"
-CLIENTS_PATH = RES_PATH
 # state
 LAST_SLEEP = 0
 LOGS = []

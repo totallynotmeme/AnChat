@@ -18,15 +18,22 @@ def bootstrap(_globals):
 
 # your function here
 def func():
+    did_crash = pg.get_init()
     if VARS.RUNNING:
-        # generic soft reset warning
-        log("WARN: Soft reset detected. Did the client just crash?")
+        # soft reset - no shutdown before reinitialization
+        if did_crash:
+            # pygame is still initialized - crash
+            log("WARN: Soft reset detected. Did the client just crash?")
+        else:
+            # pygame is not initialized - intended reset
+            log("-- Reinitialization, the window should re-open in a moment --")
     else:
-        # print the message on hard reset
+        # hard reset - after shutdown, most likely intended
         log("")
         log("---[  INITIALIZING BLUEBERRY CLIENT  ]---")
         log("")
-    chat_message.downloads_path = os.getcwd() + "/downloads"
+    
+    chat_message.downloads_path = DOWNLOADS_PATH
     VARS.CLIENT_VERSION = "0.1.0-INDEV"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0

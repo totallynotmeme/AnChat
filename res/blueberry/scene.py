@@ -179,8 +179,11 @@ class Main:
             elif Main.connecting:
                 return
         
-        if ev.type == pg.MOUSEBUTTONDOWN:
-            cursor_y = ev.pos[1]
+        if ev.type == pg.TEXTINPUT and Main.connecting:
+            return
+        
+        if ev.type == pg.MOUSEBUTTONDOWN and Main.connecting:
+            return
         
         if ev.type == pg.MOUSEMOTION:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
@@ -273,7 +276,7 @@ class Chat:
             txt = VARS.lang.MESSAGE_DISCONNECTED.encode()
             sys_msg = {b"author": b"~SYSTEM", b"content": txt}
             fmap["recvmsg"](sys_msg)
-            connection.disconnect()
+            connection.disconnect("Client disconnected from the server")
             VARS.active = Main
         
         if prompt == "/dump":
@@ -535,8 +538,9 @@ class Console:
         if _user_input == "?":
             log("""
 
-uses eval() to run Python.
+console uses eval() to run arbitrary Python code, useful for debugging.
 if command format is 'var = 123', exec('global var; var = 123') is used
+'some.thing = value' throws an error? try adding ` at the start
 
 custom console commands / shortcuts:
 clear - clear console output
@@ -576,17 +580,18 @@ clearhistory - erase command history
             history = Console.history or [""]
             
             if ev.key == pg.K_RETURN:
+                user_command = Console.prompt_line.text
                 Console.prompt_line.active = True
                 Console.logs_multiline.active = False
-                if not Console.prompt_line.text:
+                if not user_command:
                     return
                 
-                Console.run(Console.prompt_line.text)
-                if history and Console.prompt_line.text != history[-1]:
-                    Console.history.append(Console.prompt_line.text)
+                Console.run(user_command)
+                if history and user_command != history[-1]:
+                    Console.history.append(user_command)
                 
                 Console.history_ind = len(Console.history)
-                Console.logs_multiline.append_text(">>> " + Console.prompt_line.text)
+                Console.logs_multiline.append_text(">>> " + user_command)
                 Console.prompt_line.set_text("")
                 return
             

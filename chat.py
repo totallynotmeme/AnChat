@@ -1,6 +1,6 @@
 # /chat.py
 # Main wrapper around fmap and a fallback debug client
-# Use this if you're running the raw Python code
+# Use this if you're running raw Python code (recommended)
 
 
 from res import *
@@ -30,15 +30,12 @@ while VARS.RUNNING:
         elif errors == 4:
             print("That didn't seem to help. Entering recovery environment")
             print("Run 'headless = False' to resume execution\n")
-            headless = True
         
-        elif errors >= 4:
-            headless = True
-        
+        headless = errors >= 4
         continue
     
     
-    # headless cmd version for debugging
+    # headless cmd version for debugging / recovery
     _user_input = input(">>> ").strip()
     if _user_input == "":
         continue
