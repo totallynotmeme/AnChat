@@ -312,7 +312,7 @@ class Chat:
         Chat.elements.append(Chat.input_box)
     
     
-    def parse_event(ev):
+    def handle_event(ev):
         if ev.type == pg.KEYDOWN:
             if ev.key == pg.K_ESCAPE:
                 Console.toggle()

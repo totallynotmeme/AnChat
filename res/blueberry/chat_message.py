@@ -160,4 +160,13 @@ class ChatMessage:
     
     def event_TEXTINPUT(self, ev):
         return any(i.event_TEXTINPUT(ev) for i in self.elements)
-
+    
+    
+    handle_event = element.handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+        pg.KEYDOWN: event_KEYDOWN,
+        pg.TEXTINPUT: event_TEXTINPUT,
+    }
