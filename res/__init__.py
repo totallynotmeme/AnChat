@@ -13,8 +13,10 @@ client = None # default headless mode
 try:
     from . import blueberry as client
 except Exception as e:
-    print("Failed to import active client:", e)
-    print("Falling back to console environment")
+    import traceback
+    traceback.print_exception(e)
+    del traceback
+    print("\nFailed to import active client, falling back to console environment")
 from . import message
 from . import encryption
 from . import connection
@@ -58,8 +60,8 @@ def DEFAULT_tick():
     fmap["handle_log"]()
     
     # handle messages
-    if len(connection.PACKET_QUEUE) > 0:
-        packet = connection.PACKET_QUEUE.pop(0)
+    if len(connection.QUEUE) > 0:
+        packet = connection.QUEUE.pop(0)
         valid = encryption.validate(packet)
         if valid:
             packet = encryption.decrypt(packet)

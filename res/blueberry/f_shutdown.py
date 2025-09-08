@@ -13,4 +13,4 @@ def bootstrap(_globals):
 # your function here
 def func():
     pg.quit()
-    connection.disconnect()
+    connection.protocol.disconnect()

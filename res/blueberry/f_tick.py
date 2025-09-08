@@ -31,8 +31,8 @@ def func():
         VARS.active.handle_event(ev)
     
     # handle messages (pasted from __init__.py's default)
-    if len(connection.PACKET_QUEUE) > 0:
-        packet = connection.PACKET_QUEUE.pop(0)
+    if len(connection.QUEUE) > 0:
+        packet = connection.QUEUE.pop(0)
         valid = encryption.validate(packet)
         if valid:
             packet = encryption.decrypt(packet)

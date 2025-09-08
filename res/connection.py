@@ -6,59 +6,105 @@ import socket as sock
 from threading import Thread
 
 
-# todo: nuke this nonsense code and refactor everything
-ADDR = ""
-SOCKET = None
-PACKET = bytearray()
-PACKET_EXPECTED_LEN = -1
-PACKET_QUEUE = []
-OVERFLOW = b""
+QUEUE = []
 ALIVE = False
-THIS_STATE = ""
 EXIT_CODE = "Not connected to the server"
 
 
+class State:
+    packet = bytearray()
+    expected_len = -1
+    
+    def feed(chunk):
+        State.packet.extend(chunk)
+        
+        if State.expected_len == -1:
+            # determine packet length
+            if len(State.packet) < 4:
+                return
+            State.expected_len = int.from_bytes(State.packet[:4], "big")
+            del State.packet[:4]
+        
+        if len(State.packet) >= State.expected_len:
+            # got every bit of packet
+            full_packet = State.packet[:State.expected_len]
+            del State.packet[:State.expected_len]
+            
+            QUEUE.append(bytes(full_packet))
+            State.expected_len = -1
+            # handle overflow
+            if State.packet:
+                State.feed(b"")
+    
+    def flush():
+        if State.packet:
+            print(f"flushing {State.packet}")
+            QUEUE.append(bytes(State.packet))
+            del State.packet[:]
+            State.expected_len = -1
+
+
 class Protocol_socket:
+    socket = None
+    
     def handle():
-        global PACKET
-        global PACKET_EXPECTED_LEN
-        global OVERFLOW
         try:
             while True:
-                chunk = OVERFLOW or SOCKET.recv(16384)
-                OVERFLOW = b""
-                if PACKET_EXPECTED_LEN == -1:
-                    if len(chunk) < 4:
-                        # only received 1-3 bytes of the first packet, wait for more
-                        continue
-                    # new packet received
-                    PACKET_EXPECTED_LEN = int.from_bytes(chunk[:4], "big")
-                    PACKET.extend(chunk[4:])
-                    chunk = b""
-                if len(PACKET) + len(chunk) >= PACKET_EXPECTED_LEN:
-                    # finished receiving new packet (+ beginning of the next)
-                    PACKET.extend(chunk)
-                    PACKET_QUEUE.append(bytes(PACKET[:PACKET_EXPECTED_LEN]))
-                    OVERFLOW = PACKET[PACKET_EXPECTED_LEN:]
-                    PACKET = bytearray()
-                    PACKET_EXPECTED_LEN = -1
-                else:
-                    # receiving middle part of the packet
-                    PACKET.extend(chunk)
+                try:
+                    chunk = Protocol_socket.socket.recv(16384)
+                except TimeoutError:
+                    State.flush()
+                    continue
+                
+                if chunk == b"":
+                    Protocol_socket.disconnect("Received empty packet, connection has been closed")
+                    return
+                State.feed(chunk)
         except Exception as e:
-            disconnect(f"Exception: {e}")
+            Protocol_socket.disconnect(f"Exception occured: {e}")
             return
     
+    def connect(addr, port):
+        global ALIVE
+        
+        Protocol_socket.socket = sock.socket()
+        Protocol_socket.socket.connect((addr, port))
+        Protocol_socket.socket.settimeout(1)
+        Thread(target=Protocol_socket.handle).start()
+        ALIVE = True
+    
+    def disconnect(reason="[No disconnection reason]"):
+        global ALIVE
+        global EXIT_CODE
+        
+        EXIT_CODE = reason
+        ALIVE = False
+        
+        try:
+            Protocol_socket.socket.shutdown(sock.SHUT_RDWR)
+            Protocol_socket.socket.close()
+        except Exception:
+            pass
+        Protocol_socket.socket = None
+    
     def send(packet):
-        if SOCKET is None:
+        if Protocol_socket.socket is None:
             return False
         
         try:
             packet_len = len(packet).to_bytes(4, "big")
-            SOCKET.send(packet_len + packet)
+            Protocol_socket.socket.send(packet_len + packet)
             return True
         except Exception:
             return False
+    
+    def stream(data_io, name):
+        print("(Socket) Streaming has not been implemented yet!")
+        try:
+            data_io.close()
+        except Exception as e:
+            print("also your io object threw an error when closing:", e)
+    
     
     def tobits(addr, port):
         if addr.count(".") != 3:
@@ -93,90 +139,133 @@ Connection: keep-alive
 
 """[1:-1].replace(b"\n", b"\r\n")
 
-http_first_get = b"""
+http_setup = b"""
 GET / HTTP/1.1
 Host: {ADDR}
 Content-Type: application/octet-stream
-Content-Length: 0
+Content-Length: 1
 Connection: keep-alive
 
 
 """[1:-1].replace(b"\n", b"\r\n")
 
 class Protocol_http:
-    queue = bytearray()
+    socket_send = None
+    socket_recv = None
+    hostname = b""
+    
     def handle():
-        global PACKET
-        global PACKET_EXPECTED_LEN
-        global OVERFLOW
+        s = Protocol_http.socket_recv
+        request = http_header.replace(b"{ADDR}", Protocol_http.hostname)
+        request = request.replace(b"{LENGTH}", b"0")
+        send_req = True
         try:
-            first = http_first_get.replace(b"{ADDR}", ADDR.encode())
-            SOCKET.send(first)
-            resp = SOCKET.recv(1024)
-            if not resp.startswith(b"HTTP/1.1 202 Y\r\n"):
-                disconnect(f"Failed to establish HTTP connection ({resp=})")
-                return
-            
-            own_req = http_header.replace(b"{ADDR}", ADDR.encode())
-            SOCKET.settimeout(1)
-            
             while True:
-                if OVERFLOW:
-                    chunk = OVERFLOW
-                else:
-                    this_length = len(Protocol_http.queue)
-                    this_packet = Protocol_http.queue[:this_length]
-                    del Protocol_http.queue[:this_length]
-                    this_req = own_req.replace(b"{LENGTH}", str(this_length).encode())
-                    SOCKET.send(this_req + this_packet)
-                    flush()
-                    try:
-                        chunk = b""
-                        while True:
-                            chunk_chunk = SOCKET.recv(16384)
-                            print("chunk>", len(chunk_chunk))
-                            if len(chunk_chunk) < 1024:
-                                print(chunk_chunk)
-                            if chunk_chunk == b"":
-                                raise RuntimeError("server disconnected")
-                            chunk += chunk_chunk
-                    except TimeoutError:
-                        while chunk.startswith(b"HTTP/1.1 200 Y\r\n") and b"\r\n\r\n" in chunk:
-                            chunk = chunk.split(b"\r\n\r\n", 1)[1]
+                if send_req:
+                    s.send(request)
+                    send_req = False
                 
-                OVERFLOW = b""
-                if PACKET_EXPECTED_LEN == -1:
-                    if len(chunk) < 4:
-                        # only received 1-3 bytes of the first packet, wait for more
-                        continue
-                    # new packet received
-                    PACKET_EXPECTED_LEN = int.from_bytes(chunk[:4], "big")
-                    PACKET.extend(chunk[4:])
-                    chunk = b""
-                if len(PACKET) + len(chunk) >= PACKET_EXPECTED_LEN:
-                    # finished receiving new packet (+ beginning of the next)
-                    PACKET.extend(chunk)
-                    PACKET_QUEUE.append(bytes(PACKET[:PACKET_EXPECTED_LEN]))
-                    OVERFLOW = PACKET[PACKET_EXPECTED_LEN:]
-                    PACKET = bytearray()
-                    PACKET_EXPECTED_LEN = -1
+                try:
+                    chunk = s.recv(16384)
+                except TimeoutError:
+                    State.flush()
+                    continue
+                
+                if chunk.startswith(b"HTTP/1.1 200 Y\r\n") and b"\r\n\r\n" in chunk:
+                    chunk = chunk.split(b"\r\n\r\n", 1)[1]
                 else:
-                    # receiving middle part of the packet
-                    PACKET.extend(chunk)
+                    print(f"Unknown header:\n{chunk[:1024]}")
+                
+                send_req = True
+                State.feed(chunk)
+                while True:
+                    try:
+                        chunk = s.recv(16384)
+                        if chunk.startswith(b"HTTP/1.1 200 Y\r\n") and b"\r\n\r\n" in chunk:
+                            chunk = chunk.split(b"\r\n\r\n", 1)[1]
+                        State.feed(chunk)
+                        if len(chunk) < 16384:
+                            break
+                    except TimeoutError:
+                        break
         except Exception as e:
-            disconnect(f"Exception: {e}")
+            Protocol_http.disconnect(f"Exception occured: {e}")
             return
     
+    def connect(addr, port):
+        global ALIVE
+        
+        Protocol_http.hostname = addr.encode()
+        header = http_setup.replace(b"{ADDR}", addr.encode())
+        
+        s = sock.socket()
+        s.connect((addr, port))
+        s.settimeout(1)
+        s.send(header + b"r") # 114
+        resp = s.recv(1024)
+        if not resp.startswith(b"HTTP/1.1 202 Y\r\n"):
+            s.shutdown(sock.SHUT_RDWR)
+            s.close()
+            raise Exception(f"Invalid response for socket_recv: {resp}")
+        Protocol_http.socket_recv = s
+        
+        s = sock.socket()
+        s.connect((addr, port))
+        s.settimeout(1)
+        s.send(header + b"s") # 115
+        resp = s.recv(1024)
+        if not resp.startswith(b"HTTP/1.1 202 Y\r\n"):
+            Protocol_http.socket_recv.shutdown(sock.SHUT_RDWR)
+            Protocol_http.socket_recv.close()
+            s.shutdown(sock.SHUT_RDWR)
+            s.close()
+            raise Exception(f"Invalid response for socket_send: {resp}")
+        Protocol_http.socket_send = s
+        
+        Thread(target=Protocol_http.handle).start()
+        ALIVE = True
+    
+    def disconnect(reason="[No disconnection reason]"):
+        global ALIVE
+        global EXIT_CODE
+        
+        EXIT_CODE = reason
+        ALIVE = False
+        
+        try:
+            Protocol_http.socket_send.shutdown(sock.SHUT_RDWR)
+            Protocol_http.socket_send.close()
+        except Exception:
+            pass
+        Protocol_http.socket_send = None
+        
+        try:
+            Protocol_http.socket_recv.shutdown(sock.SHUT_RDWR)
+            Protocol_http.socket_recv.close()
+        except Exception:
+            pass
+        Protocol_http.socket_recv = None
+    
     def send(packet):
-        if SOCKET is None:
+        if Protocol_http.socket_send is None:
             return False
         
         try:
             packet_len = len(packet).to_bytes(4, "big")
-            Protocol_http.queue.extend(packet_len + packet)
+            header = http_header.replace(b"{ADDR}", Protocol_http.hostname)
+            header = header.replace(b"{LENGTH}", str(packet_len).encode())
+            Protocol_http.socket_send.send(header + packet_len + packet)
             return True
         except Exception:
             return False
+    
+    def stream(data_io, name):
+        print("(HTTP) Streaming has not been implemented yet!")
+        try:
+            data_io.close()
+        except Exception as e:
+            print("also your io object threw an error when closing:", e)
+    
     
     def tobits(addr, port):
         if not 0x0000 <= port <= 0xFFFF:
@@ -200,58 +289,9 @@ class Protocol_http:
         return addr, port
 
 
-def connect(addr, port):
-    global ALIVE
-    global SOCKET
-    global ADDR
-    
-    SOCKET = sock.socket()
-    SOCKET.connect((addr, port))
-    ADDR = addr
-    Thread(target=protocol.handle).start()
-    ALIVE = True
-
-def disconnect(reason="[Undefined reason]"):
-    global ALIVE
-    global PACKET
-    global PACKET_EXPECTED_LEN
-    global OVERFLOW
-    global EXIT_CODE
-    
-    ALIVE = False
-    try:
-        SOCKET.shutdown(sock.SHUT_RDWR)
-        SOCKET.close()
-    except Exception:
-        pass
-    
-    try:
-        flush()
-    except Exception:
-        pass
-    
-    PACKET = bytearray()
-    PACKET_EXPECTED_LEN = -1
-    OVERFLOW = b""
-    EXIT_CODE = reason
-
-def flush():
-    global PACKET
-    global PACKET_EXPECTED_LEN
-    global OVERFLOW
-    
-    if PACKET == b"":
-        return
-    
-    PACKET_QUEUE.append(bytes(PACKET[:PACKET_EXPECTED_LEN]))
-    OVERFLOW = PACKET[PACKET_EXPECTED_LEN:]
-    PACKET = bytearray()
-    PACKET_EXPECTED_LEN = -1
-
-
 protocol_list = {
     "Socket": Protocol_socket,
     "HTTP": Protocol_http,
 }
-protocol = Protocol_socket
 default = Protocol_socket
+protocol = default

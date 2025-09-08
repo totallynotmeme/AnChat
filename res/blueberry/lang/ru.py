@@ -7,7 +7,7 @@ WINDOW_TITLE = "AnChat - Клиент Blueberry"
 CORE_VERSION = "Версия ядра: {}"
 CLIENT_VERSION = "Версия клиента: {}"
 
-FIELD_USERNAME = "Ваше имя"
+FIELD_USERNAME = "Ваше имя (Anon)"
 FIELD_ADDRESS = "Адрес сервера"
 CONNECT_BUTTON = "Подключиться"
 
@@ -16,7 +16,9 @@ STATUS_TEXT_TRYING = "Пытаемся подключиться, подожди�
 STATUS_TEXT_FAILED = "Ошибка: {}"
 
 OPTIONS_TITLE = "Настройки"
-OPTIONS_LANGUAGE = "Поменять язык (нужен перезапуск)"
+OPTIONS_LANGUAGE = "Язык"
+OPTIONS_RESOLUTION = "Размер окна"
+OPTIONS_APPLY = "Применить"
 
 
 MESSAGE_CONNECTED = "Подключён к серверу, введите /disconnect чтобы вернуться в меню"

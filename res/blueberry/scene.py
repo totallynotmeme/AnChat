@@ -3,6 +3,7 @@
 
 from . import utils
 from . import element
+from . import lang
 import pygame as pg
 from threading import Thread
 import os
@@ -54,7 +55,7 @@ class Main:
             #    pg.draw.rect(canvas, (255, 255, 255), i.bounding_box, 1)
             i.draw(canvas)
     
-    def init():
+    def init(is_soft):
         Main.bg_filler = pg.Surface(VARS.window_size)
         txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
         txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
@@ -84,17 +85,22 @@ class Main:
         button.update_surf()
         Main.elements.append(button)
         
-        Main.protocol_button = element.Button(
+        if is_soft:
+            username = Main.field_username.text
+            address = Main.field_address.text
+            status = Main.field_status.text
+            protocol = Main.protocol_button.current
+        
+        Main.protocol_button = element.Optionsbutton(
+            # color=(0, 0, 0), font=None, options=("Undefined",)
             pos = origin + pg.Vector2(0, 40),
             size = (210, 30),
             align = "center",
-            callback = Main.button_change_protocol,
             hover_scale = 0.05,
+            color = (0, 63, 31),
+            font = VARS.fonts[20],
+            options = sorted(connection.protocol_list.keys()),
         )
-        Main.protocol_button.surface.fill((0, 63, 31))
-        txt = VARS.fonts[20].render(CONFIG.PROTOCOL, True, (255, 255, 255))
-        Main.protocol_button.surface.blit(txt, txt.get_rect(center=(105, 15)))
-        Main.protocol_button.update_surf()
         Main.elements.append(Main.protocol_button)
         
         
@@ -128,6 +134,12 @@ class Main:
         )
         Main.field_status.set_text(VARS.lang.STATUS_TEXT_DEFAULT)
         Main.elements.append(Main.field_status)
+        if is_soft:
+            Main.field_username.set_text(username)
+            Main.field_address.set_text(address)
+            Main.field_status.set_text(status)
+            Main.protocol_button.current = protocol
+            Main.protocol_button.redraw()
     
     
     def button_connect():
@@ -136,11 +148,12 @@ class Main:
         try:
             CONFIG.OWN_NAME = Main.field_username.text or "Anon"
             CONFIG.PASSWORD = Main.field_address.text.encode()
+            CONFIG.PROTOCOL = Main.protocol_button.current
             fmap["apply_config"]()
             
             bitarray = wordip.decode(Main.field_address.text)
             addr, port = connection.protocol.frombits(bitarray)
-            connection.connect(addr, port)
+            connection.protocol.connect(addr, port)
             VARS.active = Chat
             
             txt = VARS.lang.MESSAGE_CONNECTED.encode()
@@ -152,24 +165,6 @@ class Main:
             log(f"Error during connection attempt: {e}")
             Main.connecting = False
             Main.field_status.set_text(VARS.lang.STATUS_TEXT_FAILED.format(e))
-    
-    
-    def button_change_protocol():
-        sorted_protocols = sorted(connection.protocol_list.keys())
-        
-        if CONFIG.PROTOCOL in sorted_protocols:
-            this_ind = sorted_protocols.index(CONFIG.PROTOCOL)
-        else:
-            this_ind = 0
-        
-        this_ind += 1
-        this_ind %= len(sorted_protocols)
-        CONFIG.PROTOCOL = sorted_protocols[this_ind]
-        
-        Main.protocol_button.surface.fill((0, 63, 31))
-        txt = VARS.fonts[20].render(CONFIG.PROTOCOL, True, (255, 255, 255))
-        Main.protocol_button.surface.blit(txt, txt.get_rect(center=(105, 15)))
-        Main.protocol_button.update_surf()
     
     
     def handle_event(ev):
@@ -199,9 +194,6 @@ class Chat:
     scroll_step = 0
     input_box = None
     status_text_pos = (0, 0)
-    streaming_file = None
-    streaming_name = ""
-    stream_followup = False
     elements = []
     
     def draw(canvas):
@@ -218,42 +210,7 @@ class Chat:
         for i in Chat.elements:
             i.draw(canvas)
         
-        if connection.ALIVE:
-            # stream file if needed
-            if Chat.streaming_file is not None:
-                chunk = Chat.streaming_file.read(12288)
-                if chunk == b"":
-                    txt = VARS.lang.MESSAGE_STREAMING_END.encode()
-                    you_msg = {b"author": b"~YOU", b"content": txt}
-                    fmap["recvmsg"](you_msg)
-                    Chat.streaming_file.close()
-                    Chat.streaming_file = None
-                    public_msg = {
-                        b"author": CONFIG.OWN_NAME.encode(),
-                        b"content": b"File:",
-                        b"filename": Chat.streaming_name,
-                        b"filefollowup": b".",
-                        b"file-eof": b".",
-                    }
-                    fmap["sendmsg"](public_msg)
-                    return
-                public_msg = {
-                    b"author": CONFIG.OWN_NAME.encode(),
-                    b"content": b"File:",
-                    b"filename": Chat.streaming_name,
-                    b"filedata": chunk
-                }
-                if Chat.stream_followup:
-                    public_msg[b"filefollowup"] = b"."
-                Chat.stream_followup = True
-                fmap["sendmsg"](public_msg)
-        else:
-            if Chat.streaming_file is not None:
-                try:
-                    Chat.streaming_file.close()
-                    Chat.streaming_file = None
-                except Exception:
-                    Chat.streaming_file = None
+        if not connection.ALIVE:
             txt = VARS.fonts[15].render(connection.EXIT_CODE, True, (255, 127, 127))
             canvas.blit(txt, Chat.status_text_pos)
     
@@ -276,7 +233,7 @@ class Chat:
             txt = VARS.lang.MESSAGE_DISCONNECTED.encode()
             sys_msg = {b"author": b"~SYSTEM", b"content": txt}
             fmap["recvmsg"](sys_msg)
-            connection.disconnect("Client disconnected from the server")
+            connection.protocol.disconnect("Client disconnected from the server")
             VARS.active = Main
         
         if prompt == "/dump":
@@ -298,7 +255,7 @@ class Chat:
         
         return True
     
-    def init():
+    def init(is_soft):
         Chat.elements = []
         Chat.input_box = element.Line(
             pos = (VARS.window_size.x/2, VARS.window_size.y - 25),
@@ -313,6 +270,15 @@ class Chat:
         Chat.scroll_step = VARS.window_size.y / 5
         Chat.status_text_pos = (5, VARS.window_size.y - 70)
         Chat.elements.append(Chat.input_box)
+        if Chat.messages:
+            # preventing a weird crash from updating settings in Chat scene
+            for i in Chat.messages:
+                i.author_element.font = VARS.fonts[25]
+                i.text_element.font = VARS.fonts[20]
+                i.reinit()
+            last = Chat.messages[-1]
+            scroller = last.offset + last.size[1] - VARS.window_size.y + 100
+            Chat.scroll_goal = max(Chat.scroll_goal, scroller)
     
     
     def handle_event(ev):
@@ -362,9 +328,9 @@ class Chat:
             txt = VARS.lang.MESSAGE_STREAMING_START.format(name).encode()
             you_msg = {b"author": b"~YOU", b"content": txt}
             fmap["recvmsg"](you_msg)
-            Chat.streaming_file = open(file, "rb")
-            Chat.streaming_name = f"{utils.random_string(4)}_{name}".encode()
-            Chat.stream_followup = False
+            stream_file = open(file, "rb")
+            stream_name = f"{utils.random_string(4)}_{name}".encode()
+            connection.protocol.stream(stream_file, stream_name)
             return
         
         any(i.handle_event(ev) for i in Chat.elements + Chat.messages)
@@ -375,6 +341,9 @@ class Options:
     button = None
     behind = None
     container = None
+    apply_button = None
+    option_elements = {}
+    elements = ()
     
     def draw(canvas):
         Main.update_surf()
@@ -384,13 +353,11 @@ class Options:
         txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
         canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, 25)))
         
-        txt = VARS.fonts[30].render("Settings will be here soon, but not now", True, (255, 255, 255))
-        canvas.blit(txt, txt.get_rect(center=VARS.window_size/2))
-        
+        Options.container.draw(canvas)
         Options.button.draw(canvas)
-        #Options.container.draw(canvas)
+        Options.apply_button.draw(canvas)
     
-    def init():
+    def init(is_soft):
         button = element.Button(
             pos = (5, 5),
             size = (30, 30),
@@ -419,7 +386,21 @@ class Options:
         Main.elements.append(button)
         Chat.elements.append(button)
         
-        # container stuff isn't finished yet :bleh:
+        button = element.Button(
+            pos = (100, 20),
+            size = (100, 30),
+            align = "center",
+            callback = Options.apply_and_restart,
+            hover_scale = 0.1,
+        )
+        button.surface.fill((0, 63, 127))
+        txt = VARS.lang.OPTIONS_APPLY
+        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        button.surface.blit(txt, txt.get_rect(center=(50, 15)))
+        button.update_surf()
+        Options.apply_button = button
+        
+        
         Options.container = element.Container(
             pos = (0, 50),
             size = (VARS.window_size.x, VARS.window_size.y - 50),
@@ -434,17 +415,52 @@ class Options:
         )
         last.set_text(VARS.lang.OPTIONS_LANGUAGE)
         
-        last = Options.container.push(element.Button,
-            offset = (60, 20),
-            size = (90, 30),
+        last = Options.container.push(element.Optionsbutton,
+            offset = (40, 20),
+            size = (60, 30),
             align = "center",
-            callback = lambda: print("debug button hehe"),
-            hover_scale = 0.2,
+            hover_scale = 0.1,
+            color = (0, 63, 127),
+            font = VARS.fonts[20],
+            options = sorted(lang.langmap.keys()),
         )
-        last.surface.fill((255, 255, 255))
-        last.update_surf()
+        last.current = CONFIG.CLIENT["lang"]
+        last.redraw()
+        Options.option_elements["lang"] = last
         
-        Options.elements = (Options.button, Options.container)
+        last = Options.container.push(element.Line,
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_RESOLUTION)
+        
+        last = Options.container.push(element.Line,
+            offset = (10, 0),
+            size_y = 30,
+            color = (0, 127, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = True,
+        )
+        
+        last.set_text(CONFIG.CLIENT["window_size"])
+        Options.option_elements["res"] = last
+        
+        
+        Options.elements = (Options.button, Options.apply_button, Options.container)
+    
+    def apply_and_restart():
+        pg.quit()
+        #fmap["shutdown"]()
+        new_config = {
+            "lang": Options.option_elements["lang"].current,
+            "window_size": Options.option_elements["res"].text,
+        }
+        utils.save_config_file(new_config)
+        fmap["init"]()
     
     def toggle():
         if VARS.active == Options:
@@ -488,11 +504,8 @@ class Console:
         canvas.blit(Console.prompt_prefix, Console.prompt_prefix_rect)
         bb = Console.prompt_line.draw(canvas)
         bb2 = Console.logs_multiline.draw(canvas)
-        #pg.draw.rect(canvas, (255, 0, 0), bb, 1)
-        #for i in bb2:
-        #    pg.draw.rect(canvas, (255, 0, 0), i, 1)
     
-    def init():
+    def init(is_soft):
         Console.surf = pg.Surface(VARS.window_size)
         Console.surf.set_alpha(200)
         Console.lines = int(VARS.window_size.y / 16 - 1)

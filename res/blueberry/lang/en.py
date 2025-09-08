@@ -7,7 +7,7 @@ WINDOW_TITLE = "AnChat - Blueberry client"
 CORE_VERSION = "Core version: {}"
 CLIENT_VERSION = "Client version: {}"
 
-FIELD_USERNAME = "Your username"
+FIELD_USERNAME = "Your username (Anon)"
 FIELD_ADDRESS = "Server address"
 CONNECT_BUTTON = "Connect"
 
@@ -16,7 +16,9 @@ STATUS_TEXT_TRYING = "Trying to connect, please wait..."
 STATUS_TEXT_FAILED = "Failed: {}"
 
 OPTIONS_TITLE = "Settings"
-OPTIONS_LANGUAGE = "Switch language (requires restart)"
+OPTIONS_LANGUAGE = "Language"
+OPTIONS_RESOLUTION = "Window size"
+OPTIONS_APPLY = "Apply"
 
 
 MESSAGE_CONNECTED = "Connected to the server, send /disconnect to get back to menu"

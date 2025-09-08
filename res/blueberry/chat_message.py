@@ -134,6 +134,10 @@ class ChatMessage:
         self.rect = self.surface.get_rect(**{self.align: (self.x_pos, true_offset)})
         canvas.blit(self.surface, self.rect)
     
+    def reinit(self):
+        if self.align == "topright":
+            self.x_pos = window_size[0] - 25
+    
     
     def event_MOUSEMOTION(self, ev):
         if self.rect.collidepoint(ev.pos):
@@ -143,6 +147,8 @@ class ChatMessage:
             return res
     
     def event_MOUSEBUTTONDOWN(self, ev):
+        if ev.button != pg.BUTTON_LEFT:
+            return False
         ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
         res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
         ev.pos += pg.Vector2(self.rect.topleft)

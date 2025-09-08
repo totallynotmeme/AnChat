@@ -13,7 +13,7 @@ def bootstrap(_globals):
 # some constants and default stuff
 GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "seen_intro": "0",
-    "window_size": "1400x800",
+    "window_size": "1400-800",
     "lang": "en"
 }
 DEFAULT_CONFIG_FILE = """
@@ -22,10 +22,8 @@ DEFAULT_CONFIG_FILE = """
 
 // This is a standard config file for this client!
 
-// Add new settings with line 'a -> b', which will be parsed as 'a = b'
-
 // Add comments by adding '//' at the start of the line
-// (note: 'a -> b // comment' will not strip the comment)
+// (note: 'a = b // comment' will not strip the comment)
 
 
 // It's recommended to modify these settings through the client instead of here,
@@ -34,7 +32,7 @@ DEFAULT_CONFIG_FILE = """
 
 
 """[1:-1]
-config_lines = "\n".join(f"{k} -> {v}" for k, v in GET_DEFAULT_CONFIG_OPTIONS().items())
+config_lines = "\n".join(f"{k} = {v}" for k, v in GET_DEFAULT_CONFIG_OPTIONS().items())
 DEFAULT_CONFIG_FILE += config_lines + "\n"
 CONFIG_FILE_PATH = ""
 
@@ -47,10 +45,10 @@ def parse_config_file(current_config):
         for i in config_file_data:
             if i.strip() == "" or i.startswith("//"):
                 continue
-            if "->" not in i:
+            if "=" not in i:
                 verbals.append(f"WARN: Couldn't parse line {repr(i)}")
                 continue
-            key, val = i.split("->", 1)
+            key, val = i.split("=", 1)
             key = key.strip()
             val = val.strip()
             current_config[key] = val
@@ -61,10 +59,39 @@ def parse_config_file(current_config):
 
 def parse_screen_res(raw, max_res):
     try:
-        res = tuple(map(int, raw.split("x", 1)))
-        return min(res[0], max_res[0]), min(res[1], max_res[1])
+        res = tuple(map(int, raw.split("-", 1)))
+        limited_x = max(min(res[0], max_res[0]), 600)
+        limited_y = max(min(res[1], max_res[1]), 300)
+        return limited_x, limited_y
     except Exception:
         return None
+
+def save_config_file(current_config):
+    if os.path.isfile(CONFIG_FILE_PATH):
+        config_file_data = open(CONFIG_FILE_PATH, "r").read()
+    else:
+        config_file_data = DEFAULT_CONFIG_FILE
+    config_file_data = config_file_data.split("\n")
+    
+    linemap = {}
+    for ind, line in enumerate(config_file_data):
+        if line.startswith("//") or "=" not in line:
+            continue
+        key = line.split("=", 1)[0].strip()
+        linemap[key] = ind
+    
+    for key, val in current_config.items():
+        line = f"{key} = {val}"
+        if key in linemap.keys():
+            line_ind = linemap[key]
+            config_file_data[line_ind] = line
+        else:
+            config_file_data.append(line)
+    
+    while config_file_data[-1] == "":
+        config_file_data.pop()
+    
+    open(CONFIG_FILE_PATH, "w").write("\n".join(config_file_data) + "\n")
 
 
 def find_space_left(line):

@@ -19,7 +19,8 @@ def bootstrap(_globals):
 # your function here
 def func():
     did_crash = pg.get_init()
-    if VARS.RUNNING:
+    is_soft = VARS.RUNNING
+    if is_soft:
         # soft reset - no shutdown before reinitialization
         if did_crash:
             # pygame is still initialized - crash
@@ -37,10 +38,11 @@ def func():
     VARS.CLIENT_VERSION = "0.1.0-INDEV"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
-    VARS.active = scene.Main
     VARS.holding_ctrl = False
     VARS.holding_shift = False
     VARS.debug = False
+    if not is_soft:
+        VARS.active = scene.Main
     
     if connection.ALIVE:
         # soft reset while connected to the server
@@ -71,6 +73,7 @@ def func():
     if window_size is None:
         log("Couldn't parse 'window_size' parameter, will use default")
         window_size = utils.parse_screen_res(CONFIG.DEFAULTS["window_size"], max_res)
+    CONFIG.CLIENT["window_size"] = f"{window_size[0]}-{window_size[1]}"
     
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
@@ -101,15 +104,15 @@ def func():
     pg.draw.rect(logo, accent_color, pg.Rect(4, 24, 24, 4))
     pg.display.set_icon(logo)
     
-    if VARS.RUNNING:
+    if is_soft:
         saved_console_logs = scene.Console.logs_multiline.lines
     
     log("Initializing elements")
     pg.key.set_repeat(250, 30)
     for i in scene.to_init:
-        i.init()
+        i.init(is_soft)
     
-    if VARS.RUNNING:
+    if is_soft:
         scene.Console.logs_multiline.lines.extend(saved_console_logs)
     
     log("Done! Showing the UI")

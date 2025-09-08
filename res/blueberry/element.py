@@ -103,7 +103,7 @@ class Line:
     
     
     def draw(self, canvas, offset=pg.Vector2()):
-        to_render = self.text or self.placeholder
+        to_render = self.text or self.placeholder or " "
         if self.text == "":
             color = self.placeholder_color
             self.scroll_pos = 0
@@ -414,19 +414,6 @@ class Multiline:
                 pg.draw.rect(canvas, (255, 127, 0), i, 1)
         
         return self.bounding_boxes
-        
-        """
-        chess battle advanced
-        self.bounding_box = canvas.blit(txt, rect)
-        if self.edit:
-            offset_x = (self.cursor_pos - self.scroll_pos) * self.font_size.x
-            cursor_height = int(VARS.frame % 40 >= 20) * self.font_size.y // 5
-            cursor_origin = rect.topleft + pg.Vector2(offset_x, 2 + cursor_height)
-            cursor_finish = cursor_origin + pg.Vector2(0, self.font_size.y - 4 - cursor_height*2)
-            pg.draw.line(canvas, (255, 255, 255), cursor_origin, cursor_finish)
-        
-        return self.bounding_box
-        """
     
     
     def event_MOUSEMOTION(self, ev):
@@ -573,12 +560,46 @@ class Button:
         self.holding = False
     
     
+    def event_KEYDOWN(self, ev):
+        return False
+    
+    def event_TEXTINPUT(self, ev):
+        return False
+    
     handle_event = handle_event
     evmap = {
         pg.MOUSEMOTION: event_MOUSEMOTION,
         pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
         pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
     }
+
+
+class Optionsbutton(Button):
+    def __init__(self, *a, color=(0, 0, 0), font=None, options=("Undefined",), **kwa):
+        super().__init__(*a, **kwa)
+        self.options = options
+        self.current = options[-1]
+        self.color = color
+        self.font = font
+        self.callback = lambda: Optionsbutton.f_callback(self)
+        self.redraw()
+    
+    def f_callback(self):
+        if self.current in self.options:
+            this_ind = self.options.index(self.current)
+        else:
+            this_ind = -1
+        
+        this_ind += 1
+        this_ind %= len(self.options)
+        self.current = self.options[this_ind]
+        self.redraw()
+        
+    def redraw(self):
+        self.surface.fill(self.color)
+        txt = self.font.render(self.current, True, (255, 255, 255))
+        self.surface.blit(txt, txt.get_rect(center=self.size / 2))
+        self.update_surf()
 
 
 class Container:
@@ -645,11 +666,11 @@ class Container:
                 limit = 0
             else:
                 last = self.elements[-1]
-                limit = last.pos.y + last.size.y - 200
+                limit = last.pos.y + last.size.y
             self.scroll_goal = min(self.scroll_goal + self.scroll_step, limit)
             self.scroll += self.scroll_step / 2
         elif ev.button == pg.BUTTON_WHEELUP:
-            self.scroll_goal = max(self.scroll_goal - self.scroll_step, -200)
+            self.scroll_goal = max(self.scroll_goal - self.scroll_step, 0)
             self.scroll -= self.scroll_step / 2
     
     def event_MOUSEBUTTONUP(self, ev):

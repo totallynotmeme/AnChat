@@ -13,6 +13,6 @@ def bootstrap(_globals):
 
 # your function here
 def func():
-    while LOGS:
+    if LOGS:
         time, line = LOGS.pop(0)
         Console.logs_multiline.append_text(f"[{time}] {line}")
