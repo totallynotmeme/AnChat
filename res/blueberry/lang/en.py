@@ -14,10 +14,13 @@ CONNECT_BUTTON = "Connect"
 STATUS_TEXT_DEFAULT = "Fill in the fields and press Connect"
 STATUS_TEXT_TRYING = "Trying to connect, please wait..."
 STATUS_TEXT_FAILED = "Failed: {}"
+STATUS_TEXT_BADIP = "Bad IP address format: {}"
 
 OPTIONS_TITLE = "Settings"
 OPTIONS_LANGUAGE = "Language"
 OPTIONS_RESOLUTION = "Window size"
+OPTIONS_FONT = "Font"
+OPTIONS_FONT_WARN = "This is an experimental setting"
 OPTIONS_APPLY = "Apply"
 
 

@@ -92,7 +92,6 @@ class Main:
             protocol = Main.protocol_button.current
         
         Main.protocol_button = element.Optionsbutton(
-            # color=(0, 0, 0), font=None, options=("Undefined",)
             pos = origin + pg.Vector2(0, 40),
             size = (210, 30),
             align = "center",
@@ -106,7 +105,7 @@ class Main:
         
         Main.field_username = element.Line(
             pos = origin + pg.Vector2(0, -60),
-            size = (600, 30),
+            size = (580, 30),
             color = (255, 255, 255),
             font = VARS.fonts[25],
             align = "center",
@@ -116,7 +115,7 @@ class Main:
         Main.elements.append(Main.field_username)
         Main.field_address = element.Line(
             pos = origin + pg.Vector2(0, -10),
-            size = (600, 30),
+            size = (580, 30),
             color = (255, 255, 255),
             font = VARS.fonts[25],
             align = "center",
@@ -145,15 +144,34 @@ class Main:
     def button_connect():
         Main.connecting = True
         Main.field_status.set_text(VARS.lang.STATUS_TEXT_TRYING)
+        passphrase = Main.field_address.text.strip()
+        direct_ip = None
+        if "@" in passphrase:
+            passphrase, direct_ip = passphrase.split("@", 1)
+            passphrase = passphrase.strip()
+            direct_ip = direct_ip.strip()
+            try:
+                address, port = direct_ip.split(":", 1)
+                port = int(port)
+                direct_ip = (address, port)
+            except Exception as e:
+                log(f"Bad direct_ip address format: {e}")
+                Main.connecting = False
+                Main.field_status.set_text(VARS.lang.STATUS_TEXT_BADIP.format(e))
+                return
+        
         try:
             CONFIG.OWN_NAME = Main.field_username.text or "Anon"
-            CONFIG.PASSWORD = Main.field_address.text.encode()
+            CONFIG.PASSWORD = passphrase.encode()
             CONFIG.PROTOCOL = Main.protocol_button.current
             fmap["apply_config"]()
             
-            bitarray = wordip.decode(Main.field_address.text)
-            addr, port = connection.protocol.frombits(bitarray)
-            connection.protocol.connect(addr, port)
+            if direct_ip:
+                connection.protocol.connect(*direct_ip)
+            else:
+                bitarray = wordip.decode(Main.field_address.text)
+                addr, port = connection.protocol.frombits(bitarray)
+                connection.protocol.connect(addr, port)
             VARS.active = Chat
             
             txt = VARS.lang.MESSAGE_CONNECTED.encode()
@@ -271,7 +289,7 @@ class Chat:
         Chat.status_text_pos = (5, VARS.window_size.y - 70)
         Chat.elements.append(Chat.input_box)
         if Chat.messages:
-            # preventing a weird crash from updating settings in Chat scene
+            # preventing a weird crash - updating settings in Chat scene
             for i in Chat.messages:
                 i.author_element.font = VARS.fonts[25]
                 i.text_element.font = VARS.fonts[20]
@@ -344,6 +362,9 @@ class Options:
     apply_button = None
     option_elements = {}
     elements = ()
+    all_fonts = {}
+    font_preview = None
+    previous_font = None
     
     def draw(canvas):
         Main.update_surf()
@@ -352,6 +373,11 @@ class Options:
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
         canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, 25)))
+        
+        this_font = Options.option_elements["font"].current
+        if Options.previous_font != this_font:
+            Options.previous_font = this_font
+            Options.font_preview.font = Options.all_fonts[this_font]
         
         Options.container.draw(canvas)
         Options.button.draw(canvas)
@@ -429,6 +455,7 @@ class Options:
         Options.option_elements["lang"] = last
         
         last = Options.container.push(element.Line,
+            offset = (0, 10),
             size_y = 30,
             color = (255, 255, 255),
             font = VARS.fonts[25],
@@ -449,6 +476,53 @@ class Options:
         last.set_text(CONFIG.CLIENT["window_size"])
         Options.option_elements["res"] = last
         
+        last = Options.container.push(element.Line,
+            offset = (0, 15),
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_FONT)
+        
+        last = Options.container.push(element.Line,
+            size_y = 15,
+            color = (255, 255, 0),
+            font = VARS.fonts[15],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_FONT_WARN)
+        
+        all_fonts = {i: pg.font.SysFont(i, 30) for i in pg.font.get_fonts()}
+        for key, val in all_fonts.copy().items():
+            if not utils.is_monospace(val):
+                all_fonts.pop(key)
+        Options.all_fonts = all_fonts
+        
+        last = Options.container.push(element.Optionsbutton,
+            offset = (160, 20),
+            size = (300, 30),
+            align = "center",
+            hover_scale = 0.04,
+            color = (0, 63, 127),
+            font = VARS.fonts[20],
+            options = sorted(all_fonts.keys()),
+        )
+        last.current = CONFIG.CLIENT["font"]
+        last.redraw()
+        Options.option_elements["font"] = last
+        
+        last = Options.container.push(element.Line,
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[30],
+            align = "topleft",
+            edit = True,
+            placeholder = "AaBbCc АаБбВв 0123 .,!?/@",
+        )
+        Options.font_preview = last
         
         Options.elements = (Options.button, Options.apply_button, Options.container)
     
@@ -458,6 +532,7 @@ class Options:
         new_config = {
             "lang": Options.option_elements["lang"].current,
             "window_size": Options.option_elements["res"].text,
+            "font": Options.option_elements["font"].current,
         }
         utils.save_config_file(new_config)
         fmap["init"]()

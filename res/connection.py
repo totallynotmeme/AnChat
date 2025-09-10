@@ -14,8 +14,11 @@ EXIT_CODE = "Not connected to the server"
 class State:
     packet = bytearray()
     expected_len = -1
+    prefix_len = 0
+    remove_prefix = True
     
     def feed(chunk):
+        print("got raw", chunk)
         State.packet.extend(chunk)
         
         if State.expected_len == -1:
@@ -29,6 +32,7 @@ class State:
             # got every bit of packet
             full_packet = State.packet[:State.expected_len]
             del State.packet[:State.expected_len]
+            State.remove_prefix = True
             
             QUEUE.append(bytes(full_packet))
             State.expected_len = -1
@@ -38,7 +42,7 @@ class State:
     
     def flush():
         if State.packet:
-            print(f"flushing {State.packet}")
+            print("flushed", State.packet)
             QUEUE.append(bytes(State.packet))
             del State.packet[:]
             State.expected_len = -1
@@ -49,7 +53,7 @@ class Protocol_socket:
     
     def handle():
         try:
-            while True:
+            while ALIVE:
                 try:
                     chunk = Protocol_socket.socket.recv(16384)
                 except TimeoutError:
@@ -70,8 +74,10 @@ class Protocol_socket:
         Protocol_socket.socket = sock.socket()
         Protocol_socket.socket.connect((addr, port))
         Protocol_socket.socket.settimeout(1)
-        Thread(target=Protocol_socket.handle).start()
+        
         ALIVE = True
+        State.prefix_len = 0
+        Thread(target=Protocol_socket.handle).start()
     
     def disconnect(reason="[No disconnection reason]"):
         global ALIVE
@@ -129,65 +135,56 @@ class Protocol_socket:
         return ip, port
 
 
-http_header = b"""
-POST / HTTP/1.1
-Host: {ADDR}
-Content-Type: application/octet-stream
-Content-Length: {LENGTH}
-Connection: keep-alive
+http_send = b"""
+GET /s HTTP/1.1
+host: {ADDR}
+content-type: application/octet-stream
+content-length: {LENGTH}
+connection: close
 
 
 """[1:-1].replace(b"\n", b"\r\n")
 
-http_setup = b"""
-GET / HTTP/1.1
-Host: {ADDR}
-Content-Type: application/octet-stream
-Content-Length: 1
-Connection: keep-alive
+http_recv = b"""
+GET /r HTTP/1.1
+host: {ADDR}
+content-type: application/octet-stream
+content-length: 0
+connection: close
+
+
+"""[1:-1].replace(b"\n", b"\r\n")
+
+http_ping = b"""
+GET /p HTTP/1.1
+host: {ADDR}
+content-type: application/octet-stream
+content-length: 0
+connection: close
 
 
 """[1:-1].replace(b"\n", b"\r\n")
 
 class Protocol_http:
-    socket_send = None
-    socket_recv = None
+    user_id = random.randbytes(4)
     hostname = b""
+    socket_args = ()
     
     def handle():
-        s = Protocol_http.socket_recv
-        request = http_header.replace(b"{ADDR}", Protocol_http.hostname)
-        request = request.replace(b"{LENGTH}", b"0")
-        send_req = True
+        get_request = http_recv + Protocol_http.user_id
         try:
-            while True:
-                if send_req:
-                    s.send(request)
-                    send_req = False
-                
-                try:
-                    chunk = s.recv(16384)
-                except TimeoutError:
+            while ALIVE:
+                packet = Protocol_http._send_request(get_request, 10)
+                if packet == b"":
                     State.flush()
                     continue
                 
-                if chunk.startswith(b"HTTP/1.1 200 Y\r\n") and b"\r\n\r\n" in chunk:
-                    chunk = chunk.split(b"\r\n\r\n", 1)[1]
-                else:
-                    print(f"Unknown header:\n{chunk[:1024]}")
+                if packet.startswith(Protocol_http.user_id):
+                    # own packet, ignore
+                    continue
                 
-                send_req = True
-                State.feed(chunk)
-                while True:
-                    try:
-                        chunk = s.recv(16384)
-                        if chunk.startswith(b"HTTP/1.1 200 Y\r\n") and b"\r\n\r\n" in chunk:
-                            chunk = chunk.split(b"\r\n\r\n", 1)[1]
-                        State.feed(chunk)
-                        if len(chunk) < 16384:
-                            break
-                    except TimeoutError:
-                        break
+                if packet:
+                    State.feed(packet)
         except Exception as e:
             Protocol_http.disconnect(f"Exception occured: {e}")
             return
@@ -195,35 +192,15 @@ class Protocol_http:
     def connect(addr, port):
         global ALIVE
         
+        Protocol_http.socket_args = (addr, port)
         Protocol_http.hostname = addr.encode()
-        header = http_setup.replace(b"{ADDR}", addr.encode())
+        resp = Protocol_http._send_request(http_ping)
+        if resp != b"silly":
+            raise Exception(f"Invalid ping response from server ({resp})")
         
-        s = sock.socket()
-        s.connect((addr, port))
-        s.settimeout(1)
-        s.send(header + b"r") # 114
-        resp = s.recv(1024)
-        if not resp.startswith(b"HTTP/1.1 202 Y\r\n"):
-            s.shutdown(sock.SHUT_RDWR)
-            s.close()
-            raise Exception(f"Invalid response for socket_recv: {resp}")
-        Protocol_http.socket_recv = s
-        
-        s = sock.socket()
-        s.connect((addr, port))
-        s.settimeout(1)
-        s.send(header + b"s") # 115
-        resp = s.recv(1024)
-        if not resp.startswith(b"HTTP/1.1 202 Y\r\n"):
-            Protocol_http.socket_recv.shutdown(sock.SHUT_RDWR)
-            Protocol_http.socket_recv.close()
-            s.shutdown(sock.SHUT_RDWR)
-            s.close()
-            raise Exception(f"Invalid response for socket_send: {resp}")
-        Protocol_http.socket_send = s
-        
-        Thread(target=Protocol_http.handle).start()
         ALIVE = True
+        State.prefix_len = 4
+        Thread(target=Protocol_http.handle).start()
     
     def disconnect(reason="[No disconnection reason]"):
         global ALIVE
@@ -247,14 +224,14 @@ class Protocol_http:
         Protocol_http.socket_recv = None
     
     def send(packet):
-        if Protocol_http.socket_send is None:
+        if not ALIVE:
             return False
         
         try:
             packet_len = len(packet).to_bytes(4, "big")
-            header = http_header.replace(b"{ADDR}", Protocol_http.hostname)
-            header = header.replace(b"{LENGTH}", str(packet_len).encode())
-            Protocol_http.socket_send.send(header + packet_len + packet)
+            header = http_send.replace(b"{LENGTH}", str(len(packet)+8).encode())
+            http_packet = header + Protocol_http.user_id + packet_len + packet
+            Protocol_http._send_request(http_packet, nowait=True)
             return True
         except Exception:
             return False
@@ -265,6 +242,50 @@ class Protocol_http:
             data_io.close()
         except Exception as e:
             print("also your io object threw an error when closing:", e)
+    
+    def _send_request(what, timeout=3, nowait=False):
+        req = what.replace(b"{ADDR}", Protocol_http.hostname)
+        s = sock.socket()
+        s.settimeout(timeout)
+        try:
+            s.connect(Protocol_http.socket_args)
+            s.send(req)
+            if nowait:
+                return b""
+            try:
+                chunk = s.recv(16384)
+                resp = chunk
+            except TimeoutError:
+                return b""
+            if resp == b"":
+                return b""
+            
+            resp_head, resp = resp.split(b"\r\n\r\n", 1)
+            if not resp_head.startswith(b"HTTP/1.1 200 Y\r\n"):
+                if b"\r\n" in resp_head:
+                    resp_head = resp_head.split(b"\r\n", 1)[0]
+                Protocol_http.disconnect(f"Dead connection: unknown header {resp_head}")
+            
+            if len(chunk) < 16384:
+                return resp
+            
+            s.settimeout(1)
+            try:
+                while True:
+                    chunk = s.recv(16384)
+                    if chunk == b"":
+                        break
+                    resp += chunk
+                    if len(chunk) < 16384:
+                        break
+            except Exception:
+                pass
+            return resp
+        except Exception:
+            return b""
+        finally:
+            s.shutdown(sock.SHUT_RDWR)
+            s.close()
     
     
     def tobits(addr, port):

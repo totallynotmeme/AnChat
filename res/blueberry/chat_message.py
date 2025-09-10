@@ -126,8 +126,8 @@ class ChatMessage:
             return
         
         surf_rect = self.surface.get_rect()
-        pg.draw.rect(self.surface, (30, 30, 30), surf_rect, 0, *self.corners)
-        pg.draw.rect(self.surface, (60, 60, 60), surf_rect, 2, *self.corners)
+        pg.draw.rect(self.surface, (25, 35, 45), surf_rect, 0, *self.corners)
+        pg.draw.rect(self.surface, (40, 60, 80), surf_rect, 2, *self.corners)
         self.author_element.draw(self.surface)
         self.text_element.draw(self.surface)
         true_offset = int(self.offset - scroll_offset)

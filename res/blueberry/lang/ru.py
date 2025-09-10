@@ -14,10 +14,13 @@ CONNECT_BUTTON = "Подключиться"
 STATUS_TEXT_DEFAULT = "Заполните поля и нажмите Подключиться"
 STATUS_TEXT_TRYING = "Пытаемся подключиться, подождите..."
 STATUS_TEXT_FAILED = "Ошибка: {}"
+STATUS_TEXT_BADIP = "Плохой формат IP адреса: {}"
 
 OPTIONS_TITLE = "Настройки"
 OPTIONS_LANGUAGE = "Язык"
 OPTIONS_RESOLUTION = "Размер окна"
+OPTIONS_FONT = "Шрифт"
+OPTIONS_FONT_WARN = "Это экспериментальная настройка"
 OPTIONS_APPLY = "Применить"
 
 

@@ -77,7 +77,7 @@ def func():
     
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
-    VARS.lang = lang.langmap[CONFIG.CLIENT["lang"]]
+    VARS.lang = lang.langmap.get(CONFIG.CLIENT["lang"], lang.default)
     chat_message.error_codes = VARS.lang.ERROR_CODES
     
     # that log() explains what this block does lol
@@ -87,7 +87,7 @@ def func():
     VARS.clock = pg.time.Clock()
     VARS.fonts = {}
     for i in range(10, 50, 5):
-        VARS.fonts[i] = pg.font.SysFont("consolas", i)
+        VARS.fonts[i] = pg.font.SysFont(CONFIG.CLIENT["font"], i)
     chat_message.fonts = VARS.fonts
     txt = VARS.fonts[30].render("Initializing Blueberry client", True, (255, 255, 255))
     VARS.canvas.blit(txt, txt.get_rect(center=VARS.window_size/2))

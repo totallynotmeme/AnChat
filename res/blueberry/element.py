@@ -149,8 +149,8 @@ class Line:
         
         text_len = len(self.text)
         if text_len > self.max_chars + 1:
-            left = self.bounding_box.bottomleft
-            right = self.bounding_box.bottomright
+            left = offset + self.bounding_box.bottomleft
+            right = offset + self.bounding_box.bottomright
             pg.draw.line(canvas, (100, 100, 100), left, right)
             where_start = self.scroll_pos / text_len
             where_start = pg.Vector2(where_start * self.size.x, -1) + left

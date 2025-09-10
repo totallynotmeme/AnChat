@@ -14,7 +14,8 @@ def bootstrap(_globals):
 GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "seen_intro": "0",
     "window_size": "1400-800",
-    "lang": "en"
+    "lang": "en",
+    "font": "lucidaconsole",
 }
 DEFAULT_CONFIG_FILE = """
 // /config.txt
@@ -68,7 +69,7 @@ def parse_screen_res(raw, max_res):
 
 def save_config_file(current_config):
     if os.path.isfile(CONFIG_FILE_PATH):
-        config_file_data = open(CONFIG_FILE_PATH, "r").read()
+        config_file_data = open(CONFIG_FILE_PATH, "r").read().rstrip()
     else:
         config_file_data = DEFAULT_CONFIG_FILE
     config_file_data = config_file_data.split("\n")
@@ -140,3 +141,9 @@ def text_to_lines(text, max_length):
                 lines.append(chunk)
     
     return lines
+
+
+def is_monospace(font, sample="iW ,"):
+    goal = font.size(sample[0])
+    return all(font.size(i) == goal for i in sample[1:])
+
