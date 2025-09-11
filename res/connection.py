@@ -14,11 +14,8 @@ EXIT_CODE = "Not connected to the server"
 class State:
     packet = bytearray()
     expected_len = -1
-    prefix_len = 0
-    remove_prefix = True
     
     def feed(chunk):
-        print("got raw", chunk)
         State.packet.extend(chunk)
         
         if State.expected_len == -1:
@@ -32,7 +29,6 @@ class State:
             # got every bit of packet
             full_packet = State.packet[:State.expected_len]
             del State.packet[:State.expected_len]
-            State.remove_prefix = True
             
             QUEUE.append(bytes(full_packet))
             State.expected_len = -1
@@ -42,7 +38,6 @@ class State:
     
     def flush():
         if State.packet:
-            print("flushed", State.packet)
             QUEUE.append(bytes(State.packet))
             del State.packet[:]
             State.expected_len = -1
@@ -76,7 +71,6 @@ class Protocol_socket:
         Protocol_socket.socket.settimeout(1)
         
         ALIVE = True
-        State.prefix_len = 0
         Thread(target=Protocol_socket.handle).start()
     
     def disconnect(reason="[No disconnection reason]"):
@@ -149,7 +143,7 @@ http_recv = b"""
 GET /r HTTP/1.1
 host: {ADDR}
 content-type: application/octet-stream
-content-length: 0
+content-length: 4
 connection: close
 
 
@@ -174,7 +168,7 @@ class Protocol_http:
         get_request = http_recv + Protocol_http.user_id
         try:
             while ALIVE:
-                packet = Protocol_http._send_request(get_request, 10)
+                packet = Protocol_http._send_request(get_request, 15)
                 if packet == b"":
                     State.flush()
                     continue
@@ -199,7 +193,6 @@ class Protocol_http:
             raise Exception(f"Invalid ping response from server ({resp})")
         
         ALIVE = True
-        State.prefix_len = 4
         Thread(target=Protocol_http.handle).start()
     
     def disconnect(reason="[No disconnection reason]"):
@@ -231,8 +224,7 @@ class Protocol_http:
             packet_len = len(packet).to_bytes(4, "big")
             header = http_send.replace(b"{LENGTH}", str(len(packet)+8).encode())
             http_packet = header + Protocol_http.user_id + packet_len + packet
-            Protocol_http._send_request(http_packet, nowait=True)
-            return True
+            return Protocol_http._send_request(http_packet, nowait=True)
         except Exception:
             return False
     
