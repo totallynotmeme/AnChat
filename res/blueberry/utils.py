@@ -62,7 +62,7 @@ def parse_screen_res(raw, max_res):
     try:
         res = tuple(map(int, raw.split("-", 1)))
         limited_x = max(min(res[0], max_res[0]), 600)
-        limited_y = max(min(res[1], max_res[1]), 300)
+        limited_y = max(min(res[1], max_res[1]), 400)
         return limited_x, limited_y
     except Exception:
         return None

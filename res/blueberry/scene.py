@@ -142,47 +142,8 @@ class Main:
     
     
     def button_connect():
-        Main.connecting = True
-        Main.field_status.set_text(VARS.lang.STATUS_TEXT_TRYING)
-        passphrase = Main.field_address.text.strip()
-        direct_ip = None
-        if "@" in passphrase:
-            passphrase, direct_ip = passphrase.split("@", 1)
-            passphrase = passphrase.strip()
-            direct_ip = direct_ip.strip()
-            try:
-                address, port = direct_ip.split(":", 1)
-                port = int(port)
-                direct_ip = (address, port)
-            except Exception as e:
-                log(f"Bad direct_ip address format: {e}")
-                Main.connecting = False
-                Main.field_status.set_text(VARS.lang.STATUS_TEXT_BADIP.format(e))
-                return
-        
-        try:
-            CONFIG.OWN_NAME = Main.field_username.text or "Anon"
-            CONFIG.PASSWORD = passphrase.encode()
-            CONFIG.PROTOCOL = Main.protocol_button.current
-            fmap["apply_config"]()
-            
-            if direct_ip:
-                connection.protocol.connect(*direct_ip)
-            else:
-                bitarray = wordip.decode(Main.field_address.text)
-                addr, port = connection.protocol.frombits(bitarray)
-                connection.protocol.connect(addr, port)
-            VARS.active = Chat
-            
-            txt = VARS.lang.MESSAGE_CONNECTED.encode()
-            system_join_msg = {b"author": b"~SYSTEM", b"content": txt}
-            fmap["recvmsg"](system_join_msg)
-            Main.connecting = False
-            Main.field_status.set_text(VARS.lang.STATUS_TEXT_DEFAULT)
-        except Exception as e:
-            log(f"Error during connection attempt: {e}")
-            Main.connecting = False
-            Main.field_status.set_text(VARS.lang.STATUS_TEXT_FAILED.format(e))
+        t = task.Connect(Main.field_address.text)
+        t.run()
     
     
     def handle_event(ev):
@@ -655,6 +616,8 @@ clearhistory - erase command history
                     log(repr(_))
         except Exception as e:
             log(f"Error: {e}. Run '?' for help")
+        except SystemExit:
+            log("SystemExit call blocked as it hangs the whole window. Use `VARS.RUNNING=False instead")
     
     
     def handle_event(ev):

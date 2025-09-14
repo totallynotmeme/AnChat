@@ -2,6 +2,7 @@
 
 
 from . import lang
+from . import task
 from . import utils
 from . import scene
 from . import element
@@ -48,9 +49,13 @@ def func():
         # soft reset while connected to the server
         VARS.active = scene.Chat
     
+    task.bootstrap(globals())
     utils.bootstrap(globals())
     scene.bootstrap(globals())
     element.bootstrap(globals())
+    
+    log("Bootstrapping tasks from task.py")
+    task.Stream.sendmsg = fmap["sendmsg"]
     
     log("Initializing Pygame")
     pg.init() # yes that's it

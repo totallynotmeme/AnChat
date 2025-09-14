@@ -48,32 +48,6 @@ class ChatMessage:
             self.errorcode = raw[b"~errorcode"]
             self.content = error_codes.get(self.errorcode, self.content)
         
-        if b"filedata" in raw or b"file-eof" in raw:
-            self.type = "file"
-            if b"filename" in raw:
-                self.filename = safe_decode(raw[b"filename"])
-                for i in '\\/:*?"<>|':
-                    self.filename = self.filename.replace(i, "_")
-            else:
-                self.filename = utils.random_string(16)
-            self.show = b"filefollowup" not in raw
-            
-            if b"file-eof" in raw:
-                print("EOF RECEIVED")
-                if self.filename in writing_files:
-                    writing_files.pop(self.filename).close()
-                    print("stream closed")
-                self.show = False
-            else:
-                if self.filename not in writing_files:
-                    handler = open(downloads_path + "/" + self.filename, "ab")
-                    writing_files[self.filename] = handler
-                    print("FILE OPENED")
-                writing_files[self.filename].write(raw[b"filedata"])
-            
-            if not self.show:
-                return
-        
         author_color = (255, 255, 255)
         
         if self.author == "[YOU]":

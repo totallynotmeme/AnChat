@@ -1,6 +1,7 @@
 # /res/blueberry/f_tick.py
 
 
+from . import task
 from . import utils
 import pygame as pg
 
@@ -47,6 +48,31 @@ def func():
     
     fmap["handle_log"]()
     VARS.active.draw(VARS.canvas)
+    
+    x_pos = VARS.window_size.x - 2
+    y_pos = 32
+    font = VARS.fonts[15]
+    
+    for i in task.FINISHED:
+        txt = font.render(str(i[0]), True, (0, 200, 0))
+        VARS.canvas.blit(txt, txt.get_rect(topright=(x_pos, y_pos)))
+        y_pos += 16
+        i[1] -= 1
+    while task.FINISHED and task.FINISHED[0][1] < 0:
+        task.FINISHED.pop(0)
+    
+    for i in task.FAILED:
+        txt = font.render(str(i[0]), True, (200, 0, 0))
+        VARS.canvas.blit(txt, txt.get_rect(topright=(x_pos, y_pos)))
+        y_pos += 16
+        i[1] -= 1
+    while task.FAILED and task.FAILED[0][1] < 0:
+        task.FAILED.pop(0)
+    
+    for i in task.RUNNING:
+        txt = font.render(str(i), True, (150, 150, 150))
+        VARS.canvas.blit(txt, txt.get_rect(topright=(x_pos, y_pos)))
+        y_pos += 16
     
     pg.display.flip()
     VARS.frame += 1
