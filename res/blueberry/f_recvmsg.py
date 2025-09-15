@@ -4,7 +4,6 @@
 from .chat_message import ChatMessage
 from .scene import Chat
 import pygame as pg
-import os
 
 # bootstrapping cba nonsense
 def bootstrap(_globals):
@@ -34,3 +33,4 @@ def func(msg):
         files_received.append(msg[b"filename"])
     chat_msg = ChatMessage(msg)
     Chat.push(chat_msg)
+
