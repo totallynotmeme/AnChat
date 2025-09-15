@@ -40,6 +40,7 @@ MESSAGE_DISCONNECTED = "Отключён от сервера"
 MESSAGE_DUMPED = "История сообщений была сохранена в {}"
 MESSAGE_STREAMING_START = "Передаём файл '{}' участникам чата"
 MESSAGE_STREAMING_END = "Передача завершена."
+MESSAGE_STREAMING_FAIL = "Не удалось начать передачу файла: {}"
 
 CHATBOX_FIELD = "Напишите своё сообщение здесь"
 CONNECTION_ERROR = "Ошибка соединения: {}"

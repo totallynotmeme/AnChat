@@ -40,6 +40,7 @@ MESSAGE_DISCONNECTED = "Disconnected from the server"
 MESSAGE_DUMPED = "Dumped message history into {}"
 MESSAGE_STREAMING_START = "Streaming file '{}' to members of this chat"
 MESSAGE_STREAMING_END = "Streaming finished."
+MESSAGE_STREAMING_FAIL = "Can't stream this file: {}"
 
 CHATBOX_FIELD = "Type your message here"
 CONNECTION_ERROR = "Connection error: {}"

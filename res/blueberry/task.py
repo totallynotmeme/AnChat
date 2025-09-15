@@ -5,6 +5,7 @@
 from threading import Thread
 from time import sleep
 import math
+import os
 
 
 # bootstrapping cba nonsense
@@ -26,16 +27,20 @@ def threaded(func):
 
 
 class Stream:
-    sendmsg = None
-    chunksize = 1024 * 1024
+    chunksize = 1024 * 512
     
-    def __init__(self, dataio, name, totalsize):
+    def __init__(self, filepath):
+        dataio = open(filepath, "rb")
+        name = filepath.replace("\\", "/").rsplit("/", 1)[-1]
+        name = utils.random_string(4) + name
+        totalsize = os.path.getsize(filepath)
+        totalsize = max(totalsize, 1)
         for i in '\\/:*?"<>|':
             name = name.replace(i, "_")
+        
         self.dataio = dataio
         self.name = name
         self.bytename = name.encode()
-        totalsize = max(totalsize, 1)
         self.totalsize = totalsize
         self.totalchunks = math.ceil(totalsize / Stream.chunksize)
         self.status = "ready"
@@ -66,7 +71,6 @@ class Stream:
             return
         self.status = "running"
         RUNNING.append(self)
-        sleep(5)
         while self.status == "running":
             if self.tick():
                 sleep(1)
@@ -89,12 +93,12 @@ class Stream:
                 self.terminate("done")
                 return False
             msg = {
-                b"author": b"Unknown Author",
-                b"content": f"[[Attachment {self.name}]] chunk#{self.chunkid}".encode(),
+                b"author": CONFIG.OWN_NAME.encode(),
+                b"content": f"[[Attachment: {self.name}]]".encode(),
                 b"filename": self.bytename,
                 b"filedata": chunk,
             }
-            success = Stream.sendmsg(msg)
+            success = fmap["sendmsg"](msg)
             if success:
                 self.chunkid += 1
                 return True

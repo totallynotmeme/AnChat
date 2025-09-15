@@ -300,16 +300,18 @@ class Chat:
             return
     
         if ev.type == pg.DROPFILE:
-            file = ev.file
-            if not os.path.isfile(file):
+            if not os.path.isfile(ev.file):
                 return
-            name = file.replace("\\", "/").rsplit("/", 1)[1]
-            txt = VARS.lang.MESSAGE_STREAMING_START.format(name).encode()
+            
+            try:
+                t = task.Stream(ev.file)
+                t.run()
+                txt = VARS.lang.MESSAGE_STREAMING_START.format(t.name).encode()
+            except Exception as e:
+                txt = VARS.lang.MESSAGE_STREAMING_FAIL.format(e).encode()
+            
             you_msg = {b"author": b"~YOU", b"content": txt}
             fmap["recvmsg"](you_msg)
-            stream_file = open(file, "rb")
-            stream_name = f"{utils.random_string(4)}_{name}".encode()
-            connection.protocol.stream(stream_file, stream_name)
             return
         
         any(i.handle_event(ev) for i in Chat.elements + Chat.messages)

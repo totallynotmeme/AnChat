@@ -16,6 +16,7 @@ class State:
     expected_len = -1
     
     def feed(chunk):
+        print(f"received {len(chunk)} bytes")
         State.packet.extend(chunk)
         
         if State.expected_len == -1:
@@ -23,6 +24,7 @@ class State:
             if len(State.packet) < 4:
                 return
             State.expected_len = int.from_bytes(State.packet[:4], "big")
+            print("expected:", State.expected_len)
             del State.packet[:4]
         
         if len(State.packet) >= State.expected_len:
@@ -97,13 +99,6 @@ class Protocol_socket:
             return True
         except Exception:
             return False
-    
-    def stream(data_io, name):
-        print("(Socket) Streaming has not been implemented yet!")
-        try:
-            data_io.close()
-        except Exception as e:
-            print("also your io object threw an error when closing:", e)
     
     
     def tobits(addr, port):
@@ -228,13 +223,6 @@ class Protocol_http:
         except Exception:
             return False
     
-    def stream(data_io, name):
-        print("(HTTP) Streaming has not been implemented yet!")
-        try:
-            data_io.close()
-        except Exception as e:
-            print("also your io object threw an error when closing:", e)
-    
     def _send_request(what, timeout=3, nowait=False):
         req = what.replace(b"{ADDR}", Protocol_http.hostname)
         s = sock.socket()
@@ -243,7 +231,7 @@ class Protocol_http:
             s.connect(Protocol_http.socket_args)
             s.send(req)
             if nowait:
-                return b""
+                return True
             try:
                 chunk = s.recv(16384)
                 resp = chunk
@@ -258,9 +246,6 @@ class Protocol_http:
                     resp_head = resp_head.split(b"\r\n", 1)[0]
                 Protocol_http.disconnect(f"Dead connection: unknown header {resp_head}")
             
-            if len(chunk) < 16384:
-                return resp
-            
             s.settimeout(1)
             try:
                 while True:
@@ -268,8 +253,6 @@ class Protocol_http:
                     if chunk == b"":
                         break
                     resp += chunk
-                    if len(chunk) < 16384:
-                        break
             except Exception:
                 pass
             return resp
