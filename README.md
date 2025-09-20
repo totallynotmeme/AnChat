@@ -1,5 +1,11 @@
 # AnChat
 
+README in different languages:
+- [Русский перевод](README.ru.md)
+- more coming soon(?)
+
+---
+
 > [!WARNING]
 > This project is currently Work In Progress.
 > Server hosting files are unavailable and some features may be broken and scuffed.
