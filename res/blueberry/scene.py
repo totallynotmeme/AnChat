@@ -314,7 +314,7 @@ class Chat:
                 except Exception as e:
                     txt = VARS.lang.MESSAGE_STREAMING_FAIL.format(e).encode()
             
-            you_msg = {b"author": b"~YOU", b"content": txt}
+            you_msg = {b"author": b"~SYSTEM", b"content": txt}
             fmap["recvmsg"](you_msg)
             return
         

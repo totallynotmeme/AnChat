@@ -50,7 +50,7 @@ class ChatMessage:
         
         author_color = (255, 255, 255)
         
-        if self.author == "[YOU]":
+        if self.author in ("[YOU]", "[SYSTEM]"):
             self.align = "topright"
             self.x_pos = window_size[0] - 25
             self.corners = ChatMessage.corners[::-1]
