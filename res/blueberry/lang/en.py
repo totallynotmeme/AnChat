@@ -41,6 +41,8 @@ MESSAGE_DUMPED = "Dumped message history into {}"
 MESSAGE_STREAMING_START = "Streaming file '{}' to members of this chat"
 MESSAGE_STREAMING_END = "Streaming finished."
 MESSAGE_STREAMING_FAIL = "Can't stream this file: {}"
+MESSAGE_STREAMING_WARN = """File streaming currently doesn't work as intended. This will be fixed in the future.
+If you really want to stream this file, drag it into this window again"""
 
 CHATBOX_FIELD = "Type your message here"
 CONNECTION_ERROR = "Connection error: {}"
