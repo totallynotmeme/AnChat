@@ -8,7 +8,8 @@ README in different languages:
 
 > [!WARNING]
 > This project is currently Work In Progress.
-> Server hosting files are unavailable and some features may be broken and scuffed.
+> Some features may be broken and scuffed, and server hosting files are only available in `raw_code.py` version.
+> Please don't try to host your own server unless you know what you're doing.
 
 Private anonymous tool for chatting with your friends.
 Just create your own tunnel and send the passphrase to your friend, it's that easy.
