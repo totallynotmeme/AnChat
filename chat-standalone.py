@@ -30,8 +30,8 @@ AnChat has crashed *during initialization stage* at {{}}
 {funny}
 
 
-Please reinstall the application from the official GitHub repository:
-(blah blah blah, will add the link later)
+Please reinstall this application from the official GitHub repository:
+https://github.com/totallynotmeme/AnChat
 Feel free to create an issue with this message attached so the dev can fix it!
 
 
@@ -47,8 +47,8 @@ AnChat has crashed *at runtime* at {{}}
 
 Try to re-launch the application to see if it fixes the problem
 
-If that doesn't help, reinstall the application from the official GitHub repository:
-(blah blah blah, will add the link later)
+If that doesn't help, reinstall this application from the official GitHub repository:
+https://github.com/totallynotmeme/AnChat
 Feel free to create an issue with this message attached so the dev can fix it!
 If possible, describe what you were doing before the crash happened
 
@@ -98,3 +98,9 @@ while VARS.RUNNING:
             if reinit_err:
                 traceback.print_exception(reinit_err, file=crash_dump)
         exit()
+
+# shutdown in case user ran `VARS.RUNNING=False
+try:
+    fmap["shutdown"]()
+except Exception:
+    pass

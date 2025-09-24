@@ -28,9 +28,8 @@ def func(msg):
             print("SHIT HAPPENED:", e)
             return
         if msg[b"filename"] in files_received:
-            print(f"ignoring message {msg['content']}")
+            print(f"ignoring message {msg[b'filename']}")
             return
         files_received.append(msg[b"filename"])
     chat_msg = ChatMessage(msg)
     Chat.push(chat_msg)
-

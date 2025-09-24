@@ -13,6 +13,10 @@ fmap["handle_log"]()
 headless = client is None
 errors = 0
 
+# tmp
+client.scene.Main.field_address.text = "clown motor await frock scorn blame event nasal legal adage @ 127.0.0.1:65333"
+client.scene.Main.field_address.text = "@127.0.0.1:65333"
+
 
 while VARS.RUNNING:
     if not headless:
@@ -60,3 +64,9 @@ while VARS.RUNNING:
                 print(_)
     except Exception as e:
         print("E:", e)
+
+# shutdown in case user ran `VARS.RUNNING=False
+try:
+    fmap["shutdown"]()
+except Exception:
+    pass

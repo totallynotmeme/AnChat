@@ -34,6 +34,10 @@ TASK_CONNECT_RUNNING = "Trying to connect to the server"
 TASK_CONNECT_DONE = "Connected successfully!"
 TASK_CONNECT_FAILED = "Connection failed"
 
+TASK_SENDMSG_RUNNING = "Sending your message..."
+TASK_SENDMSG_DONE = "Success!"
+TASK_SENDMSG_FAILED = "Failed to send a message"
+
 
 MESSAGE_CONNECTED = "Connected to the server, send /disconnect to get back to menu"
 MESSAGE_DISCONNECTED = "Disconnected from the server"

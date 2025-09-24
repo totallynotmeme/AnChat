@@ -225,21 +225,26 @@ class Protocol_http:
     
     def _send_request(what, timeout=3, nowait=False):
         req = what.replace(b"{ADDR}", Protocol_http.hostname)
+        chunks = (req[i: i+65536] for i in range(0, len(req), 65536))
         s = sock.socket()
         s.settimeout(timeout)
         try:
             s.connect(Protocol_http.socket_args)
-            s.send(req)
+            for i in chunks:
+                s.send(i)
             if nowait:
                 return True
             try:
                 chunk = s.recv(16384)
                 resp = chunk
             except TimeoutError:
+                print("timeout")
                 return b""
             if resp == b"":
+                print("no resp")
                 return b""
             
+            print(resp[:1024])
             resp_head, resp = resp.split(b"\r\n\r\n", 1)
             if not resp_head.startswith(b"HTTP/1.1 200 Y\r\n"):
                 if b"\r\n" in resp_head:

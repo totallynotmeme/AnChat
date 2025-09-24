@@ -270,13 +270,12 @@ class Chat:
                 Chat.input_box.set_text("")
                 if Chat.parse_command(prompt.strip()):
                     return
-            
-                prompt = prompt.encode()
-                you_msg = {b"author": b"~YOU", b"content": prompt}
-                public_msg = {b"author": CONFIG.OWN_NAME.encode(), b"content": prompt}
                 
-                fmap["recvmsg"](you_msg)
-                fmap["sendmsg"](public_msg)
+                t = task.Sendmsg(
+                    author = CONFIG.OWN_NAME.encode(),
+                    content = prompt.encode()
+                )
+                t.run()
                 return
         
         if ev.type == pg.MOUSEBUTTONDOWN:

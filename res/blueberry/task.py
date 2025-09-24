@@ -73,7 +73,7 @@ class Stream:
         RUNNING.append(self)
         while self.status == "running":
             if self.tick():
-                sleep(1)
+                sleep(2)
         
         if self in RUNNING:
             RUNNING.remove(self)
@@ -129,7 +129,7 @@ class Connect:
         self.status = "ready"
     
     def __repr__(self):
-        return f"Connect(raw=(...) [{self.status}])"
+        return f"Connect(raw=<...> [{self.status}])"
     
     def __str__(self):
         # can be replaced with a dictionary but im too lazy.
@@ -201,6 +201,55 @@ class Connect:
             LOGS.append(f"Error during connection attempt: {e}")
             Main.connecting = False
             Main.field_status.set_text(VARS.lang.STATUS_TEXT_FAILED.format(e))
+            RUNNING.remove(self)
+            FAILED.append([self, 240])
+            self.status = "failed"
+
+
+class Sendmsg:
+    def __init__(self, **kwargs):
+        self.message = {i.encode(): j for i, j in kwargs.items()}
+        self.status = "ready"
+    
+    def __repr__(self):
+        return f"Sendmsg(<{len(self.message)} attributes>  [{self.status}])"
+    
+    def __str__(self):
+        # can be replaced with a dictionary but im too lazy.
+        # if you're reading this, go ahead, do it
+        # and yes, this section was copied from Connect task.
+        if self.status == "running":
+            return VARS.lang.TASK_SENDMSG_RUNNING
+        
+        if self.status == "done":
+            return VARS.lang.TASK_SENDMSG_DONE
+        
+        if self.status == "failed":
+            return VARS.lang.TASK_SENDMSG_FAILED
+        
+        return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+    
+    @threaded
+    def run(self):
+        if self.status != "ready":
+            LOGS.append(f"Tried to run a non-ready task {repr(self)}")
+            return
+        
+        self.status = "running"
+        RUNNING.append(self)
+        try:
+            own_message = {
+                b"author": b"~YOU",
+                b"content": self.message[b"content"],
+            }
+            fmap["recvmsg"](own_message)
+            if not fmap["sendmsg"](self.message):
+                raise RuntimeError("recvmsg call failed")
+            RUNNING.remove(self)
+            FINISHED.append([self, 240])
+            self.status = "done"
+        except Exception as e:
+            LOGS.append(f"Error when sending message: {e}")
             RUNNING.remove(self)
             FAILED.append([self, 240])
             self.status = "failed"
