@@ -462,6 +462,13 @@ class Options:
         last.set_text(VARS.lang.OPTIONS_FONT_WARN)
         
         all_fonts = {i: pg.font.SysFont(i, 30) for i in pg.font.get_fonts()}
+        all_fonts = {}
+        for i in pg.font.get_fonts():
+            try:
+                all_fonts[i] = pg.font.SysFont(i, 30)
+            except Exception as e:
+                print(f"Error occured when importing font {i}: {e}")
+        
         for key, val in all_fonts.copy().items():
             if not utils.is_monospace(val):
                 all_fonts.pop(key)
@@ -667,3 +674,4 @@ clearhistory - erase command history
 
 
 to_init = (Main, Chat, Options, Console)
+
