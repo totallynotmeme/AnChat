@@ -461,7 +461,6 @@ class Options:
         )
         last.set_text(VARS.lang.OPTIONS_FONT_WARN)
         
-        all_fonts = {i: pg.font.SysFont(i, 30) for i in pg.font.get_fonts()}
         all_fonts = {}
         for i in pg.font.get_fonts():
             try:
@@ -674,4 +673,5 @@ clearhistory - erase command history
 
 
 to_init = (Main, Chat, Options, Console)
+
 
