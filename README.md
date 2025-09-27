@@ -11,7 +11,7 @@ README in different languages:
 > Some features may be broken and scuffed, and server hosting files are only available in `raw_code.py` version.
 > Please don't try to host your own server unless you know what you're doing.
 
-Private anonymous tool for chatting with your friends.
+Tool for chatting privately with your friends.
 Just create your own tunnel and send the passphrase to your friend, it's that easy.
 
 Please keep in mind that this is ***not a replacement for existing chatting platforms***
