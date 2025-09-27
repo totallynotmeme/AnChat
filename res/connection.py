@@ -16,7 +16,6 @@ class State:
     expected_len = -1
     
     def feed(chunk):
-        print(f"received {len(chunk)} bytes")
         State.packet.extend(chunk)
         
         if State.expected_len == -1:
@@ -24,7 +23,6 @@ class State:
             if len(State.packet) < 4:
                 return
             State.expected_len = int.from_bytes(State.packet[:4], "big")
-            print("expected:", State.expected_len)
             del State.packet[:4]
         
         if len(State.packet) >= State.expected_len:
@@ -238,13 +236,10 @@ class Protocol_http:
                 chunk = s.recv(16384)
                 resp = chunk
             except TimeoutError:
-                print("timeout")
                 return b""
             if resp == b"":
-                print("no resp")
                 return b""
             
-            print(resp[:1024])
             resp_head, resp = resp.split(b"\r\n\r\n", 1)
             if not resp_head.startswith(b"HTTP/1.1 200 Y\r\n"):
                 if b"\r\n" in resp_head:
@@ -296,3 +291,4 @@ protocol_list = {
 }
 default = Protocol_socket
 protocol = default
+
