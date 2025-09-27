@@ -50,7 +50,7 @@ print(f"""
 ALL OF THIS IS EXPERIMENTAL, THINGS **WILL** BREAK
 
 Running ssh forwarding via localhost.run on port {local_port}
-Check their website for more information: https://www.localhost.run
+Check their website for more information: https://localhost.run
 If you get any errors, try running the command in your console instead
 
 {cmd}
