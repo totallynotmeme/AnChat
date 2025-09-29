@@ -687,6 +687,15 @@ class Container:
     def event_TEXTINPUT(self, ev):
         return any(i.event_TEXTINPUT(ev) for i in self.elements)
     
+    def event_MOUSEWHEEL(self, ev):
+        if len(self.elements) == 0:
+            limit = 0
+        else:
+            last = self.elements[-1]
+            limit = last.pos.y + last.size.y
+        self.scroll_goal -= ev.precise_y * 100
+        self.scroll_goal = min(max(self.scroll_goal, 0), limit)
+        self.scroll -= ev.precise_y * 10
     
     handle_event = handle_event
     evmap = {
@@ -695,4 +704,5 @@ class Container:
         pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
         pg.KEYDOWN: event_KEYDOWN,
         pg.TEXTINPUT: event_TEXTINPUT,
+        pg.MOUSEWHEEL: event_MOUSEWHEEL,
     }
