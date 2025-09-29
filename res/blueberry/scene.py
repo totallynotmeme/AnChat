@@ -278,28 +278,15 @@ class Chat:
                 t.run()
                 return
         
-        if ev.type == pg.MOUSEBUTTONDOWN:
-            if ev.button == pg.BUTTON_WHEELDOWN:
-                if len(Chat.messages) == 0:
-                    limit = 0
-                else:
-                    last = Chat.messages[-1]
-                    limit = last.offset + last.size[1] - 200
-                Chat.scroll_goal = min(Chat.scroll_goal + Chat.scroll_step, limit)
-                Chat.scroll += Chat.scroll_step / 5
-            elif ev.button == pg.BUTTON_WHEELUP:
-                Chat.scroll_goal = max(Chat.scroll_goal - Chat.scroll_step, -200)
-                Chat.scroll -= Chat.scroll_step / 5
-        
         if ev.type == pg.MOUSEWHEEL:
             if len(Chat.messages) == 0:
                 limit = 0
             else:
                 last = Chat.messages[-1]
                 limit = last.offset + last.size[1] - 200
-            Chat.scroll_goal -= ev.precise_y * 100
+            Chat.scroll_goal -= ev.precise_y * Chat.scroll_step
             Chat.scroll_goal = min(max(Chat.scroll_goal, -200), limit)
-            Chat.scroll -= ev.precise_y * 10
+            Chat.scroll -= ev.precise_y * Chat.scroll_step / 10
             return
         
         if ev.type == pg.MOUSEMOTION:
@@ -684,4 +671,3 @@ clearhistory - erase command history
 
 
 to_init = (Main, Chat, Options, Console)
-

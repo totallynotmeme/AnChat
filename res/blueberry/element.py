@@ -658,20 +658,8 @@ class Container:
         ev.pos = pg.Vector2(ev.pos) - offset
         res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
         ev.pos += offset
-        if res:
-            return
-        
-        if ev.button == pg.BUTTON_WHEELDOWN:
-            if len(self.elements) == 0:
-                limit = 0
-            else:
-                last = self.elements[-1]
-                limit = last.pos.y + last.size.y
-            self.scroll_goal = min(self.scroll_goal + self.scroll_step, limit)
-            self.scroll += self.scroll_step / 2
-        elif ev.button == pg.BUTTON_WHEELUP:
-            self.scroll_goal = max(self.scroll_goal - self.scroll_step, 0)
-            self.scroll -= self.scroll_step / 2
+        # if res:
+        #     return
     
     def event_MOUSEBUTTONUP(self, ev):
         offset = pg.Vector2(self.rect.topleft)
@@ -693,9 +681,9 @@ class Container:
         else:
             last = self.elements[-1]
             limit = last.pos.y + last.size.y
-        self.scroll_goal -= ev.precise_y * 100
+        self.scroll_goal -= ev.precise_y * self.scroll_step
         self.scroll_goal = min(max(self.scroll_goal, 0), limit)
-        self.scroll -= ev.precise_y * 10
+        self.scroll -= ev.precise_y * self.scroll_step / 2
     
     handle_event = handle_event
     evmap = {
