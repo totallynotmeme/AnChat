@@ -431,11 +431,6 @@ class Multiline:
     
     
     def event_MOUSEBUTTONDOWN(self, ev):
-        if ev.button == pg.BUTTON_WHEELDOWN:
-            self.scroll_pos = min(self.scroll_pos + 3, len(self.lines) - 1)
-        if ev.button == pg.BUTTON_WHEELUP:
-            self.scroll_pos = max(self.scroll_pos - 3, 0)
-        
         if ev.button == pg.BUTTON_LEFT:
             self.selection_start = (-1, -1)
             self.selection_end = (-1, -1)
@@ -482,11 +477,14 @@ class Multiline:
             clipboard_copy(selected)
             return
     
-    
     def event_TEXTINPUT(self, ev):
         if self.selection_start != (-1, -1):
             self.selection_start = (-1, -1)
             self.selection_end = (-1, -1)
+    
+    def event_MOUSEWHEEL(self, ev):
+        limit = len(self.lines) - 1
+        self.scroll_pos = min(max(self.scroll_pos - ev.y * 3, 0), limit)
     
     
     handle_event = handle_event
@@ -496,6 +494,7 @@ class Multiline:
         pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
         pg.KEYDOWN: event_KEYDOWN,
         pg.TEXTINPUT: event_TEXTINPUT,
+        pg.MOUSEWHEEL: event_MOUSEWHEEL,
     }
 
 
