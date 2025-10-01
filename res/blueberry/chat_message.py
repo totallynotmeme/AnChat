@@ -22,10 +22,12 @@ special_names = {
     "~YOU": "[YOU]",
     "~SYSTEM": "[SYSTEM]",
 }
-
+colors = {
+    -1: (200, 50, 50), # failed
+    0: (100, 100, 100), # pending
+    1: (200, 200, 200), # success
+}
 error_codes = {}
-
-writing_files = {}
 
 
 class ChatMessage:
@@ -42,6 +44,7 @@ class ChatMessage:
         self.offset = 0
         self.type = "text"
         self.show = True
+        self.status = 1
         
         if b"~errorcode" in raw:
             self.type = "error"
@@ -99,6 +102,7 @@ class ChatMessage:
         if self.offset - scroll_offset >= window_size[1]:
             return
         
+        self.text_element.color = colors[self.status]
         surf_rect = self.surface.get_rect()
         pg.draw.rect(self.surface, (25, 35, 45), surf_rect, 0, *self.corners)
         pg.draw.rect(self.surface, (40, 60, 80), surf_rect, 2, *self.corners)

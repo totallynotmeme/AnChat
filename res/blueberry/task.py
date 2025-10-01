@@ -242,14 +242,30 @@ class Sendmsg:
                 b"author": b"~YOU",
                 b"content": self.message[b"content"],
             }
-            fmap["recvmsg"](own_message)
+            chatmsg = fmap["recvmsg"](own_message)
+            if chatmsg:
+                try:
+                    chatmsg.status = 0
+                except Exception as e:
+                    LOGS.append(f"Error when setting message status: {e}")
+            sleep(2)
             if not fmap["sendmsg"](self.message):
                 raise RuntimeError("recvmsg call failed")
             RUNNING.remove(self)
             FINISHED.append([self, 240])
             self.status = "done"
+            if chatmsg:
+                try:
+                    chatmsg.status = 1
+                except Exception as e:
+                    LOGS.append(f"Error when setting message status: {e}")
         except Exception as e:
             LOGS.append(f"Error when sending message: {e}")
             RUNNING.remove(self)
             FAILED.append([self, 240])
             self.status = "failed"
+            if chatmsg:
+                try:
+                    chatmsg.status = -1
+                except Exception as e:
+                    LOGS.append(f"Error when setting message status: {e}")
