@@ -248,7 +248,6 @@ class Sendmsg:
                     chatmsg.status = 0
                 except Exception as e:
                     LOGS.append(f"Error when setting message status: {e}")
-            sleep(2)
             if not fmap["sendmsg"](self.message):
                 raise RuntimeError("recvmsg call failed")
             RUNNING.remove(self)
