@@ -37,7 +37,7 @@ def func():
         VARS.show_stream_warn = True # temporary line
     
     chat_message.downloads_path = DOWNLOADS_PATH
-    VARS.CLIENT_VERSION = "0.1.0-INDEV"
+    VARS.CLIENT_VERSION = "0.1.1-INDEV"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
     VARS.holding_ctrl = False
@@ -45,10 +45,6 @@ def func():
     VARS.debug = False
     if not is_soft:
         VARS.active = scene.Main
-    
-    if connection.ALIVE:
-        # soft reset while connected to the server
-        VARS.active = scene.Chat
     
     task.bootstrap(globals())
     utils.bootstrap(globals())
