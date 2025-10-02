@@ -13,5 +13,3 @@ from . import en, ru
 
 langmap = {i: eval(i) for i in __all__}
 default = langmap["en"]
-
-

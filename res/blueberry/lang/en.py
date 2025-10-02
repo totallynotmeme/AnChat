@@ -42,11 +42,19 @@ TASK_SENDMSG_FAILED = "Failed to send a message"
 MESSAGE_CONNECTED = "Connected to the server, send /disconnect to get back to menu"
 MESSAGE_DISCONNECTED = "Disconnected from the server"
 MESSAGE_DUMPED = "Dumped message history into {}"
+MESSAGE_CLEARED = "Message history cleared"
 MESSAGE_STREAMING_START = "Streaming file '{}' to members of this chat"
 MESSAGE_STREAMING_END = "Streaming finished."
 MESSAGE_STREAMING_FAIL = "Can't stream this file: {}"
 MESSAGE_STREAMING_WARN = """File streaming currently doesn't work as intended. This will be fixed in the future.
 If you really want to stream this file, drag it into this window again"""
+MESSAGE_HELP = """
+/disconnect - from the server
+/dump - message history into a file
+/clear - message history
+/help - menu has been shown to you!
+(SYSTEM messages are only visible to you)
+"""[1:-1]
 
 CHATBOX_FIELD = "Type your message here"
 CONNECTION_ERROR = "Connection error: {}"

@@ -216,9 +216,9 @@ class Chat:
             VARS.active = Main
         
         if prompt == "/dump":
-            filename = utils.random_string(16) + ".dump"
-            dump = []
+            filename = utils.random_string(16) + ".txt" #".dump"
             
+            """ to do: make in-app dump reader
             for i in Chat.messages:
                 chunk = bytearray()
                 for name, data in i.raw.items():
@@ -227,8 +227,23 @@ class Chat:
                     chunk.extend(data + data_length + name + name_length)
                 dump.append(len(chunk).to_bytes(4, "big") + chunk)
             open(filename, "wb").write(b"".join(dump))
+            """
+            dump = "\n\n\n".join(f"[{i.author}]\n{i.content}" for i in Chat.messages)
+            open(filename, "w", encoding="utf-8").write(dump)
             
             txt = VARS.lang.MESSAGE_DUMPED.format(filename).encode()
+            sys_msg = {b"author": b"~SYSTEM", b"content": txt}
+            fmap["recvmsg"](sys_msg)
+        
+        if prompt == "/clear":
+            Chat.messages = []
+            Chat.scroll_goal = 0
+            txt = VARS.lang.MESSAGE_CLEARED.encode()
+            sys_msg = {b"author": b"~SYSTEM", b"content": txt}
+            fmap["recvmsg"](sys_msg)
+        
+        if prompt == "/help":
+            txt = VARS.lang.MESSAGE_HELP.encode()
             sys_msg = {b"author": b"~SYSTEM", b"content": txt}
             fmap["recvmsg"](sys_msg)
         
