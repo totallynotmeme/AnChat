@@ -2,6 +2,7 @@
 
 
 from . import utils
+from . import icons
 from . import element
 from . import lang
 import pygame as pg
@@ -142,7 +143,7 @@ class Main:
     
     
     def button_connect():
-        t = task.Connect(Main.field_address.text)
+        t = task.Connect(Main.field_address.text, Main.protocol_button.current)
         t.run()
     
     
@@ -370,23 +371,9 @@ class Options:
             callback = Options.toggle,
             hover_scale = 0,
         )
-        button.surface.fill((0, 63, 127))
-        
-        # cogwheel
-        center = pg.Vector2(15, 15)
-        up = pg.Vector2(0, -12)
-        for r in range(6):
-            point_a = center + up.rotate(r * 60 + 30)
-            point_b = center + up.rotate((r+1) * 60 + 30)
-            pg.draw.aaline(button.surface, (0, 127, 255), point_a, point_b)
-        # inner cogwheel
-        up = pg.Vector2(0, -6)
-        for r in range(6):
-            point_a = center + up.rotate(r * 60)
-            point_b = center + up.rotate((r+1) * 60)
-            pg.draw.aaline(button.surface, (0, 127, 255), point_a, point_b)
-        
+        button.surface.blit(icons.options, (0, 0))
         button.update_surf()
+        
         Options.button = button
         Main.elements.append(button)
         Chat.elements.append(button)

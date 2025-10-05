@@ -16,19 +16,20 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "window_size": "1400-800",
     "lang": "en",
     "font": "lucidaconsole",
+    "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
 }
 DEFAULT_CONFIG_FILE = """
-// /config.txt
+# /config.txt
 
 
-// This is a standard config file for this client!
+# This is a standard config file for this client!
 
-// Add comments by adding '//' at the start of the line
-// (note: 'a = b // comment' will not strip the comment)
+# Add comments by adding '#' at the start of the line
+# (note: 'a = b # comment' will not strip the comment)
 
 
-// It's recommended to modify these settings through the client instead of here,
-// but you can do whatever you want. it's your file, i can't stop you.
+# It's recommended to modify these settings through the client instead of here,
+# but you can do whatever you want. it's your file, i can't stop you.
 
 
 
@@ -44,7 +45,7 @@ def parse_config_file(current_config):
     if os.path.isfile(CONFIG_FILE_PATH):
         config_file_data = open(CONFIG_FILE_PATH, "r").readlines()
         for i in config_file_data:
-            if i.strip() == "" or i.startswith("//"):
+            if i.strip() == "" or i.startswith("#"):
                 continue
             if "=" not in i:
                 verbals.append(f"WARN: Couldn't parse line {repr(i)}")
@@ -76,7 +77,13 @@ def save_config_file(current_config):
     
     linemap = {}
     for ind, line in enumerate(config_file_data):
-        if line.startswith("//") or "=" not in line:
+        # temporary, migrating comments from // to #
+        # (useful to 0 people who actually use this tool)
+        if line.startswith("//"):
+            config_file_data[ind] = line.replace("//", "#")
+            continue
+        
+        if line.startswith("#") or "=" not in line:
             continue
         key = line.split("=", 1)[0].strip()
         linemap[key] = ind

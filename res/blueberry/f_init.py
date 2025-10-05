@@ -5,6 +5,7 @@ from . import lang
 from . import task
 from . import utils
 from . import scene
+from . import icons
 from . import element
 from . import chat_message
 import pygame as pg
@@ -37,7 +38,7 @@ def func():
         VARS.show_stream_warn = True # temporary line
     
     chat_message.downloads_path = DOWNLOADS_PATH
-    VARS.CLIENT_VERSION = "0.1.1-INDEV"
+    VARS.CLIENT_VERSION = "0.1.2-ALPHA"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
     VARS.holding_ctrl = False
@@ -96,15 +97,9 @@ def func():
     pg.display.flip()
     pg.scrap.init()
     
-    log("Drawing window logo")
-    background_color = (20, 30, 40)
-    accent_color = (100, 150, 255)
-    logo = pg.Surface((32, 32))
-    logo.fill(background_color)
-    pg.draw.rect(logo, accent_color, pg.Rect(4, 4, 12, 4))
-    pg.draw.rect(logo, accent_color, pg.Rect(4, 4, 4, 24))
-    pg.draw.rect(logo, accent_color, pg.Rect(4, 24, 24, 4))
-    pg.display.set_icon(logo)
+    log("Drawing icons")
+    icons.draw()
+    pg.display.set_icon(icons.app)
     
     if is_soft:
         saved_console_logs = scene.Console.logs_multiline.lines
@@ -116,6 +111,13 @@ def func():
     
     if is_soft:
         scene.Console.logs_multiline.lines.extend(saved_console_logs)
+    
+    if CONFIG.CLIENT["onboot"] and not CONFIG.CLIENT["onboot"].startswith("#"):
+        log("Running on-onboot command")
+        try:
+            exec(CONFIG.CLIENT["onboot"])
+        except Exception as e:
+            log(f"Exception occured: {e}")
     
     log("Done! Showing the UI")
     VARS.RUNNING = True

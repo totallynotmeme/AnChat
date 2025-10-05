@@ -124,12 +124,13 @@ class Stream:
 
 
 class Connect:
-    def __init__(self, raw):
+    def __init__(self, raw, protocol):
         self.raw = raw
+        self.protocol = protocol
         self.status = "ready"
     
     def __repr__(self):
-        return f"Connect(raw=<...> [{self.status}])"
+        return f"Connect(raw=<...> protocol={self.protocol} [{self.status}])"
     
     def __str__(self):
         # can be replaced with a dictionary but im too lazy.
@@ -178,7 +179,7 @@ class Connect:
         try:
             CONFIG.OWN_NAME = Main.field_username.text or "Anon"
             CONFIG.PASSWORD = passphrase.encode()
-            CONFIG.PROTOCOL = Main.protocol_button.current
+            CONFIG.PROTOCOL = self.protocol
             fmap["apply_config"]()
             
             if direct_ip:

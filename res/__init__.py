@@ -9,9 +9,13 @@ if __name__ == "__main__":
 
 client = None # default headless mode
 
+import os
+only_load_core = "ANCHAT_ONLY_LOAD_CORE" in os.environ
+
 # for client developers: replace "blueberry" with the name of your client
 try:
-    from . import blueberry as client
+    if not only_load_core:
+        from . import blueberry as client
 except Exception as e:
     import traceback
     traceback.print_exception(e)
@@ -23,7 +27,6 @@ from . import connection
 from . import wordip
 import time
 import sys
-import os
 
 
 # standard variables that should not be overwritten
@@ -34,7 +37,7 @@ LAST_SLEEP = 0
 LOGS = []
 
 class VARS:
-    CORE_VERSION = "0.1.0-INDEV"
+    CORE_VERSION = "0.1.1-ALPHA"
     RUNNING = False
 
 class CONFIG:
@@ -126,11 +129,6 @@ def log(what):
 
 
 # initialization routine
-log("Default functions created, initializing Core")
-if not os.path.isdir(DOWNLOADS_PATH):
-    log("Creating downloads folder at currect working dir")
-    os.mkdir(DOWNLOADS_PATH)
-
 fmap = {
     "init": DEFAULT_init,
     "handle_log": DEFAULT_handle_log,
@@ -141,9 +139,15 @@ fmap = {
     "shutdown": DEFAULT_shutdown,
 }
 
-# loading funcs and bootstrapping the modules
-if client is not None:
-    log(f"Loading and bootstrapping client {client.__name__}")
-    fmap.update(client.fmap)
-    for i in client.to_bootstrap:
-        i.bootstrap(globals())
+if not only_load_core:
+    log("Default functions created, initializing Core")
+    if not os.path.isdir(DOWNLOADS_PATH):
+        log("Creating downloads folder at currect working dir")
+        os.mkdir(DOWNLOADS_PATH)
+
+    # loading funcs and bootstrapping the modules
+    if client is not None:
+        log(f"Loading and bootstrapping client {client.__name__}")
+        fmap.update(client.fmap)
+        for i in client.to_bootstrap:
+            i.bootstrap(globals())

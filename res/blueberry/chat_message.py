@@ -35,9 +35,18 @@ class ChatMessage:
     def __init__(self, raw):
         #print("="*40, *raw.keys(), "="*40, sep="\n")
         self.raw = raw
-        self.content = safe_decode(raw[b"content"])
-        self.author = safe_decode(raw[b"author"])
         
+        if b"content" in raw:
+            self.content = safe_decode(raw[b"content"])
+        else:
+            self.content = "[Empty message]"
+        if b"author" in raw:
+            self.author = safe_decode(raw[b"author"])
+        else:
+            self.author = "[Unknown author]"
+        
+        if len(self.author) > 32:
+            self.author = self.author[:30] + "..."
         if self.author in special_names:
             self.author = special_names[self.author]
         
@@ -81,8 +90,9 @@ class ChatMessage:
         text_font = fonts[20]
         font_size = pg.Vector2(text_font.size(" "))
         lines = utils.text_to_lines(self.content, int(500 / font_size.x))
-        #size_x = int(max(len(i) for i in lines) * font_size.x)
-        size_x = 500
+        size_x = int(max(len(i) for i in lines) * font_size.x)
+        size_x = max(size_x, int(author_font.size(self.author)[0]))
+        #size_x = 500
         size_y = int(len(lines) * font_size.y)
         self.text_element = element.Multiline(
             pos = (15, 40),

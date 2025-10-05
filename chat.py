@@ -66,4 +66,3 @@ try:
     fmap["shutdown"]()
 except Exception:
     pass
-

@@ -10,19 +10,19 @@ import time
 
 
 crash_log_name = f"anchat-crash-log-{random.randint(0, 999999999)}.txt"
-funny = random.choice([
-"Shit happens, buddy, just give it another shot!",
-"I guess too much privacy can lead to crashes like this. Oh well",
-"According to all known laws of coding, there's no way spaghetti should be able to work",
-"im a haxxor youve been BEAMED send crypto to this address 0xT07AL7Y-A-R3AL-W4LL37",
-"Timmy, i told you NOT to mess with the freaking console!",
-"There is no funny text here, keep scrolling",
-"Look at me reading the crash log as if i understand something!",
-"I stole this idea from Minecraft's crash logs, you can't judge me!!!",
-"I am currently writing these phrases at 3 am. Say hi to my past self!",
-"Very important error code: 418 Im a teapot",
-"It's dangerous to go alone, take this! https://www.reddit.com/r/cutecats/",
-])
+funny = random.choice("""
+Shit happens, buddy, just give it another shot!
+I guess too much privacy can lead to crashes like this. Oh well
+According to all known laws of coding, there's no way spaghetti should be able to work
+im a haxxor youve been BEAMED send crypto to this address 0xT07AL7Y-A-R3AL-W4LL37
+Timmy, i told you NOT to mess with the freaking console!
+There is no funny text here, keep scrolling
+Look at me reading the crash log as if i understand something!
+I stole this idea from Minecraft's crash logs, you can't judge me!!!
+I am currently writing these phrases at 3 am. Say hi to my past self!
+Very important error code: 418 Im a teapot
+It's dangerous to go alone, take this! https://www.reddit.com/r/cutecats/
+"""[1:-1].split("\n"))
 
 
 crash_message_on_init = f"""
@@ -46,8 +46,9 @@ AnChat has crashed *at runtime* at {{}}
 
 
 Try to re-launch the application to see if it fixes the problem
+If you have on-boot command specified in config, try deleting it.
 
-If that doesn't help, reinstall this application from the official GitHub repository:
+If nothing helps, reinstall this application from the official GitHub repository:
 https://github.com/totallynotmeme/AnChat
 Feel free to create an issue with this message attached so the dev can fix it!
 If possible, describe what you were doing before the crash happened
