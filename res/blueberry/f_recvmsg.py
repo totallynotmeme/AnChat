@@ -23,12 +23,11 @@ def func(msg):
             for i in '\\/:*?"<>|':
                 name = name.replace(i, "_")
             full_path = DOWNLOADS_PATH + "/" + name
-            open(full_path, "wb").write(msg[b"filedata"])
+            open(full_path, "ab").write(msg[b"filedata"])
         except Exception as e:
-            print("SHIT HAPPENED:", e)
+            log(f"Exception occured on file write attempt: {e}")
             return
         if msg[b"filename"] in files_received:
-            print(f"ignoring message {msg[b'filename']}")
             return
         files_received.append(msg[b"filename"])
     chat_msg = ChatMessage(msg)
