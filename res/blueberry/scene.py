@@ -359,9 +359,8 @@ class Options:
             Options.previous_font = this_font
             Options.font_preview.font = Options.all_fonts[this_font]
         
-        Options.container.draw(canvas)
-        Options.button.draw(canvas)
-        Options.apply_button.draw(canvas)
+        for i in Options.elements:
+            i.draw(canvas)
     
     def init(is_soft):
         button = element.Button(
@@ -392,6 +391,20 @@ class Options:
         button.update_surf()
         Options.apply_button = button
         
+        button = element.Button(
+            pos = (210, 20),
+            size = (100, 30),
+            align = "center",
+            callback = Options.reset_settings,
+            hover_scale = 0.1,
+        )
+        button.surface.fill((127, 0, 0))
+        txt = VARS.lang.OPTIONS_RESET
+        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        button.surface.blit(txt, txt.get_rect(center=(50, 15)))
+        button.update_surf()
+        Options.reset_button = button
+        
         
         Options.container = element.Container(
             pos = (0, 50),
@@ -416,8 +429,6 @@ class Options:
             font = VARS.fonts[20],
             options = sorted(lang.langmap.keys()),
         )
-        last.current = CONFIG.CLIENT["lang"]
-        last.redraw()
         Options.option_elements["lang"] = last
         
         last = Options.container.push(element.Line,
@@ -438,8 +449,6 @@ class Options:
             align = "topleft",
             edit = True,
         )
-        
-        last.set_text(CONFIG.CLIENT["window_size"])
         Options.option_elements["res"] = last
         
         last = Options.container.push(element.Line,
@@ -482,8 +491,6 @@ class Options:
             font = VARS.fonts[20],
             options = sorted(all_fonts.keys()),
         )
-        last.current = CONFIG.CLIENT["font"]
-        last.redraw()
         Options.option_elements["font"] = last
         
         last = Options.container.push(element.Line,
@@ -495,8 +502,9 @@ class Options:
             placeholder = "AaBbCc АаБбВв 0123 .,!?/@",
         )
         Options.font_preview = last
+        Options.reset_settings()
         
-        Options.elements = (Options.button, Options.apply_button, Options.container)
+        Options.elements = (Options.button, Options.apply_button, Options.reset_button, Options.container)
     
     def apply_and_restart():
         pg.quit()
@@ -508,6 +516,13 @@ class Options:
         }
         utils.save_config_file(new_config)
         fmap["init"]()
+    
+    def reset_settings():
+        Options.option_elements["lang"].current = CONFIG.CLIENT["lang"]
+        Options.option_elements["lang"].redraw()
+        Options.option_elements["res"].set_text(CONFIG.CLIENT["window_size"])
+        Options.option_elements["font"].current = CONFIG.CLIENT["font"]
+        Options.option_elements["font"].redraw()
     
     def toggle():
         if VARS.active == Options:
