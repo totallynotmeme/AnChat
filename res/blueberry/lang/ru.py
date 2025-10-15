@@ -22,6 +22,7 @@ OPTIONS_RESOLUTION = "Размер окна"
 OPTIONS_FONT = "Шрифт"
 OPTIONS_FONT_WARN = "Это экспериментальная настройка"
 OPTIONS_APPLY = "Применить"
+OPTIONS_RESET = "Сбросить"
 
 
 TASK_UNKNOWN = "Неизвестный текст статуса '{}' для задания {}"

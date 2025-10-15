@@ -22,6 +22,7 @@ OPTIONS_RESOLUTION = "Window size"
 OPTIONS_FONT = "Font"
 OPTIONS_FONT_WARN = "This is an experimental setting"
 OPTIONS_APPLY = "Apply"
+OPTIONS_RESET = "Reset"
 
 
 TASK_UNKNOWN = "Unknown status text '{}' for task {}"
