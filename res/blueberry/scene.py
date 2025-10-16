@@ -281,17 +281,22 @@ class Chat:
             if ev.key == pg.K_ESCAPE:
                 Console.toggle()
                 return
-            elif ev.key == pg.K_RETURN and Chat.input_box.text:
-                prompt = Chat.input_box.text
-                Chat.input_box.set_text("")
-                if Chat.parse_command(prompt.strip()):
-                    return
-                
-                t = task.Sendmsg(
-                    author = CONFIG.OWN_NAME.encode(),
-                    content = prompt.encode()
-                )
-                t.run()
+            elif ev.key == pg.K_RETURN:
+                if Chat.input_box.active and Chat.input_box.text:
+                    prompt = Chat.input_box.text
+                    Chat.input_box.set_text("")
+                    if Chat.parse_command(prompt.strip()):
+                        return
+                    
+                    t = task.Sendmsg(
+                        author = CONFIG.OWN_NAME.encode(),
+                        content = prompt.encode()
+                    )
+                    t.run()
+                else:
+                    # this causes a bug when you press enter with text selected
+                    # doesn't affect anything and gets fixed with one click so eh
+                    Chat.input_box.active = True
                 return
         
         if ev.type == pg.MOUSEWHEEL:
