@@ -514,11 +514,12 @@ class Options:
     def apply_and_restart():
         pg.quit()
         #fmap["shutdown"]()
-        new_config = {
+        new_config = CONFIG.CLIENT.copy()
+        new_config.update({
             "lang": Options.option_elements["lang"].current,
             "window_size": Options.option_elements["res"].text,
             "font": Options.option_elements["font"].current,
-        }
+        })
         utils.save_config_file(new_config)
         fmap["init"]()
     
