@@ -577,6 +577,19 @@ class Options:
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         
+        # icon dump
+        last = Options.container.push(element.Button,
+            offset = (70, 20),
+            size = (120, 30),
+            align = "center",
+            hover_scale = 0.04,
+            callback = icons.dump,
+        )
+        last.surface.fill((0, 63, 127))
+        txt = VARS.fonts[15].render("Dump icons", True, (255, 255, 255))
+        last.surface.blit(txt, txt.get_rect(center=(60, 15)))
+        last.update_surf()
+        
         Options.reset_settings()
         Options.elements = (Options.button, Options.apply_button, Options.reset_button, Options.container)
     
