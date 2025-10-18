@@ -182,8 +182,14 @@ class Chat:
         
         Chat.scroll = (Chat.scroll * 3 + Chat.scroll_goal) / 4
         
-        for i in Chat.messages:
-            i.draw(canvas, Chat.scroll)
+        if VARS.debug:
+            for i in Chat.messages:
+                rect = i.draw(canvas, Chat.scroll)
+                if rect:
+                    pg.draw.rect(canvas, (0, 255, 127), rect, 1)
+        else:
+            for i in Chat.messages:
+                i.draw(canvas, Chat.scroll)
         
         pg.draw.line(canvas, (50, 50, 50), (0, Chat.y_limit-1), (VARS.window_size.x, Chat.y_limit-1))
         pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, Chat.y_limit, VARS.window_size.x, 50))
@@ -368,6 +374,7 @@ class Options:
             i.draw(canvas)
     
     def init(is_soft):
+        # draw main options menu button
         button = element.Button(
             pos = (5, 5),
             size = (30, 30),
@@ -382,6 +389,7 @@ class Options:
         Main.elements.append(button)
         Chat.elements.append(button)
         
+        # apply and restart button
         button = element.Button(
             pos = (100, 20),
             size = (100, 30),
@@ -396,6 +404,7 @@ class Options:
         button.update_surf()
         Options.apply_button = button
         
+        # reset options button
         button = element.Button(
             pos = (210, 20),
             size = (100, 30),
@@ -410,12 +419,13 @@ class Options:
         button.update_surf()
         Options.reset_button = button
         
-        
+        # create container for all options
         Options.container = element.Container(
             pos = (0, 50),
             size = (VARS.window_size.x, VARS.window_size.y - 50),
         )
         
+        # language
         last = Options.container.push(element.Line,
             size_y = 30,
             color = (255, 255, 255),
@@ -436,6 +446,7 @@ class Options:
         )
         Options.option_elements["lang"] = last
         
+        # window size / resolution
         last = Options.container.push(element.Line,
             offset = (0, 10),
             size_y = 30,
@@ -456,6 +467,7 @@ class Options:
         )
         Options.option_elements["res"] = last
         
+        # font
         last = Options.container.push(element.Line,
             offset = (0, 15),
             size_y = 30,
@@ -507,8 +519,65 @@ class Options:
             placeholder = "AaBbCc АаБбВв 0123 .,!?/@",
         )
         Options.font_preview = last
-        Options.reset_settings()
         
+        
+        # dev options start here
+        last = Options.container.push(element.Line,
+            offset = (0, 70),
+            size_y = 30,
+            color = (255, 255, 200),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_DEVELOPER)
+        
+        # debug mode
+        def func():
+            VARS.debug = not VARS.debug
+        last = Options.container.push(element.Button,
+            offset = (70, 20),
+            size = (120, 30),
+            align = "center",
+            hover_scale = 0.04,
+            callback = func,
+        )
+        last.surface.fill((0, 63, 127))
+        txt = VARS.fonts[15].render("Toggle debug", True, (255, 255, 255))
+        last.surface.blit(txt, txt.get_rect(center=(60, 15)))
+        last.update_surf()
+        
+        # switch between scenes
+        # scene.Main
+        def func():
+            VARS.active = Main
+        last = Options.container.push(element.Button,
+            offset = (70, 20),
+            size = (120, 30),
+            align = "center",
+            hover_scale = 0.04,
+            callback = func,
+        )
+        last.surface.fill((0, 63, 127))
+        txt = VARS.fonts[15].render("Go to Main", True, (255, 255, 255))
+        last.surface.blit(txt, txt.get_rect(center=(60, 15)))
+        last.update_surf()
+        # scene.Chat
+        def func():
+            VARS.active = Chat
+        last = Options.container.push(element.Button,
+            offset = (200, -35),
+            size = (120, 30),
+            align = "center",
+            hover_scale = 0.04,
+            callback = func,
+        )
+        last.surface.fill((0, 63, 127))
+        txt = VARS.fonts[15].render("Go to Chat", True, (255, 255, 255))
+        last.surface.blit(txt, txt.get_rect(center=(60, 15)))
+        last.update_surf()
+        
+        Options.reset_settings()
         Options.elements = (Options.button, Options.apply_button, Options.reset_button, Options.container)
     
     def apply_and_restart():

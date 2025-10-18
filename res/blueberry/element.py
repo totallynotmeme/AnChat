@@ -135,9 +135,15 @@ class Line:
             if offset:
                 display_bb = pg.Vector2(self.bounding_box.topleft) + offset
                 display_bb = pg.Rect(display_bb, self.bounding_box.size)
-                pg.draw.rect(canvas, (255, 127, 0), display_bb, 1)
+                color = (255, 0, 127)
+                if self.active:
+                    color = (0, 255, 127)
+                pg.draw.rect(canvas, color, display_bb, 1)
             else:
-                pg.draw.rect(canvas, (255, 0, 0), self.bounding_box, 1)
+                color = (255, 0, 0)
+                if self.active:
+                    color = (0, 255, 0)
+                pg.draw.rect(canvas, color, self.bounding_box, 1)
             pg.draw.rect(canvas, (127, 0, 0), self.true_bb, 1)
         
         if self.active and self.edit:
@@ -541,6 +547,12 @@ class Button:
         
         rect = surf.get_rect(**{self.align: self.pos + offset})
         self.true_bb = canvas.blit(surf, rect)
+        
+        if VARS.debug:
+            if self.holding:
+                pg.draw.rect(canvas, (255, 127, 0), self.true_bb, 2)
+            if self.hovering:
+                pg.draw.rect(canvas, (255, 0, 127), self.true_bb, 1)
         return self.true_bb
     
     
@@ -622,7 +634,10 @@ class Container:
     
     def push(self, element, **kwargs):
         if "size_y" in kwargs:
-            kwargs["size"] = (self.size.x - 10, kwargs.pop("size_y"))
+            padding_x = 10
+            if "offset" in kwargs:
+                padding_x += kwargs["offset"][0]
+            kwargs["size"] = (self.size.x - padding_x, kwargs.pop("size_y"))
         
         if self.elements:
             last = self.elements[-1]

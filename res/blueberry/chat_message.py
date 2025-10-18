@@ -120,7 +120,7 @@ class ChatMessage:
         self.text_element.draw(self.surface)
         true_offset = int(self.offset - scroll_offset)
         self.rect = self.surface.get_rect(**{self.align: (self.x_pos, true_offset)})
-        canvas.blit(self.surface, self.rect)
+        return canvas.blit(self.surface, self.rect)
     
     def reinit(self):
         if self.align == "topright":
