@@ -4,6 +4,7 @@
 
 
 from res import *
+from sys import exit
 import traceback
 import random
 import time
@@ -105,3 +106,4 @@ try:
     fmap["shutdown"]()
 except Exception:
     pass
+
