@@ -45,7 +45,8 @@ def parse_config_file(current_config):
     if os.path.isfile(CONFIG_FILE_PATH):
         config_file_data = open(CONFIG_FILE_PATH, "r").readlines()
         for i in config_file_data:
-            if i.strip() == "" or i.startswith("#"):
+            if i.strip() == "" or i.startswith("#") or i.startswith("//"):
+                # "//" is temporary and will be removed after a while
                 continue
             if "=" not in i:
                 verbals.append(f"WARN: Couldn't parse line {repr(i)}")
@@ -153,4 +154,3 @@ def text_to_lines(text, max_length):
 def is_monospace(font, sample="iW ,"):
     goal = font.size(sample[0])
     return all(font.size(i) == goal for i in sample[1:])
-
