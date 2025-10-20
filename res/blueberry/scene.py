@@ -4,6 +4,7 @@
 from . import utils
 from . import icons
 from . import element
+from . import background
 from . import lang
 import pygame as pg
 from threading import Thread
@@ -17,57 +18,36 @@ def bootstrap(_globals):
 
 
 class Main:
-    surf = None
     elements = []
     connecting = False
     protocol_button = None
     field_username = None
     field_address = None
     field_status = None
-    bg_filler = None
-    bg_scanline_1 = 0
-    bg_scanline_2 = 0
-    
-    def update_surf():
-        Main.surf.blit(Main.bg_filler, (0, 0))
-        step = VARS.window_size.y / 4
-        Main.bg_scanline_1 += 1
-        Main.bg_scanline_1 %= step
-        Main.bg_scanline_2 += 0.73
-        Main.bg_scanline_2 %= step * 2
-        y1 = Main.bg_scanline_1 - 100
-        y2 = Main.bg_scanline_2 - 100
-        for offset in range(5):
-            p_from = (0, y1 + 100)
-            p_to = (VARS.window_size.x, y1)
-            pg.draw.aaline(Main.surf, (0, 30, 60), p_from, p_to)
-            y1 += step
-        for offset in range(3):
-            p_from = (0, y2 + 50)
-            p_to = (VARS.window_size.x, y2)
-            pg.draw.aaline(Main.surf, (0, 30, 60), p_from, p_to)
-            y2 += step*2
+    background = None
+    line_1 = 0
+    line_2 = 0
     
     def draw(canvas):
-        Main.update_surf()
-        canvas.blit(Main.surf, (0, 0))
+        Main.background.step()
+        canvas.blit(background.surface, (0, 0))
         for i in Main.elements:
-            #if i.type == "line" and i.edit:
-            #    pg.draw.rect(canvas, (255, 255, 255), i.bounding_box, 1)
             i.draw(canvas)
     
     def init(is_soft):
-        Main.bg_filler = pg.Surface(VARS.window_size)
+        background.filler = pg.Surface(VARS.window_size)
         txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
         txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
-        Main.bg_filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 3)))
+        background.filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 3)))
         
         txt = VARS.lang.CLIENT_VERSION.format(VARS.CLIENT_VERSION)
         txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
-        Main.bg_filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 18)))
+        background.filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 18)))
         
-        Main.surf = pg.Surface(VARS.window_size)
-        Main.update_surf()
+        background.surface = pg.Surface(VARS.window_size)
+        background.size = VARS.window_size
+        Main.background = background.bgmap.get(CONFIG.CLIENT["background"], background.Lines)
+        Main.background.init()
         origin = VARS.window_size/2
         
         Main.elements = []
@@ -177,8 +157,8 @@ class Chat:
     elements = []
     
     def draw(canvas):
-        Main.update_surf()
-        canvas.blit(Main.surf, (0, 0))
+        Main.background.step()
+        canvas.blit(background.surface, (0, 0))
         
         Chat.scroll = (Chat.scroll * 3 + Chat.scroll_goal) / 4
         
@@ -356,10 +336,11 @@ class Options:
     all_fonts = {}
     font_preview = None
     previous_font = None
+    previous_bg = None
     
     def draw(canvas):
-        Main.update_surf()
-        canvas.blit(Main.surf, (0, 0))
+        Main.background.step()
+        canvas.blit(background.surface, (0, 0))
         
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
@@ -369,6 +350,14 @@ class Options:
         if Options.previous_font != this_font:
             Options.previous_font = this_font
             Options.font_preview.font = Options.all_fonts[this_font]
+        
+        this_bg = Options.option_elements["bg"].current
+        if Options.previous_bg is None:
+            Options.previous_bg = this_bg
+        if Options.previous_bg != this_bg:
+            Options.previous_bg = this_bg
+            Main.background = background.bgmap.get(this_bg, background.Black)
+            Main.background.init()
         
         for i in Options.elements:
             i.draw(canvas)
@@ -487,17 +476,23 @@ class Options:
         )
         last.set_text(VARS.lang.OPTIONS_FONT_WARN)
         
-        all_fonts = {}
-        for i in pg.font.get_fonts():
-            try:
-                all_fonts[i] = pg.font.SysFont(i, 30)
-            except Exception as e:
-                print(f"Error occured when importing font {i}: {e}")
-        
-        for key, val in all_fonts.copy().items():
-            if not utils.is_monospace(val):
-                all_fonts.pop(key)
-        Options.all_fonts = all_fonts
+        if is_soft:
+            for i in Options.all_fonts.keys():
+                # probably shouldn't throw an exception
+                Options.all_fonts[i] = pg.font.SysFont(i, 30)
+            all_fonts = Options.all_fonts
+        else:
+            all_fonts = {}
+            for i in pg.font.get_fonts():
+                try:
+                    all_fonts[i] = pg.font.SysFont(i, 30)
+                except Exception as e:
+                    print(f"Error occured when importing font {i}: {e}")
+            
+            for key, val in all_fonts.copy().items():
+                if not utils.is_monospace(val):
+                    all_fonts.pop(key)
+            Options.all_fonts = all_fonts
         
         last = Options.container.push(element.Optionsbutton,
             offset = (160, 20),
@@ -519,6 +514,28 @@ class Options:
             placeholder = "AaBbCc АаБбВв 0123 .,!?/@",
         )
         Options.font_preview = last
+        
+        # background
+        last = Options.container.push(element.Line,
+            offset = (0, 20),
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_BACKGROUND)
+        
+        last = Options.container.push(element.Optionsbutton,
+            offset = (60, 20),
+            size = (100, 30),
+            align = "center",
+            hover_scale = 0.1,
+            color = (0, 63, 127),
+            font = VARS.fonts[20],
+            options = list(background.bgmap.keys()),
+        )
+        Options.option_elements["bg"] = last
         
         
         # dev options start here
@@ -591,6 +608,7 @@ class Options:
         last.update_surf()
         
         Options.reset_settings()
+        Options.previous_bg = None
         Options.elements = (Options.button, Options.apply_button, Options.reset_button, Options.container)
     
     def apply_and_restart():
@@ -601,6 +619,7 @@ class Options:
             "lang": Options.option_elements["lang"].current,
             "window_size": Options.option_elements["res"].text,
             "font": Options.option_elements["font"].current,
+            "background": Options.option_elements["bg"].current,
         })
         utils.save_config_file(new_config)
         fmap["init"]()
@@ -611,6 +630,9 @@ class Options:
         Options.option_elements["res"].set_text(CONFIG.CLIENT["window_size"])
         Options.option_elements["font"].current = CONFIG.CLIENT["font"]
         Options.option_elements["font"].redraw()
+        Options.option_elements["bg"].current = CONFIG.CLIENT["background"]
+        Options.option_elements["bg"].redraw()
+        Options.previous_bg = -1
     
     def toggle():
         if VARS.active == Options:

@@ -16,6 +16,7 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "window_size": "1400-800",
     "lang": "en",
     "font": "lucidaconsole",
+    "background": "Lines",
     "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
 }
 DEFAULT_CONFIG_FILE = """

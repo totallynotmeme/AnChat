@@ -48,7 +48,8 @@ class Line:
         self.color = pg.Color(color)
         self.font = font
         self.font_size = pg.Vector2(font.size(" "))
-        self.max_chars = int(self.size.x / self.font_size.x)
+        self.max_chars = int(self.size.x / self.font_size.x - 0.99)
+        self.size.x = self.font_size.x * (self.max_chars + 1)
         self.align = align
         self.edit = edit
         self.text = ""
@@ -562,7 +563,10 @@ class Button:
     
     def event_MOUSEBUTTONDOWN(self, ev):
         if self.hovering and ev.button == pg.BUTTON_LEFT:
-            self.holding = True
+            # double check just in case
+            self.hovering = self.bounding_box.collidepoint(ev.pos)
+            if self.hovering:
+                self.holding = True
     
     
     def event_MOUSEBUTTONUP(self, ev):

@@ -101,7 +101,7 @@ class ChatMessage:
             font = text_font,
         )
         self.text_element.set_text(self.content)
-        self.surface = pg.Surface((size_x + 30, size_y + 50))
+        self.surface = pg.Surface((size_x + 30, size_y + 50), pg.SRCALPHA)
         self.size = self.surface.get_size()
         self.rect = pg.Rect(0, 0, 0, 0)
         self.elements = (self.author_element, self.text_element)
@@ -113,6 +113,7 @@ class ChatMessage:
             return
         
         self.text_element.color = colors[self.status]
+        self.surface.fill((0, 0, 0, 0))
         surf_rect = self.surface.get_rect()
         pg.draw.rect(self.surface, (25, 35, 45), surf_rect, 0, *self.corners)
         pg.draw.rect(self.surface, (40, 60, 80), surf_rect, 2, *self.corners)

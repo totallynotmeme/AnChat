@@ -7,6 +7,7 @@ from . import utils
 from . import scene
 from . import icons
 from . import element
+from . import background
 from . import chat_message
 import pygame as pg
 import os
