@@ -25,6 +25,8 @@ NEVER connect to random people you don't know, and don't let random people conne
 3. supports multiple protocols (Socket for local networks or direct port forwarding; HTTP for 3rd party port forwarding)
 4. interactive UI, dynamic settings menu
 5. passphrases are cool
+6. multiple customizable elements (fonts and backgrounds, colors coming soon)
+7. ZERO ai code, every character was written by hand with the help of basic non-ai autocomplete
 
 ### -
 1. HTTP protocol is extremely scuffed
