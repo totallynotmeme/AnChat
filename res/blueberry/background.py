@@ -1,4 +1,4 @@
-# /res/blueberry/icons.py
+# /res/blueberry/background.py
 
 
 import pygame as pg
