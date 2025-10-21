@@ -28,15 +28,25 @@ scrap_text = "text/plain;charset=utf-8"
 def clipboard_copy(text):
     if not text:
         return
-    text = text.encode("utf-16")
-    text = text.strip(b"\xff\xfe") + b"\x00\x00" # evil cyrillic hack
-    pg.scrap.put(scrap_text, text)
+    if os.name == "nt":
+        # evil cyrillic hack for windows
+        text = text.encode("utf-16")
+        text = text.strip(b"\xff\xfe") + b"\x00\x00"
+        pg.scrap.put(scrap_text, text)
+        return
+    # os.name == "java" has not been tested yet
+    pg.scrap.put(scrap_text, text.encode("utf-8"))
+    return
 
 def clipboard_paste():
     raw = pg.scrap.get(scrap_text)
     if raw is None:
         return
-    return raw.decode("utf-16", errors="ignore").replace("\x00", "")
+    if os.name == "nt":
+        # another evil hack for windows
+        return raw.decode("utf-16", errors="ignore").replace("\x00", "")
+    # todo: os.name == "java"
+    return raw.decode(errors="ignore")
 
 
 class Line:
