@@ -31,9 +31,8 @@ NEVER connect to random people you don't know, and don't let random people conne
 ### -
 1. HTTP protocol is extremely scuffed
 2. connection can expose your ip address to server host (doesn't really matter if you're friends)
-3. features don't work in some cases (Linux: clipboard is broken)
-4. file transfers can fail miserably, especially for big files
-5. a lot of other small issues
+3. file transfers can fail miserably, especially for big files
+4. a lot of other small issues
 
 
 ## Why use this instead of other (and better) chat platforms?
