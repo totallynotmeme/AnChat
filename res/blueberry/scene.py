@@ -344,7 +344,8 @@ class Options:
         
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
-        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, 25)))
+        txt_pos_y = 60 if VARS.window_size.x < 750 else 25
+        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, txt_pos_y)))
         
         this_font = Options.option_elements["font"].current
         if Options.previous_font != this_font:
@@ -359,6 +360,10 @@ class Options:
             Main.background = background.bgmap.get(this_bg, background.Black)
             Main.background.init()
         
+        Options.container.draw(canvas)
+        pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, 0, 270, 40))
+        pg.draw.line(canvas, (0, 63, 127), (0, 40), (270, 40))
+        pg.draw.line(canvas, (0, 63, 127), (270, 40), (270, 0))
         for i in Options.elements:
             i.draw(canvas)
     
@@ -609,7 +614,7 @@ class Options:
         
         Options.reset_settings()
         Options.previous_bg = None
-        Options.elements = (Options.button, Options.apply_button, Options.reset_button, Options.container)
+        Options.elements = (Options.button, Options.apply_button, Options.reset_button)
     
     def apply_and_restart():
         pg.quit()
@@ -652,7 +657,10 @@ class Options:
                 Console.toggle()
                 return
         
-        any(i.handle_event(ev) for i in Options.elements)
+        # handle overlay buttons first, then the rest
+        if any(i.handle_event(ev) for i in Options.elements):
+            return
+        Options.container.handle_event(ev)
 
 
 

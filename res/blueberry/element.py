@@ -577,11 +577,14 @@ class Button:
             self.hovering = self.bounding_box.collidepoint(ev.pos)
             if self.hovering:
                 self.holding = True
+                return True
     
     
     def event_MOUSEBUTTONUP(self, ev):
         if self.holding and self.hovering and ev.button == pg.BUTTON_LEFT:
+            self.holding = False
             self.callback()
+            return True
         self.holding = False
     
     
