@@ -191,16 +191,19 @@ class Chat:
         scroller = offset + msg.size[1] - VARS.window_size.y + 100
         Chat.scroll_goal = max(Chat.scroll_goal, scroller)
     
+    def disconnect():
+        txt = VARS.lang.MESSAGE_DISCONNECTED.encode()
+        sys_msg = {b"author": b"~SYSTEM", b"content": txt}
+        fmap["recvmsg"](sys_msg)
+        connection.protocol.disconnect("Client disconnected from the server")
+        VARS.active = Main
+    
     def parse_command(prompt):
         if not prompt.startswith("/"):
             return False
         
         if prompt == "/disconnect":
-            txt = VARS.lang.MESSAGE_DISCONNECTED.encode()
-            sys_msg = {b"author": b"~SYSTEM", b"content": txt}
-            fmap["recvmsg"](sys_msg)
-            connection.protocol.disconnect("Client disconnected from the server")
-            VARS.active = Main
+            Chat.disconnect()
         
         if prompt == "/dump":
             filename = utils.random_string(16) + ".txt" #".dump"
@@ -260,6 +263,20 @@ class Chat:
             last = Chat.messages[-1]
             scroller = last.offset + last.size[1] - VARS.window_size.y + 100
             Chat.scroll_goal = max(Chat.scroll_goal, scroller)
+        # disconnect button
+        button = element.Button(
+            pos = (110, 20),
+            size = (120, 30),
+            align = "center",
+            callback = Chat.disconnect,
+            hover_scale = 0.1,
+        )
+        button.surface.fill((127, 0, 0))
+        txt = VARS.lang.CHAT_DISCONNECT
+        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        button.surface.blit(txt, txt.get_rect(center=(60, 15)))
+        button.update_surf()
+        Chat.elements.append(button)
     
     
     def handle_event(ev):

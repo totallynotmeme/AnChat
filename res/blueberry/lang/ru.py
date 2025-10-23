@@ -60,6 +60,7 @@ MESSAGE_HELP = """
 """[1:-1]
 
 CHATBOX_FIELD = "Напишите своё сообщение здесь"
+CHAT_DISCONNECT = "Отключиться"
 CONNECTION_ERROR = "Ошибка соединения: {}"
 
 ERROR_CODES = {
