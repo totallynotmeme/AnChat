@@ -8,7 +8,7 @@ import os
 
 
 fonts = {}
-window_size = 0
+window_size = (200, 200)
 downloads_path = ""
 
 def safe_decode(text):
@@ -89,7 +89,7 @@ class ChatMessage:
             self.content += f"\n[[Attachment: {self.filename}]]"
         text_font = fonts[20]
         font_size = pg.Vector2(text_font.size(" "))
-        lines = utils.text_to_lines(self.content, int(500 / font_size.x))
+        lines = utils.text_to_lines(self.content, int((window_size[0]-100) / font_size.x))
         size_x = int(max(len(i) for i in lines) * font_size.x)
         size_x = max(size_x, int(author_font.size(self.author)[0]))
         #size_x = 500
@@ -105,7 +105,7 @@ class ChatMessage:
         self.size = self.surface.get_size()
         self.rect = pg.Rect(0, 0, 0, 0)
         self.elements = (self.author_element, self.text_element)
-    
+
     def draw(self, canvas, scroll_offset):
         if self.size[1] + self.offset <= scroll_offset:
             return
@@ -126,6 +126,25 @@ class ChatMessage:
     def reinit(self):
         if self.align == "topright":
             self.x_pos = window_size[0] - 25
+        # janky code to make messages resize when user changes screen res
+        # should be refactored later ig
+        text_font = fonts[20]
+        author_font = fonts[25]
+        font_size = pg.Vector2(text_font.size(" "))
+        lines = utils.text_to_lines(self.content, int((window_size[0]-100) / font_size.x))
+        size_x = int(max(len(i) for i in lines) * font_size.x)
+        size_x = max(size_x, int(author_font.size(self.author)[0]))
+        size_y = int(len(lines) * font_size.y)
+        self.text_element = element.Multiline(
+            pos = (15, 40),
+            size = (size_x, size_y),
+            color = (200, 200, 200),
+            font = text_font,
+        )
+        self.text_element.set_text(self.content)
+        self.surface = pg.Surface((size_x + 30, size_y + 50), pg.SRCALPHA)
+        self.size = self.surface.get_size()
+        self.elements = (self.author_element, self.text_element)
     
     
     def event_MOUSEMOTION(self, ev):

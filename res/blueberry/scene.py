@@ -277,6 +277,16 @@ class Chat:
         button.surface.blit(txt, txt.get_rect(center=(60, 15)))
         button.update_surf()
         Chat.elements.append(button)
+        if is_soft:
+            # to be refactored - realign messages after window resize
+            last = None
+            for msg in Chat.messages:
+                if last:
+                    offset = last.offset + last.size[1] + 5
+                else:
+                    offset = 25
+                msg.offset = offset
+                last = msg
     
     
     def handle_event(ev):
