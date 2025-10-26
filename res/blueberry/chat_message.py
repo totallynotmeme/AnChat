@@ -105,7 +105,7 @@ class ChatMessage:
         self.size = self.surface.get_size()
         self.rect = pg.Rect(0, 0, 0, 0)
         self.elements = (self.author_element, self.text_element)
-
+    
     def draw(self, canvas, scroll_offset):
         if self.size[1] + self.offset <= scroll_offset:
             return
