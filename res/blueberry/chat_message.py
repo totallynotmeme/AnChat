@@ -54,6 +54,7 @@ class ChatMessage:
         self.type = "text"
         self.show = True
         self.status = 1
+        self.expand = False
         
         if b"~errorcode" in raw:
             self.type = "error"
@@ -121,6 +122,8 @@ class ChatMessage:
         self.text_element.draw(self.surface)
         true_offset = int(self.offset - scroll_offset)
         self.rect = self.surface.get_rect(**{self.align: (self.x_pos, true_offset)})
+        if self.expand:
+            pass # i wonder what this is for
         return canvas.blit(self.surface, self.rect)
     
     def reinit(self):
@@ -155,8 +158,12 @@ class ChatMessage:
             return res
     
     def event_MOUSEBUTTONDOWN(self, ev):
+        if ev.button == pg.BUTTON_RIGHT:
+            res = self.rect.collidepoint(ev.pos)
+            self.expand = res
         if ev.button != pg.BUTTON_LEFT:
             return False
+        
         ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
         res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
         ev.pos += pg.Vector2(self.rect.topleft)
