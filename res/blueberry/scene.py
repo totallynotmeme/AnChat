@@ -6,6 +6,7 @@ from . import icons
 from . import element
 from . import background
 from . import lang
+from .chat_message import ChatMessage
 import pygame as pg
 from threading import Thread
 import os
@@ -171,6 +172,8 @@ class Chat:
             for i in Chat.messages:
                 i.draw(canvas, Chat.scroll)
         
+        canvas.blit(ChatMessage.expanded, (5, 40))
+        
         pg.draw.line(canvas, (50, 50, 50), (0, Chat.y_limit-1), (VARS.window_size.x, Chat.y_limit-1))
         pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, Chat.y_limit, VARS.window_size.x, 50))
         for i in Chat.elements:
@@ -325,6 +328,10 @@ class Chat:
         
         if ev.type == pg.MOUSEMOTION:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
+        
+        if ev.type == pg.MOUSEBUTTONDOWN and ev.button == pg.BUTTON_RIGHT:
+            # MORE SPAGHETTI OHNOES
+            ChatMessage.expanded = pg.Surface((0, 0))
         
         if ev.type == pg.TEXTINPUT:
             Chat.input_box.event_TEXTINPUT(ev)

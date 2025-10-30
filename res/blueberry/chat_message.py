@@ -32,6 +32,7 @@ error_codes = {}
 
 class ChatMessage:
     corners = (25, 10, 15, 10)
+    expanded = pg.Surface((0, 0))
     def __init__(self, raw):
         #print("="*40, *raw.keys(), "="*40, sep="\n")
         self.raw = raw
@@ -123,7 +124,12 @@ class ChatMessage:
         true_offset = int(self.offset - scroll_offset)
         self.rect = self.surface.get_rect(**{self.align: (self.x_pos, true_offset)})
         if self.expand:
-            pass # i wonder what this is for
+            highlight = self.rect.copy()
+            highlight.x -= 1
+            highlight.y -= 1
+            highlight.w += 2
+            highlight.h += 2
+            pg.draw.rect(canvas, (0, 127, 255), highlight, 0, *self.corners)
         return canvas.blit(self.surface, self.rect)
     
     def reinit(self):
@@ -161,6 +167,28 @@ class ChatMessage:
         if ev.button == pg.BUTTON_RIGHT:
             res = self.rect.collidepoint(ev.pos)
             self.expand = res
+            if self.expand:
+                # drawing raw info about message
+                # note to future self: this is spaghetti, please rewrite later
+                texts = []
+                for key, val in self.raw.items():
+                    key = safe_decode(key)
+                    if len(key) > 30:
+                        key = key[:27] + f"...(len={len(key)})"
+                    val = safe_decode(val)
+                    if len(val) > 80:
+                        val = val[:77] + f"...(len={len(val)})"
+                    texts.append(f"{key}: {val}")
+                
+                font = fonts[20]
+                font_size = pg.Vector2(font.size(" "))
+                size = (len(max(texts, key=len)) * font_size.x + 10, len(texts) * font_size.y + 10)
+                ChatMessage.expanded = pg.Surface(size)
+                for ind, i in enumerate(texts):
+                    txt = font.render(i, True, (255, 255, 255))
+                    ChatMessage.expanded.blit(txt, (5, ind * font_size.y + 5))
+                
+                pg.draw.rect(ChatMessage.expanded, (0, 63, 127), pg.Rect(0, 0, *size), 3)
         if ev.button != pg.BUTTON_LEFT:
             return False
         
