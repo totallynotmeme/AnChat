@@ -109,9 +109,14 @@ class ChatMessage:
         self.elements = (self.author_element, self.text_element)
     
     def draw(self, canvas, scroll_offset):
-        if self.size[1] + self.offset <= scroll_offset:
-            return
-        if self.offset - scroll_offset >= window_size[1]:
+        # off-screen check
+        update_rect = self.show
+        self.show = self.size[1] + self.offset >= scroll_offset and\
+                    self.offset <= window_size[1] + scroll_offset
+        
+        if not self.show:
+            if update_rect:
+                self.rect.w = 0
             return
         
         self.text_element.color = colors[self.status]
@@ -158,9 +163,11 @@ class ChatMessage:
     
     def event_MOUSEMOTION(self, ev):
         if self.rect.collidepoint(ev.pos):
-            ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+            shifted = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+            original = ev.pos
+            ev.pos = shifted
             res = any(i.event_MOUSEMOTION(ev) for i in self.elements)
-            ev.pos += pg.Vector2(self.rect.topleft)
+            ev.pos = original
             return res
     
     def event_MOUSEBUTTONDOWN(self, ev):
@@ -192,15 +199,19 @@ class ChatMessage:
         if ev.button != pg.BUTTON_LEFT:
             return False
         
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        shifted = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        original = ev.pos
+        ev.pos = shifted
         res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
+        ev.pos = original
         return res
     
     def event_MOUSEBUTTONUP(self, ev):
-        ev.pos = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        shifted = pg.Vector2(ev.pos) - pg.Vector2(self.rect.topleft)
+        original = ev.pos
+        ev.pos = shifted
         res = any(i.event_MOUSEBUTTONUP(ev) for i in self.elements)
-        ev.pos += pg.Vector2(self.rect.topleft)
+        ev.pos = original
         return res
     
     
