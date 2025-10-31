@@ -163,14 +163,10 @@ class Chat:
         
         Chat.scroll = (Chat.scroll * 3 + Chat.scroll_goal) / 4
         
-        if VARS.debug:
-            for i in Chat.messages:
-                rect = i.draw(canvas, Chat.scroll)
-                if rect:
-                    pg.draw.rect(canvas, (0, 255, 127), rect, 1)
-        else:
-            for i in Chat.messages:
-                i.draw(canvas, Chat.scroll)
+        for i in Chat.messages:
+            i.draw(canvas, Chat.scroll)
+            if VARS.debug:
+                pg.draw.rect(canvas, (0, 255, 127), i.rect, 1)
         
         canvas.blit(ChatMessage.expanded, (5, 40))
         
