@@ -178,17 +178,16 @@ class ChatMessage:
                 # drawing raw info about message
                 # note to future self: this is spaghetti, please rewrite later
                 texts = []
-                for key, val in self.raw.items():
-                    key = safe_decode(key)
-                    if len(key) > 30:
-                        key = key[:27] + f"...(len={len(key)})"
-                    val = safe_decode(val)
-                    if len(val) > 80:
-                        val = val[:77] + f"...(len={len(val)})"
-                    texts.append(f"{key}: {val}")
-                
                 font = fonts[20]
                 font_size = pg.Vector2(font.size(" "))
+                limit = int((window_size[0] - 10) / font_size.x) - 1
+                for key, val in self.raw.items():
+                    thing = f"{safe_decode(key)}: {safe_decode(val)}"
+                    if len(thing) > limit:
+                        suffix = f"...({len(thing)})"
+                        thing = thing[:limit-len(suffix)] + suffix
+                    texts.append(thing)
+                
                 size = (len(max(texts, key=len)) * font_size.x + 10, len(texts) * font_size.y + 10)
                 ChatMessage.expanded = pg.Surface(size)
                 for ind, i in enumerate(texts):
