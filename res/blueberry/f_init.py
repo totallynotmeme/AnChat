@@ -21,18 +21,19 @@ def bootstrap(_globals):
 
 # your function here
 def func():
-    did_crash = pg.get_init()
+    intentional_reset = getattr(VARS, "RESETTING", False) # this is cursed(?)
     is_soft = VARS.RUNNING
+    VARS.RESETTING = False
     if is_soft:
         # soft reset - no shutdown before reinitialization
-        if did_crash:
-            # pygame is still initialized - crash
-            log("WARN: Soft reset detected. Did the client just crash?")
-        else:
-            # pygame is not initialized - intended reset
+        if intentional_reset:
+            # intentional reset guh
             log("-- Reinitialization, the window should re-open in a moment --")
+        else:
+            # non-intentional reset - crash
+            log("WARN: Soft reset detected. Did the client just crash?")
     else:
-        # hard reset - after shutdown, most likely intended
+        # hard reset - after shutdown, most likely first run
         log("")
         log("---[  INITIALIZING BLUEBERRY CLIENT  ]---")
         log("")

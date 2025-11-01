@@ -647,7 +647,9 @@ class Options:
         Options.elements = (Options.button, Options.apply_button, Options.reset_button)
     
     def apply_and_restart():
-        pg.quit()
+        VARS.RESETTING = True
+        if CONFIG.CLIENT["window_size"] != Options.option_elements["res"].text:
+            pg.quit()
         #fmap["shutdown"]()
         new_config = CONFIG.CLIENT.copy()
         new_config.update({
@@ -667,7 +669,6 @@ class Options:
         Options.option_elements["font"].redraw()
         Options.option_elements["bg"].current = CONFIG.CLIENT["background"]
         Options.option_elements["bg"].redraw()
-        Options.previous_bg = -1
     
     def toggle():
         if VARS.active == Options:
