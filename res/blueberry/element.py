@@ -609,7 +609,7 @@ class Optionsbutton(Button):
         self.current = options[-1]
         self.color = color
         self.font = font
-        self.callback = lambda: Optionsbutton.f_callback(self)
+        self.callback = self.f_callback
         self.redraw()
     
     def f_callback(self):
