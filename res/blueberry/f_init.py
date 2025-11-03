@@ -80,6 +80,7 @@ def func():
         window_size = utils.parse_screen_res(CONFIG.DEFAULTS["window_size"], max_res)
     CONFIG.CLIENT["window_size"] = f"{window_size[0]}-{window_size[1]}"
     
+    old_size = getattr(VARS, "window_size", None) # this is also cursed
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
     VARS.lang = lang.langmap.get(CONFIG.CLIENT["lang"], lang.default)
@@ -88,7 +89,8 @@ def func():
     # that log() explains what this block does lol
     log("Creating pygame window")
     pg.display.set_caption(VARS.lang.WINDOW_TITLE)
-    VARS.canvas = pg.display.set_mode(window_size)
+    if not intentional_reset or VARS.window_size != old_size:
+        VARS.canvas = pg.display.set_mode(window_size)
     VARS.clock = pg.time.Clock()
     VARS.fonts = {}
     for i in range(10, 50, 5):
