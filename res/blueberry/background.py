@@ -1,9 +1,11 @@
 # /res/blueberry/background.py
 
 
+# from . import theme # TODO
 import pygame as pg
 import random
 
+theme = None
 
 surface = pg.Surface((5, 5))
 size = pg.Vector2(5, 5)
@@ -23,6 +25,8 @@ class Lines:
     line_2 = 0
     
     def init():
+        global color
+        color = tuple(i//2 for i in theme["base"])
         surface.blit(filler, (0, 0))
         # Lines.line_1 = 0
         # Lines.line_2 = 0
@@ -87,6 +91,8 @@ class Rain:
     active = []
     
     def init():
+        global color
+        color = tuple(i//2 for i in theme["base"])
         surface.blit(filler, (0, 0))
         Rain.active = []
     

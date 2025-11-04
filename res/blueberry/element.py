@@ -187,7 +187,6 @@ class Line:
         
         if self.bounding_box.collidepoint(ev.pos):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_IBEAM)
-            return True
         return False
     
     
@@ -630,6 +629,116 @@ class Optionsbutton(Button):
         self.update_surf()
 
 
+class Colorpicker:
+    white = pg.Surface((255, 255), pg.SRCALPHA)
+    black = pg.Surface((255, 255), pg.SRCALPHA)
+    rainbow = pg.Surface((30, 255))
+    
+    # setting up surfaces
+    color = pg.Color(0)
+    for i in range(255):
+        pg.draw.line(white, (255, 255, 255, 254-i), (i, 0), (i, 255))
+        pg.draw.line(black, (0, 0, 0, i), (0, i), (255, i))
+        color.hsva = (i*360/255, 100, 100, 100)
+        pg.draw.line(rainbow, color, (0, i), (30, i))
+    del color
+    
+    def __init__(self, pos):
+        self.pos = pg.Vector2(pos)
+        self.size = pg.Vector2(285, 255)
+        self.surface = pg.Surface((285, 255))
+        self.color = pg.Color(255, 0, 0)
+        self.hue = 0
+        self.sv = pg.Vector2(0, 255)
+        self.hovering = False
+        self.holding = False
+        self.holding_hue = False
+        self.bounding_box = pg.Rect(self.pos, self.size)
+    
+    def draw(self, canvas, offset=pg.Vector2()):
+        canvas.blit(self.surface, self.pos + offset)
+        cursize = 5 + self.holding * 10
+        
+        line_from = self.pos + offset + (255, self.hue)
+        line_to = line_from + (29, 0)
+        sv_point = self.pos + offset - self.sv
+        sv_point.x += 255 - cursize
+        sv_point.y += 255 - cursize
+        c = (self.color.hsva[2]*3 - self.color.hsva[1] < 120) * 255 # magic
+        cursize = cursize * 2 + 1
+        
+        pg.draw.line(canvas, (255, 255, 255), line_from, line_to, 3)
+        pg.draw.rect(canvas, self.color, pg.Rect(*sv_point, cursize, cursize))
+        pg.draw.rect(canvas, (c, c, c), pg.Rect(*sv_point, cursize, cursize), 1)
+    
+    def set_color(self, color):
+        color = pg.Color(color)
+        self.hue = color.hsva[0] * 255 / 360
+        self.sv.x = 255 - color.hsva[1] * 2.55
+        self.sv.y = color.hsva[2] * 2.55
+        self.update()
+    
+    def update(self):
+        h = self.hue * 360 / 255
+        s = 100 - self.sv.x / 2.55
+        v = self.sv.y / 2.55
+        self.color.hsva = (h, s, v, 100)
+        saturated = pg.Color(0)
+        saturated.hsva = (h, 100, 100, 100)
+        self.surface.fill(saturated)
+        self.surface.blit(Colorpicker.white, (0, 0))
+        self.surface.blit(Colorpicker.black, (0, 0))
+        self.surface.blit(Colorpicker.rainbow, (255, 0))
+    
+    
+    def event_MOUSEMOTION(self, ev):
+        self.hovering = self.bounding_box.collidepoint(ev.pos)
+        if self.holding:
+            if self.holding_hue:
+                self.hue = (ev.pos[1] - self.pos.y) % 255
+                self.update()
+            else:
+                self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
+                self.sv.y = 255 - min(max(ev.pos[1] - self.pos.y, 0), 255)
+                self.update()
+    
+    def event_MOUSEBUTTONDOWN(self, ev):
+        if self.hovering and ev.button == pg.BUTTON_LEFT:
+            self.holding = True
+            if ev.pos[0] - self.pos.x > 255:
+                self.holding_hue = True
+                self.hue = (ev.pos[1] - self.pos.y) % 255
+                self.update()
+            else:
+                self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
+                self.sv.y = 255 - min(max(ev.pos[1] - self.pos.y, 0), 255)
+                self.update()
+    
+    def event_MOUSEBUTTONUP(self, ev):
+        if self.holding and ev.button == pg.BUTTON_LEFT:
+            self.holding = False
+            self.holding_hue = False
+    
+    def event_KEYDOWN(self, ev):
+        return False
+    
+    def event_TEXTINPUT(self, ev):
+        return False
+    
+    def event_MOUSEWHEEL(self, ev):
+        return False
+    
+    handle_event = handle_event
+    evmap = {
+        pg.MOUSEMOTION: event_MOUSEMOTION,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
+        pg.KEYDOWN: event_KEYDOWN,
+        pg.TEXTINPUT: event_TEXTINPUT,
+        pg.MOUSEWHEEL: event_MOUSEWHEEL,
+    }
+
+
 class Container:
     # still not finished, but we're getting closer
     def __init__(self, pos, size, align="topleft", step=50):
@@ -711,7 +820,7 @@ class Container:
             limit = 0
         else:
             last = self.elements[-1]
-            limit = last.pos.y + last.size.y
+            limit = max(last.pos.y + last.size.y - self.size.y, 0)
         self.scroll_goal -= ev.precise_y * self.scroll_step
         self.scroll_goal = min(max(self.scroll_goal, 0), limit)
         self.scroll -= ev.precise_y * self.scroll_step / 2

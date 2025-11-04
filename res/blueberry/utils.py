@@ -18,6 +18,7 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "font": "lucidaconsole",
     "background": "Lines",
     "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
+    "theme": "Default/base:004080/accent:0080ff/accent2:800000",
 }
 DEFAULT_CONFIG_FILE = """
 # /config.txt
@@ -35,9 +36,16 @@ DEFAULT_CONFIG_FILE = """
 
 
 """[1:-1]
-config_lines = "\n".join(f"{k} = {v}" for k, v in GET_DEFAULT_CONFIG_OPTIONS().items())
-DEFAULT_CONFIG_FILE += config_lines + "\n"
+config_lines = "".join(f"{k} = {v}\n" for k, v in GET_DEFAULT_CONFIG_OPTIONS().items())
+DEFAULT_CONFIG_FILE += config_lines
+del config_lines
 CONFIG_FILE_PATH = ""
+
+GET_DEFAULT_THEME = lambda: {
+    "base": (0, 64, 128),
+    "accent": (0, 128, 255),
+    "accent2": (128, 0, 0),
+}
 
 
 def parse_config_file(current_config):
@@ -102,6 +110,14 @@ def save_config_file(current_config):
         config_file_data.pop()
     
     open(CONFIG_FILE_PATH, "w").write("\n".join(config_file_data) + "\n")
+
+
+tohexbyte = lambda x: hex(x)[2:].zfill(2)
+def colortohex(color):
+    return tohexbyte(color[0]) + tohexbyte(color[1]) + tohexbyte(color[2])
+
+def hextocolor(color):
+    return tuple(int(color[i:i+2], 16) for i in range(0, 6, 2))
 
 
 def find_space_left(line):

@@ -40,7 +40,7 @@ def func():
         VARS.show_stream_warn = True # temporary line
     
     chat_message.downloads_path = DOWNLOADS_PATH
-    VARS.CLIENT_VERSION = "0.1.2-ALPHA"
+    VARS.CLIENT_VERSION = "0.1.3-ALPHA"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
     VARS.holding_ctrl = False
@@ -49,27 +49,49 @@ def func():
     if not is_soft:
         VARS.active = scene.Main
     
+    # bootstrapping everything lol
     task.bootstrap(globals())
     utils.bootstrap(globals())
     scene.bootstrap(globals())
     element.bootstrap(globals())
-    
-    log("Bootstrapping tasks from task.py")
     task.Stream.sendmsg = fmap["sendmsg"]
     
     log("Initializing Pygame")
     pg.init() # yes that's it
     
-    log("Reading config and language files")
-    
+    log("Reading config and parsing themes")
     # initializing some variables
     CONFIG.DEFAULTS = utils.GET_DEFAULT_CONFIG_OPTIONS()
     CONFIG.CLIENT = utils.GET_DEFAULT_CONFIG_OPTIONS()
+    CONFIG.THEME = utils.GET_DEFAULT_THEME()
     utils.CONFIG_FILE_PATH = os.getcwd() + "/config.txt"
     
     # parsing config file
     for i in utils.parse_config_file(CONFIG.CLIENT):
         log(i)
+    # todo: move this to theme.py and maybe utils.py
+    name, *theme_values = CONFIG.CLIENT["theme"].split("/")
+    config_theme = {}
+    for i in theme_values:
+        if ":" in i:
+            prop, value = i.split(":", 1)
+            try:
+                value = utils.hextocolor(value)
+                config_theme[prop] = value
+            except Exception as e:
+                log(f"Error during theme parsing: {e}")
+        # else: mb handle flags??
+    CONFIG.THEME.update(config_theme)
+    # todo: DEFINITELY move this to theme.py
+    # i just want to push the commit lol i spent far too long working on this
+    CONFIG.THEME_NAME = name
+    CONFIG.LOADED_THEMES = {
+        "Default": {"base": (0, 64, 128), "accent": (0, 128, 255), "accent2": (128, 0, 0)},
+        "Purpleberry": {"base": (39, 20, 177), "accent": (206, 25, 228), "accent2": (18, 75, 219)},
+    }
+    # temporary solution xd
+    background.theme = CONFIG.THEME
+    icons.theme = CONFIG.THEME
     
     # getting screen resolution from config (or default)
     display_data = pg.display.Info()
@@ -101,18 +123,17 @@ def func():
     pg.display.flip()
     pg.scrap.init()
     
-    log("Drawing icons")
     icons.draw()
     pg.display.set_icon(icons.app)
-    
     if is_soft:
         saved_console_logs = scene.Console.logs_multiline.lines
     
-    log("Initializing elements")
+    # initializing elements and stuff
     pg.key.set_repeat(250, 30)
     for i in scene.to_init:
         i.init(is_soft)
     
+    # soft restart checks
     if is_soft:
         scene.Console.logs_multiline.lines.extend(saved_console_logs)
     

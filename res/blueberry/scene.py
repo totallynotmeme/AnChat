@@ -36,6 +36,10 @@ class Main:
             i.draw(canvas)
     
     def init(is_soft):
+        c_base = CONFIG.THEME["base"]
+        c_accent = CONFIG.THEME["accent"]
+        c_accent2 = CONFIG.THEME["accent2"]
+        
         background.filler = pg.Surface(VARS.window_size)
         txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
         txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
@@ -61,7 +65,7 @@ class Main:
             callback = lambda: Thread(target=Main.button_connect).start(),
             hover_scale = 0.1,
         )
-        button.surface.fill((0, 63, 127))
+        button.surface.fill(c_base)
         txt = VARS.fonts[25].render(txt, True, (255, 255, 255))
         button.surface.blit(txt, txt.get_rect(center=(button_size_x // 2, 25)))
         button.update_surf()
@@ -239,6 +243,10 @@ class Chat:
         return True
     
     def init(is_soft):
+        c_base = CONFIG.THEME["base"]
+        c_accent = CONFIG.THEME["accent"]
+        c_accent2 = CONFIG.THEME["accent2"]
+        
         Chat.elements = []
         Chat.input_box = element.Line(
             pos = (VARS.window_size.x/2, VARS.window_size.y - 25),
@@ -270,7 +278,7 @@ class Chat:
             callback = Chat.disconnect,
             hover_scale = 0.1,
         )
-        button.surface.fill((127, 0, 0))
+        button.surface.fill(c_accent2)
         txt = VARS.lang.CHAT_DISCONNECT
         txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
         button.surface.blit(txt, txt.get_rect(center=(60, 15)))
@@ -365,23 +373,30 @@ class Options:
     elements = ()
     all_fonts = {}
     font_preview = None
+    # i need to refactor this smh
     previous_font = None
     previous_bg = None
+    previous_preset = None
+    previous_category = None
+    previous_pickerhold = False
     
     def draw(canvas):
         Main.background.step()
         canvas.blit(background.surface, (0, 0))
         
+        # title thingy
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
         txt_pos_y = 60 if VARS.window_size.x < 750 else 25
         canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, txt_pos_y)))
         
+        # font
         this_font = Options.option_elements["font"].current
         if Options.previous_font != this_font:
             Options.previous_font = this_font
             Options.font_preview.font = Options.all_fonts[this_font]
         
+        # background
         this_bg = Options.option_elements["bg"].current
         if Options.previous_bg is None:
             Options.previous_bg = this_bg
@@ -390,14 +405,41 @@ class Options:
             Main.background = background.bgmap.get(this_bg, background.Black)
             Main.background.init()
         
+        # themes
+        this_category = Options.option_elements["colorcategory"].current.lower()
+        picker = Options.option_elements["colorpicker"]
+        preset_button = Options.option_elements["themepreset"]
+        
+        if Options.previous_preset != preset_button.current:
+            Options.previous_preset = preset_button.current
+            Options.previous_category = None
+            if preset_button.current != "Custom":
+                CONFIG.THEME_TEMP = CONFIG.LOADED_THEMES[preset_button.current].copy()
+        
+        if Options.previous_category != this_category:
+            Options.previous_category = this_category
+            color = CONFIG.THEME_TEMP[this_category]
+            picker.set_color(color)
+        
+        if Options.previous_pickerhold and not picker.holding:
+            CONFIG.THEME_TEMP[this_category] = picker.color
+            if preset_button.current != "Custom":
+                preset_button.current = "Custom"
+                preset_button.redraw()
+        Options.previous_pickerhold = picker.holding
+        
+        # drawing everything
         Options.container.draw(canvas)
         pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, 0, 270, 40))
-        pg.draw.line(canvas, (0, 63, 127), (0, 40), (270, 40))
-        pg.draw.line(canvas, (0, 63, 127), (270, 40), (270, 0))
+        pg.draw.line(canvas, CONFIG.THEME["base"], (0, 40), (270, 40))
+        pg.draw.line(canvas, CONFIG.THEME["base"], (270, 40), (270, 0))
         for i in Options.elements:
             i.draw(canvas)
     
     def init(is_soft):
+        c_base = CONFIG.THEME["base"]
+        c_accent = CONFIG.THEME["accent"]
+        c_accent2 = CONFIG.THEME["accent2"]
         # draw main options menu button
         button = element.Button(
             pos = (5, 5),
@@ -421,7 +463,7 @@ class Options:
             callback = Options.apply_and_restart,
             hover_scale = 0.1,
         )
-        button.surface.fill((0, 63, 127))
+        button.surface.fill(c_base)
         txt = VARS.lang.OPTIONS_APPLY
         txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
         button.surface.blit(txt, txt.get_rect(center=(50, 15)))
@@ -436,18 +478,25 @@ class Options:
             callback = Options.reset_settings,
             hover_scale = 0.1,
         )
-        button.surface.fill((127, 0, 0))
+        button.surface.fill(c_accent2)
         txt = VARS.lang.OPTIONS_RESET
         txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
         button.surface.blit(txt, txt.get_rect(center=(50, 15)))
         button.update_surf()
         Options.reset_button = button
         
+        if is_soft:
+            container_scroll = Options.container.scroll_goal
+        
         # create container for all options
         Options.container = element.Container(
             pos = (0, 50),
             size = (VARS.window_size.x, VARS.window_size.y - 50),
         )
+        
+        if is_soft:
+            Options.container.scroll = container_scroll
+            Options.container.scroll_goal = container_scroll
         
         # language
         last = Options.container.push(element.Line,
@@ -464,7 +513,7 @@ class Options:
             size = (60, 30),
             align = "center",
             hover_scale = 0.1,
-            color = (0, 63, 127),
+            color = c_base,
             font = VARS.fonts[20],
             options = sorted(lang.langmap.keys()),
         )
@@ -484,7 +533,7 @@ class Options:
         last = Options.container.push(element.Line,
             offset = (10, 0),
             size_y = 30,
-            color = (0, 127, 255),
+            color = c_accent,
             font = VARS.fonts[25],
             align = "topleft",
             edit = True,
@@ -534,7 +583,7 @@ class Options:
             size = (300, 30),
             align = "center",
             hover_scale = 0.04,
-            color = (0, 63, 127),
+            color = c_base,
             font = VARS.fonts[20],
             options = sorted(all_fonts.keys()),
         )
@@ -566,12 +615,57 @@ class Options:
             size = (100, 30),
             align = "center",
             hover_scale = 0.1,
-            color = (0, 63, 127),
+            color = c_base,
             font = VARS.fonts[20],
             options = list(background.bgmap.keys()),
         )
         Options.option_elements["bg"] = last
         
+        # themes and stuff
+        last = Options.container.push(element.Line,
+            offset = (0, 70),
+            size_y = 30,
+            color = (255, 255, 255),
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_THEME)
+        
+        last = Options.container.push(element.Optionsbutton,
+            offset = (110, 20),
+            size = (200, 30),
+            align = "center",
+            hover_scale = 0.1,
+            color = c_accent,
+            font = VARS.fonts[20],
+            options = sorted(CONFIG.LOADED_THEMES.keys()),
+        )
+        Options.option_elements["themepreset"] = last
+        
+        if is_soft:
+            category = Options.option_elements["colorcategory"].current
+        else:
+            category = "Base"
+        
+        last = Options.container.push(element.Optionsbutton,
+            offset = (85, 20),
+            size = (150, 30),
+            align = "center",
+            hover_scale = 0.1,
+            color = c_base,
+            font = VARS.fonts[20],
+            options = ["Base", "Accent", "Accent2"],
+        )
+        last.current = category
+        last.redraw()
+        Options.option_elements["colorcategory"] = last
+        
+        last = Options.container.push(element.Colorpicker,
+            offset = (10, -5),
+        )
+        Options.option_elements["colorpicker"] = last
+        last.update()
         
         # dev options start here
         last = Options.container.push(element.Line,
@@ -594,7 +688,7 @@ class Options:
             hover_scale = 0.04,
             callback = func,
         )
-        last.surface.fill((0, 63, 127))
+        last.surface.fill(c_base)
         txt = VARS.fonts[15].render("Toggle debug", True, (255, 255, 255))
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
@@ -610,7 +704,7 @@ class Options:
             hover_scale = 0.04,
             callback = func,
         )
-        last.surface.fill((0, 63, 127))
+        last.surface.fill(c_base)
         txt = VARS.fonts[15].render("Go to Main", True, (255, 255, 255))
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
@@ -624,7 +718,7 @@ class Options:
             hover_scale = 0.04,
             callback = func,
         )
-        last.surface.fill((0, 63, 127))
+        last.surface.fill(c_base)
         txt = VARS.fonts[15].render("Go to Chat", True, (255, 255, 255))
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
@@ -637,7 +731,7 @@ class Options:
             hover_scale = 0.04,
             callback = icons.dump,
         )
-        last.surface.fill((0, 63, 127))
+        last.surface.fill(c_base)
         txt = VARS.fonts[15].render("Dump icons", True, (255, 255, 255))
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
@@ -651,24 +745,33 @@ class Options:
         if CONFIG.CLIENT["window_size"] != Options.option_elements["res"].text:
             pg.quit()
         #fmap["shutdown"]()
+        theme_thing = Options.option_elements["themepreset"].current + "/" +\
+                      "/".join(key + ":" + utils.colortohex(val) for key, val in CONFIG.THEME_TEMP.items())
         new_config = CONFIG.CLIENT.copy()
         new_config.update({
             "lang": Options.option_elements["lang"].current,
             "window_size": Options.option_elements["res"].text,
             "font": Options.option_elements["font"].current,
             "background": Options.option_elements["bg"].current,
+            "theme": theme_thing,
         })
         utils.save_config_file(new_config)
         fmap["init"]()
     
     def reset_settings():
-        Options.option_elements["lang"].current = CONFIG.CLIENT["lang"]
-        Options.option_elements["lang"].redraw()
-        Options.option_elements["res"].set_text(CONFIG.CLIENT["window_size"])
-        Options.option_elements["font"].current = CONFIG.CLIENT["font"]
-        Options.option_elements["font"].redraw()
-        Options.option_elements["bg"].current = CONFIG.CLIENT["background"]
-        Options.option_elements["bg"].redraw()
+        table = Options.option_elements
+        table["lang"].current = CONFIG.CLIENT["lang"]
+        table["lang"].redraw()
+        table["res"].set_text(CONFIG.CLIENT["window_size"])
+        table["font"].current = CONFIG.CLIENT["font"]
+        table["font"].redraw()
+        table["bg"].current = CONFIG.CLIENT["background"]
+        table["bg"].redraw()
+        CONFIG.THEME_TEMP = CONFIG.THEME.copy()
+        category = table["colorcategory"].current.lower()
+        table["colorpicker"].set_color(CONFIG.THEME_TEMP[category])
+        table["themepreset"].current = CONFIG.THEME_NAME
+        table["themepreset"].redraw()
     
     def toggle():
         if VARS.active == Options:
