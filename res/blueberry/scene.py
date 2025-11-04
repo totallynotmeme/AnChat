@@ -422,7 +422,7 @@ class Options:
             picker.set_color(color)
         
         if Options.previous_pickerhold and not picker.holding:
-            CONFIG.THEME_TEMP[this_category] = picker.color
+            CONFIG.THEME_TEMP[this_category] = picker.color[:3]
             if preset_button.current != "Custom":
                 preset_button.current = "Custom"
                 preset_button.redraw()
