@@ -41,7 +41,7 @@ def func():
         VARS.show_stream_warn = True # temporary line
     
     chat_message.downloads_path = DOWNLOADS_PATH
-    VARS.CLIENT_VERSION = "0.1.3-ALPHA"
+    VARS.CLIENT_VERSION = "0.2.0-ALPHA"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
     VARS.holding_ctrl = False
