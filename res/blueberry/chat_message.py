@@ -2,6 +2,7 @@
 
 
 from . import utils
+from . import theme
 from . import element
 import pygame as pg
 import os
@@ -122,8 +123,8 @@ class ChatMessage:
         self.text_element.color = colors[self.status]
         self.surface.fill((0, 0, 0, 0))
         surf_rect = self.surface.get_rect()
-        pg.draw.rect(self.surface, (25, 35, 45), surf_rect, 0, *self.corners)
-        pg.draw.rect(self.surface, (40, 60, 80), surf_rect, 2, *self.corners)
+        pg.draw.rect(self.surface, theme.c["bubble"], surf_rect, 0, *self.corners)
+        pg.draw.rect(self.surface, theme.c["bubble edge"], surf_rect, 2, *self.corners)
         self.author_element.draw(self.surface)
         self.text_element.draw(self.surface)
         true_offset = int(self.offset - scroll_offset)

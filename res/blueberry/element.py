@@ -630,18 +630,22 @@ class Optionsbutton(Button):
 
 
 class Colorpicker:
-    white = pg.Surface((255, 255), pg.SRCALPHA)
-    black = pg.Surface((255, 255), pg.SRCALPHA)
-    rainbow = pg.Surface((30, 255))
-    
-    # setting up surfaces
-    color = pg.Color(0)
-    for i in range(255):
-        pg.draw.line(white, (255, 255, 255, 254-i), (i, 0), (i, 255))
-        pg.draw.line(black, (0, 0, 0, i), (0, i), (255, i))
-        color.hsva = (i*360/255, 100, 100, 100)
-        pg.draw.line(rainbow, color, (0, i), (30, i))
-    del color
+    white = None
+    black = None
+    rainbow = None
+
+    def _init():
+        Colorpicker.white = pg.Surface((255, 255), pg.SRCALPHA)
+        Colorpicker.black = pg.Surface((255, 255), pg.SRCALPHA)
+        Colorpicker.rainbow = pg.Surface((30, 255))
+        
+        # setting up surfaces
+        color = pg.Color(0)
+        for i in range(255):
+            pg.draw.line(Colorpicker.white, (255, 255, 255, 254-i), (i, 0), (i, 255))
+            pg.draw.line(Colorpicker.black, (0, 0, 0, i), (0, i), (255, i))
+            color.hsva = (i*360/255, 100, 100, 100)
+            pg.draw.line(Colorpicker.rainbow, color, (0, i), (30, i))
     
     def __init__(self, pos):
         self.pos = pg.Vector2(pos)

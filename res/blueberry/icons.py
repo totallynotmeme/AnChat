@@ -1,13 +1,10 @@
 # /res/blueberry/icons.py
 
 
-# from . import theme # also todo
+from . import theme
 import pygame as pg
 
-theme = None
 
-
-accent_color = (100, 150, 255)
 options_points = 18
 
 def draw():
@@ -15,9 +12,9 @@ def draw():
     global options
     
     # more todo: make this into separate color categories
-    background_color = tuple(i//2 for i in theme["base"])
-    middle_color = theme["base"]
-    accent_color = tuple(min(100 + i, 255) for i in theme["base"])
+    background_color = tuple(i//2 for i in theme.c["base"])
+    middle_color = theme.c["base"]
+    accent_color = tuple(min(100 + i, 255) for i in theme.c["base"])
     
     # app logo
     app = pg.Surface((32, 32))

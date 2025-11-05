@@ -3,6 +3,7 @@
 
 from . import utils
 from . import icons
+from . import theme
 from . import element
 from . import background
 from . import lang
@@ -36,11 +37,13 @@ class Main:
             i.draw(canvas)
     
     def init(is_soft):
-        c_base = CONFIG.THEME["base"]
-        c_accent = CONFIG.THEME["accent"]
-        c_accent2 = CONFIG.THEME["accent2"]
+        c_base = theme.c["base"]
+        c_background = theme.c["background"]
+        c_accent = theme.c["accent"]
+        c_accent2 = theme.c["accent2"]
         
         background.filler = pg.Surface(VARS.window_size)
+        background.filler.fill(c_background)
         txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
         txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
         background.filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 3)))
@@ -82,7 +85,7 @@ class Main:
             size = (210, 30),
             align = "center",
             hover_scale = 0.05,
-            color = (0, 63, 31),
+            color = c_accent,
             font = VARS.fonts[20],
             options = sorted(connection.protocol_list.keys()),
         )
@@ -243,9 +246,10 @@ class Chat:
         return True
     
     def init(is_soft):
-        c_base = CONFIG.THEME["base"]
-        c_accent = CONFIG.THEME["accent"]
-        c_accent2 = CONFIG.THEME["accent2"]
+        c_base = theme.c["base"]
+        c_background = theme.c["background"]
+        c_accent = theme.c["accent"]
+        c_accent2 = theme.c["accent2"]
         
         Chat.elements = []
         Chat.input_box = element.Line(
@@ -414,15 +418,15 @@ class Options:
             Options.previous_preset = preset_button.current
             Options.previous_category = None
             if preset_button.current != "Custom":
-                CONFIG.THEME_TEMP = CONFIG.LOADED_THEMES[preset_button.current].copy()
+                theme.temp = theme.all_themes[preset_button.current].copy()
         
         if Options.previous_category != this_category:
             Options.previous_category = this_category
-            color = CONFIG.THEME_TEMP[this_category]
+            color = theme.temp[this_category]
             picker.set_color(color)
         
         if Options.previous_pickerhold and not picker.holding:
-            CONFIG.THEME_TEMP[this_category] = picker.color[:3]
+            theme.temp[this_category] = picker.color[:3]
             if preset_button.current != "Custom":
                 preset_button.current = "Custom"
                 preset_button.redraw()
@@ -431,15 +435,17 @@ class Options:
         # drawing everything
         Options.container.draw(canvas)
         pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, 0, 270, 40))
-        pg.draw.line(canvas, CONFIG.THEME["base"], (0, 40), (270, 40))
-        pg.draw.line(canvas, CONFIG.THEME["base"], (270, 40), (270, 0))
+        pg.draw.line(canvas, theme.c["base"], (0, 40), (270, 40))
+        pg.draw.line(canvas, theme.c["base"], (270, 40), (270, 0))
         for i in Options.elements:
             i.draw(canvas)
     
     def init(is_soft):
-        c_base = CONFIG.THEME["base"]
-        c_accent = CONFIG.THEME["accent"]
-        c_accent2 = CONFIG.THEME["accent2"]
+        c_base = theme.c["base"]
+        c_background = theme.c["background"]
+        c_accent = theme.c["accent"]
+        c_accent2 = theme.c["accent2"]
+        
         # draw main options menu button
         button = element.Button(
             pos = (5, 5),
@@ -639,14 +645,14 @@ class Options:
             hover_scale = 0.1,
             color = c_accent,
             font = VARS.fonts[20],
-            options = sorted(CONFIG.LOADED_THEMES.keys()),
+            options = sorted(theme.all_themes.keys()),
         )
         Options.option_elements["themepreset"] = last
         
         if is_soft:
             category = Options.option_elements["colorcategory"].current
         else:
-            category = "Base"
+            category = theme.categories[0].title()
         
         last = Options.container.push(element.Optionsbutton,
             offset = (85, 20),
@@ -655,7 +661,7 @@ class Options:
             hover_scale = 0.1,
             color = c_base,
             font = VARS.fonts[20],
-            options = ["Base", "Accent", "Accent2"],
+            options = list(map(str.title, theme.categories)),
         )
         last.current = category
         last.redraw()
@@ -741,12 +747,11 @@ class Options:
         Options.elements = (Options.button, Options.apply_button, Options.reset_button)
     
     def apply_and_restart():
-        VARS.RESETTING = True
         if CONFIG.CLIENT["window_size"] != Options.option_elements["res"].text:
             pg.quit()
         #fmap["shutdown"]()
-        theme_thing = Options.option_elements["themepreset"].current + "/" +\
-                      "/".join(key + ":" + utils.colortohex(val) for key, val in CONFIG.THEME_TEMP.items())
+        name = Options.option_elements["themepreset"].current
+        theme_thing = theme.theme_to_str(name, theme.temp)
         new_config = CONFIG.CLIENT.copy()
         new_config.update({
             "lang": Options.option_elements["lang"].current,
@@ -756,6 +761,7 @@ class Options:
             "theme": theme_thing,
         })
         utils.save_config_file(new_config)
+        VARS.RESETTING = True
         fmap["init"]()
     
     def reset_settings():
@@ -767,10 +773,10 @@ class Options:
         table["font"].redraw()
         table["bg"].current = CONFIG.CLIENT["background"]
         table["bg"].redraw()
-        CONFIG.THEME_TEMP = CONFIG.THEME.copy()
+        theme.temp = theme.c.copy()
         category = table["colorcategory"].current.lower()
-        table["colorpicker"].set_color(CONFIG.THEME_TEMP[category])
-        table["themepreset"].current = CONFIG.THEME_NAME
+        table["colorpicker"].set_color(theme.temp[category])
+        table["themepreset"].current = theme.name
         table["themepreset"].redraw()
     
     def toggle():

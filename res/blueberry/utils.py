@@ -41,12 +41,6 @@ DEFAULT_CONFIG_FILE += config_lines
 del config_lines
 CONFIG_FILE_PATH = ""
 
-GET_DEFAULT_THEME = lambda: {
-    "base": (0, 64, 128),
-    "accent": (0, 128, 255),
-    "accent2": (128, 0, 0),
-}
-
 
 def parse_config_file(current_config):
     verbals = []
@@ -110,14 +104,6 @@ def save_config_file(current_config):
         config_file_data.pop()
     
     open(CONFIG_FILE_PATH, "w").write("\n".join(config_file_data) + "\n")
-
-
-tohexbyte = lambda x: hex(x)[2:].zfill(2)
-def colortohex(color):
-    return tohexbyte(color[0]) + tohexbyte(color[1]) + tohexbyte(color[2])
-
-def hextocolor(color):
-    return tuple(int(color[i:i+2], 16) for i in range(0, 6, 2))
 
 
 def find_space_left(line):
