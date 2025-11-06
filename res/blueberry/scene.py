@@ -178,7 +178,7 @@ class Chat:
         canvas.blit(ChatMessage.expanded, (5, 40))
         
         pg.draw.line(canvas, (50, 50, 50), (0, Chat.y_limit-1), (VARS.window_size.x, Chat.y_limit-1))
-        pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, Chat.y_limit, VARS.window_size.x, 50))
+        pg.draw.rect(canvas, theme.c["background"], pg.Rect(0, Chat.y_limit, VARS.window_size.x, 50))
         for i in Chat.elements:
             i.draw(canvas)
         
@@ -374,6 +374,7 @@ class Options:
     container = None
     apply_button = None
     option_elements = {}
+    theme_elements = []
     elements = ()
     all_fonts = {}
     font_preview = None
@@ -424,21 +425,31 @@ class Options:
             Options.previous_category = this_category
             color = theme.temp[this_category]
             picker.set_color(color)
+            Options.update_preview()
         
         if Options.previous_pickerhold and not picker.holding:
             theme.temp[this_category] = picker.color[:3]
             if preset_button.current != "Custom":
                 preset_button.current = "Custom"
                 preset_button.redraw()
+            Options.update_preview()
         Options.previous_pickerhold = picker.holding
         
         # drawing everything
         Options.container.draw(canvas)
-        pg.draw.rect(canvas, (0, 0, 0), pg.Rect(0, 0, 270, 40))
+        pg.draw.rect(canvas, theme.c["background"], pg.Rect(0, 0, 270, 40))
         pg.draw.line(canvas, theme.c["base"], (0, 40), (270, 40))
         pg.draw.line(canvas, theme.c["base"], (270, 40), (270, 0))
         for i in Options.elements:
             i.draw(canvas)
+    
+    def update_preview():
+        for ind, color in enumerate(theme.categories):
+            this = Options.theme_elements[ind]
+            this.surface.fill(theme.temp[color])
+            txt = VARS.fonts[20].render(color.title(), True, (255, 255, 255))
+            this.surface.blit(txt, txt.get_rect(center=this.size/2))
+            this.update_surf()
     
     def init(is_soft):
         c_base = theme.c["base"]
@@ -673,9 +684,29 @@ class Options:
         Options.option_elements["colorpicker"] = last
         last.update()
         
+        # theme preview elements
+        Options.theme_elements = []
+        def gen_callback(where):
+            def callback():
+                Options.option_elements["colorcategory"].current = where
+                Options.option_elements["colorcategory"].redraw()
+            return callback
+        
+        offset = (400, -240)
+        for i in theme.categories:
+            last = Options.container.push(element.Button,
+                offset = offset,
+                size = (140, 30),
+                align = "center",
+                hover_scale = 0.1,
+                callback = gen_callback(i.title()),
+            )
+            Options.theme_elements.append(last)
+            offset = (400, 7)
+        
         # dev options start here
         last = Options.container.push(element.Line,
-            offset = (0, 70),
+            offset = (0, 100),
             size_y = 30,
             color = (255, 255, 200),
             font = VARS.fonts[25],
@@ -743,6 +774,7 @@ class Options:
         last.update_surf()
         
         Options.reset_settings()
+        Options.update_preview()
         Options.previous_bg = None
         Options.elements = (Options.button, Options.apply_button, Options.reset_button)
     
