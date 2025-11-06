@@ -250,7 +250,7 @@ class Sendmsg:
                 except Exception as e:
                     LOGS.append(f"Error when setting message status: {e}")
             if not fmap["sendmsg"](self.message):
-                raise RuntimeError("recvmsg call failed")
+                raise RuntimeError("sendmsg call failed")
             RUNNING.remove(self)
             FINISHED.append([self, 240])
             self.status = "done"
