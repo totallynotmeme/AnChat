@@ -2,6 +2,7 @@
 
 
 from . import utils
+from . import theme
 import pygame as pg
 
 # bootstrapping cba nonsense
@@ -624,7 +625,7 @@ class Optionsbutton(Button):
         
     def redraw(self):
         self.surface.fill(self.color)
-        txt = self.font.render(self.current, True, (255, 255, 255))
+        txt = self.font.render(self.current, True, theme.c["text"])
         self.surface.blit(txt, txt.get_rect(center=self.size / 2))
         self.update_surf()
 

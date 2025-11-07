@@ -3,7 +3,7 @@
 
 categories = [
     "background", "base", "accent", "accent2",
-    "bubble", "bubble edge",
+    "text", "accent text", "bubble", "bubble edge",
 ]
 c = {i: None for i in categories}
 
@@ -13,6 +13,8 @@ all_themes = {
         "base": (0, 64, 128),
         "accent": (0, 100, 200),
         "accent2": (128, 0, 0),
+        "text": (255, 255, 255),
+        "accent text": (255, 255, 127),
         "bubble": (25, 35, 45),
         "bubble edge": (40, 60, 80),
     }, "Purpleberry": {
@@ -20,6 +22,8 @@ all_themes = {
         "base": (39, 20, 177),
         "accent": (18, 75, 219),
         "accent2": (163, 22, 181),
+        "accent text": (255, 150, 255),
+        "text": (255, 255, 255),
         "bubble": (40, 28, 61),
         "bubble edge": (64, 35, 109),
     }
@@ -57,4 +61,3 @@ def parse_string_theme(raw):
             except Exception as e:
                 verbals.append(f"Error occured on theme parsing: {e} (@ {i})")
     return name, theme, verbals
-

@@ -39,6 +39,8 @@ class Main:
     def init(is_soft):
         c_base = theme.c["base"]
         c_background = theme.c["background"]
+        c_text = theme.c["text"]
+        c_accenttext = theme.c["accent text"]
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
@@ -69,7 +71,7 @@ class Main:
             hover_scale = 0.1,
         )
         button.surface.fill(c_base)
-        txt = VARS.fonts[25].render(txt, True, (255, 255, 255))
+        txt = VARS.fonts[25].render(txt, True, c_text)
         button.surface.blit(txt, txt.get_rect(center=(button_size_x // 2, 25)))
         button.update_surf()
         Main.elements.append(button)
@@ -95,7 +97,7 @@ class Main:
         Main.field_username = element.Line(
             pos = origin + pg.Vector2(0, -60),
             size = (580, 30),
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "center",
             edit = True,
@@ -105,7 +107,7 @@ class Main:
         Main.field_address = element.Line(
             pos = origin + pg.Vector2(0, -10),
             size = (580, 30),
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "center",
             edit = True,
@@ -115,7 +117,7 @@ class Main:
         Main.field_status = element.Line(
             pos = origin + pg.Vector2(0, 170),
             size = (VARS.window_size.x-25, 25),
-            color = (255, 255, 190),
+            color = c_accenttext,
             font = VARS.fonts[20],
             align = "center",
             edit = False,
@@ -248,6 +250,7 @@ class Chat:
     def init(is_soft):
         c_base = theme.c["base"]
         c_background = theme.c["background"]
+        c_text = theme.c["text"]
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
@@ -255,7 +258,7 @@ class Chat:
         Chat.input_box = element.Line(
             pos = (VARS.window_size.x/2, VARS.window_size.y - 25),
             size = (VARS.window_size.x - 50, 50),
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "center",
             edit = True,
@@ -284,7 +287,7 @@ class Chat:
         )
         button.surface.fill(c_accent2)
         txt = VARS.lang.CHAT_DISCONNECT
-        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        txt = VARS.fonts[15].render(txt, True, c_text)
         button.surface.blit(txt, txt.get_rect(center=(60, 15)))
         button.update_surf()
         Chat.elements.append(button)
@@ -391,7 +394,7 @@ class Options:
         
         # title thingy
         txt = VARS.lang.OPTIONS_TITLE
-        txt = VARS.fonts[35].render(txt, True, (255, 255, 255))
+        txt = VARS.fonts[35].render(txt, True, theme.c["text"])
         txt_pos_y = 60 if VARS.window_size.x < 750 else 25
         canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, txt_pos_y)))
         
@@ -446,14 +449,23 @@ class Options:
     def update_preview():
         for ind, color in enumerate(theme.categories):
             this = Options.theme_elements[ind]
-            this.surface.fill(theme.temp[color])
-            txt = VARS.fonts[20].render(color.title(), True, (255, 255, 255))
+            text_color = theme.temp["text"]
+            if "text" in color:
+                fill_color = (sum(theme.temp[color]) <= 381) * 255
+                this.surface.fill((fill_color, fill_color, fill_color))
+                if color == "accent text":
+                    text_color = theme.temp[color]
+            else:
+                this.surface.fill(theme.temp[color])
+            txt = VARS.fonts[20].render(color.title(), True, text_color)
             this.surface.blit(txt, txt.get_rect(center=this.size/2))
             this.update_surf()
     
     def init(is_soft):
         c_base = theme.c["base"]
         c_background = theme.c["background"]
+        c_text = theme.c["text"]
+        c_accenttext = theme.c["accent text"]
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
@@ -482,7 +494,7 @@ class Options:
         )
         button.surface.fill(c_base)
         txt = VARS.lang.OPTIONS_APPLY
-        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        txt = VARS.fonts[15].render(txt, True, c_text)
         button.surface.blit(txt, txt.get_rect(center=(50, 15)))
         button.update_surf()
         Options.apply_button = button
@@ -497,7 +509,7 @@ class Options:
         )
         button.surface.fill(c_accent2)
         txt = VARS.lang.OPTIONS_RESET
-        txt = VARS.fonts[15].render(txt, True, (255, 255, 255))
+        txt = VARS.fonts[15].render(txt, True, c_text)
         button.surface.blit(txt, txt.get_rect(center=(50, 15)))
         button.update_surf()
         Options.reset_button = button
@@ -518,7 +530,7 @@ class Options:
         # language
         last = Options.container.push(element.Line,
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -540,7 +552,7 @@ class Options:
         last = Options.container.push(element.Line,
             offset = (0, 10),
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -561,7 +573,7 @@ class Options:
         last = Options.container.push(element.Line,
             offset = (0, 15),
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -570,7 +582,7 @@ class Options:
         
         last = Options.container.push(element.Line,
             size_y = 15,
-            color = (255, 255, 0),
+            color = c_accenttext,
             font = VARS.fonts[15],
             align = "topleft",
             edit = False,
@@ -608,7 +620,7 @@ class Options:
         
         last = Options.container.push(element.Line,
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[30],
             align = "topleft",
             edit = True,
@@ -620,7 +632,7 @@ class Options:
         last = Options.container.push(element.Line,
             offset = (0, 20),
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -642,7 +654,7 @@ class Options:
         last = Options.container.push(element.Line,
             offset = (0, 70),
             size_y = 30,
-            color = (255, 255, 255),
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -692,7 +704,7 @@ class Options:
                 Options.option_elements["colorcategory"].redraw()
             return callback
         
-        offset = (400, -240)
+        offset = (400, -255)
         for i in theme.categories:
             last = Options.container.push(element.Button,
                 offset = offset,
@@ -702,13 +714,13 @@ class Options:
                 callback = gen_callback(i.title()),
             )
             Options.theme_elements.append(last)
-            offset = (400, 7)
+            offset = (400, 0)
         
         # dev options start here
         last = Options.container.push(element.Line,
-            offset = (0, 100),
+            offset = (0, 70),
             size_y = 30,
-            color = (255, 255, 200),
+            color = c_accenttext,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -726,7 +738,7 @@ class Options:
             callback = func,
         )
         last.surface.fill(c_base)
-        txt = VARS.fonts[15].render("Toggle debug", True, (255, 255, 255))
+        txt = VARS.fonts[15].render("Toggle debug", True, c_text)
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         
@@ -742,7 +754,7 @@ class Options:
             callback = func,
         )
         last.surface.fill(c_base)
-        txt = VARS.fonts[15].render("Go to Main", True, (255, 255, 255))
+        txt = VARS.fonts[15].render("Go to Main", True, c_text)
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         # scene.Chat
@@ -756,7 +768,7 @@ class Options:
             callback = func,
         )
         last.surface.fill(c_base)
-        txt = VARS.fonts[15].render("Go to Chat", True, (255, 255, 255))
+        txt = VARS.fonts[15].render("Go to Chat", True, c_text)
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         
@@ -769,7 +781,7 @@ class Options:
             callback = icons.dump,
         )
         last.surface.fill(c_base)
-        txt = VARS.fonts[15].render("Dump icons", True, (255, 255, 255))
+        txt = VARS.fonts[15].render("Dump icons", True, c_text)
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         
