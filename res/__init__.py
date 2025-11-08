@@ -37,7 +37,7 @@ LAST_SLEEP = 0
 LOGS = []
 
 class VARS:
-    CORE_VERSION = "0.1.1-ALPHA"
+    CORE_VERSION = "0.2.0-ALPHA"
     RUNNING = False
 
 class CONFIG:
@@ -144,7 +144,7 @@ if not only_load_core:
     if not os.path.isdir(DOWNLOADS_PATH):
         log("Creating downloads folder at currect working dir")
         os.mkdir(DOWNLOADS_PATH)
-
+    
     # loading funcs and bootstrapping the modules
     if client is not None:
         log(f"Loading and bootstrapping client {client.__name__}")

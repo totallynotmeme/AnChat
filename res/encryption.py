@@ -1,6 +1,7 @@
 # /res/encryption.py
 
 
+from . import encryption_old as old
 import operator
 import os
 from hashlib import sha256
@@ -15,13 +16,13 @@ password = b""
 
 
 # basic encryption function
-def xor(data, salt):
+def xor(data, salt, password):
     hashed = sha256(password + salt).digest()
     key = [hashed]
     len_key = 32
     len_data = len(data)
     while len_key < len_data:
-        hashed = sha256(hashed + salt).digest()
+        hashed = sha256(hashed + password + salt).digest()
         key.append(hashed)
         len_key += 32
     key = b"".join(key)
