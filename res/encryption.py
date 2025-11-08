@@ -35,12 +35,12 @@ def process_salt(salt):
 # main encryptor/decryptor
 def encrypt(raw):
     salt = os.urandom(SALT_BYTES)
-    return process_salt(salt) + xor(raw, salt)
+    return process_salt(salt) + xor(raw, salt, password)
 
 def decrypt(raw):
     salt = process_salt(raw[:SALT_BYTES])
     raw = raw[SALT_BYTES:]
-    return xor(raw, salt)
+    return xor(raw, salt, password)
 
 
 # validate salt to prevent packet duping attack
