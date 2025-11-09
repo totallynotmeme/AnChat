@@ -69,3 +69,13 @@ ERROR_CODES = {
     b"WRONGHASH": "Message hash check failed, this packet is corrupted",
     b"DUPESALT": "Received message with duplicate salt. Possible packet replay attack?",
 }
+THEME_TABLE = {
+    "background": "Background",
+    "base": "Base",
+    "accent": "Accent",
+    "accent2": "Accent 2",
+    "text": "Text",
+    "accent text": "Accent Text",
+    "bubble": "Bubble",
+    "bubble edge": "Bubble Edge",
+}

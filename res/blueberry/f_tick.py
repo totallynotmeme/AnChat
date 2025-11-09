@@ -49,6 +49,16 @@ def func():
     fmap["handle_log"]()
     VARS.active.draw(VARS.canvas)
     
+    
+    # draw version text and stuff
+    txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
+    txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
+    VARS.canvas.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 3)))
+    
+    txt = VARS.lang.CLIENT_VERSION.format(VARS.CLIENT_VERSION)
+    txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
+    VARS.canvas.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 18)))
+    
     x_pos = VARS.window_size.x - 2
     y_pos = 32
     font = VARS.fonts[15]

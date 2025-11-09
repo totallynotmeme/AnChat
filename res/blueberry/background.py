@@ -8,13 +8,12 @@ import random
 
 surface = pg.Surface((5, 5))
 size = pg.Vector2(5, 5)
-filler = pg.Surface((5, 5))
 color = (0, 30, 60)
 
 
 class Black:
     def init():
-        surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
     
     step = lambda *a: 0
 
@@ -26,12 +25,10 @@ class Lines:
     def init():
         global color
         color = tuple(i//2 for i in theme.c["base"])
-        surface.blit(filler, (0, 0))
-        # Lines.line_1 = 0
-        # Lines.line_2 = 0
+        surface.fill(theme.c["background"])
     
     def step():
-        surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
         step = size.y / 4
         Lines.line_1 += 1
         Lines.line_1 %= step
@@ -62,14 +59,14 @@ class Glow:
     timer = 0
     
     def init():
-        surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
         Glow.prev_surf = pg.Surface(size)
         Glow.this_surf = pg.Surface(size)
         Glow.colors = [random.random() for i in range(6*4)]
         Glow.timer = 0
     
     def step():
-        #surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
         Glow.timer -= 2
         if Glow.timer < 0:
             for ind, i in enumerate(Glow.colors):
@@ -92,11 +89,11 @@ class Rain:
     def init():
         global color
         color = tuple(i//2 for i in theme.c["base"])
-        surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
         Rain.active = []
     
     def step():
-        surface.blit(filler, (0, 0))
+        surface.fill(theme.c["background"])
         to_remove = []
         for ind, i in enumerate(Rain.active):
             # 0 - X, 1 - Y, 2 - Length

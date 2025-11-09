@@ -44,16 +44,6 @@ class Main:
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
-        background.filler = pg.Surface(VARS.window_size)
-        background.filler.fill(c_background)
-        txt = VARS.lang.CORE_VERSION.format(VARS.CORE_VERSION)
-        txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
-        background.filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 3)))
-        
-        txt = VARS.lang.CLIENT_VERSION.format(VARS.CLIENT_VERSION)
-        txt = VARS.fonts[15].render(txt, True, (100, 100, 100))
-        background.filler.blit(txt, txt.get_rect(topright=(VARS.window_size.x-3, 18)))
-        
         background.surface = pg.Surface(VARS.window_size)
         background.size = VARS.window_size
         Main.background = background.bgmap.get(CONFIG.CLIENT["background"], background.Lines)
@@ -457,7 +447,8 @@ class Options:
                     text_color = theme.temp[color]
             else:
                 this.surface.fill(theme.temp[color])
-            txt = VARS.fonts[20].render(color.title(), True, text_color)
+            display_name = VARS.lang.THEME_TABLE.get(color, color.title())
+            txt = VARS.fonts[20].render(display_name, True, text_color)
             this.surface.blit(txt, txt.get_rect(center=this.size/2))
             this.update_surf()
     
