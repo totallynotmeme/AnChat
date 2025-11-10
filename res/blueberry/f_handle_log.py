@@ -18,4 +18,6 @@ def func():
         log(task_LOGS.pop(0)) # Advanced Battles of Chess
     if LOGS:
         time, line = LOGS.pop(0)
-        Console.logs_multiline.append_text(f"[{time}] {line}")
+        line = f"[{time}] {line}"
+        Console.logs_raw.append(line)
+        Console.logs_multiline.append_text(line)

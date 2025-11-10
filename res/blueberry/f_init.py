@@ -108,8 +108,6 @@ def func():
     
     icons.draw()
     pg.display.set_icon(icons.app)
-    if is_soft:
-        saved_console_logs = scene.Console.logs_multiline.lines
     
     # initializing elements and stuff
     pg.key.set_repeat(250, 30)
@@ -119,7 +117,7 @@ def func():
     
     # soft restart checks
     if is_soft:
-        scene.Console.logs_multiline.lines.extend(saved_console_logs)
+        scene.Console.logs_multiline.set_text("\n".join(scene.Console.logs_raw))
     
     if CONFIG.CLIENT["onboot"] and not CONFIG.CLIENT["onboot"].startswith("#"):
         log("Running on-onboot command")

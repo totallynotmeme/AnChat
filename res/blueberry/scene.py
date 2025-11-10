@@ -850,6 +850,7 @@ class Console:
     prompt_prefix = None
     prompt_prefix_rect = None
     logs_multiline = None
+    logs_raw = []
     elements = ()
     
     def draw(canvas):
@@ -899,6 +900,7 @@ class Console:
         global _
         if _user_input == "clear":
             Console.logs_multiline.set_text("")
+            Console.logs_raw = []
             return
         if _user_input == "clearhistory":
             Console.history = []
@@ -961,6 +963,7 @@ clearhistory - erase command history
                     Console.history.append(user_command)
                 
                 Console.history_ind = len(Console.history)
+                Console.logs_raw.append(">>> " + user_command)
                 Console.logs_multiline.append_text(">>> " + user_command)
                 Console.prompt_line.set_text("")
                 return
