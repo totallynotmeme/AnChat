@@ -852,9 +852,16 @@ class Console:
     logs_multiline = None
     logs_raw = []
     elements = ()
+    is_selecting = False
     
     def draw(canvas):
         Console.behind.draw(canvas)
+        if Console.is_selecting:
+            if element.last.hovered:
+                rect = element.last.hovered.true_bb
+                pg.draw.rect(canvas, (255, 0, 0), rect, 3)
+            return
+        
         canvas.blit(Console.surf, (0, 0))
         
         canvas.blit(Console.prompt_prefix, Console.prompt_prefix_rect)
@@ -905,7 +912,11 @@ class Console:
         if _user_input == "clearhistory":
             Console.history = []
             return
-        if _user_input == "?":
+        if _user_input == "select":
+            element.last.hovered = None
+            Console.is_selecting = True
+            return
+        if _user_input == "?" or _user_input == "help":
             log("""
 
 console uses eval() to run arbitrary Python code, useful for debugging.
@@ -915,6 +926,7 @@ if command format is 'var = 123', exec('global var; var = 123') is used
 custom console commands / shortcuts:
 clear - clear console output
 clearhistory - erase command history
+select - select element, similar to browser devtools
 `(command) - run with exec() instead of eval()
 """)
             return
@@ -942,11 +954,16 @@ clearhistory - erase command history
     
     
     def handle_event(ev):
+        global _
+        
         if ev.type == pg.MOUSEMOTION:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         
         if ev.type == pg.KEYDOWN:
             if ev.key == pg.K_ESCAPE:
+                if Console.is_selecting:
+                    Console.is_selecting = False
+                    return
                 Console.toggle()
                 return
             history = Console.history or [""]
@@ -955,8 +972,6 @@ clearhistory - erase command history
                 user_command = Console.prompt_line.text
                 Console.prompt_line.active = True
                 Console.logs_multiline.active = False
-                if not user_command:
-                    return
                 
                 Console.run(user_command)
                 if history and user_command != history[-1]:
@@ -979,6 +994,16 @@ clearhistory - erase command history
                 else:
                    Console.prompt_line.set_text(history[Console.history_ind])
                 return
+        
+        if Console.is_selecting:
+            if ev.type == pg.MOUSEBUTTONDOWN and ev.button == pg.BUTTON_LEFT:
+                _ = element.last.hovered
+                Console.logs_raw.append(repr(_))
+                Console.logs_multiline.append_text(repr(_))
+                Console.is_selecting = False
+            else:
+                Console.behind.handle_event(ev)
+            return
         
         any(i.handle_event(ev) for i in Console.elements)
 

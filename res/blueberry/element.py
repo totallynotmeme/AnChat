@@ -19,6 +19,11 @@ def handle_event(self, ev):
     return func(self, ev)
 
 
+class last:
+    clicked = None
+    hovered = None
+
+
 ctrl_a = "\x01"
 ctrl_c = "\x03"
 ctrl_v = "\x16"
@@ -188,6 +193,7 @@ class Line:
         
         if self.bounding_box.collidepoint(ev.pos):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_IBEAM)
+            last.hovered = self
         return False
     
     
@@ -205,6 +211,7 @@ class Line:
                 self.selection_start = at_char
                 self.selection_end = at_char
                 self.set_cursor(at_char)
+                last.clicked = self
         return False
     
     
@@ -371,6 +378,7 @@ class Multiline:
         self.cursor_pos = (-1, -1)
         self.scroll_pos = 0
         self.bounding_boxes = []
+        self.true_bb = pg.Rect(self.pos, self.size)
     
     def set_text(self, text):
         self.lines = utils.text_to_lines(text, self.max_per_line)
@@ -385,7 +393,7 @@ class Multiline:
         pass
     
     
-    def draw(self, canvas):
+    def draw(self, canvas, offset=pg.Vector2()):
         self.bounding_boxes = []
         trimmed = self.lines[self.scroll_pos: self.scroll_pos+self.max_lines]
         
@@ -430,13 +438,14 @@ class Multiline:
             for i in self.bounding_boxes:
                 pg.draw.rect(canvas, (255, 127, 0), i, 1)
         
-        return self.bounding_boxes
+        self.true_bb.topleft = self.pos - offset
+        return self.true_bb
     
     
     def event_MOUSEMOTION(self, ev):
         if any(bb.collidepoint(ev.pos) for bb in self.bounding_boxes):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_IBEAM)
-            VARS.reset_cursor = False
+            last.hovered = self
         if self.selecting:
             at_line = int((ev.pos[1] - self.pos.y) / self.font_size.y)
             at_line = max(at_line, 0)
@@ -462,6 +471,7 @@ class Multiline:
                 self.selection_start = (at_char, at_line)
                 self.selection_end = (at_char, at_line)
                 self.set_cursor(at_char, at_line)
+                last.clicked = self
     
     
     def event_MOUSEBUTTONUP(self, ev):
@@ -569,6 +579,8 @@ class Button:
     
     def event_MOUSEMOTION(self, ev):
         self.hovering = self.bounding_box.collidepoint(ev.pos)
+        if self.hovering:
+            last.hovered = self
     
     
     def event_MOUSEBUTTONDOWN(self, ev):
@@ -577,6 +589,7 @@ class Button:
             self.hovering = self.bounding_box.collidepoint(ev.pos)
             if self.hovering:
                 self.holding = True
+                last.clicked = self
                 return True
     
     
@@ -659,9 +672,10 @@ class Colorpicker:
         self.holding = False
         self.holding_hue = False
         self.bounding_box = pg.Rect(self.pos, self.size)
+        self.true_bb = pg.Rect(self.pos, self.size)
     
     def draw(self, canvas, offset=pg.Vector2()):
-        canvas.blit(self.surface, self.pos + offset)
+        self.true_bb = canvas.blit(self.surface, self.pos + offset)
         cursize = 5 + self.holding * 10
         
         line_from = self.pos + offset + (255, self.hue)
@@ -675,6 +689,8 @@ class Colorpicker:
         pg.draw.line(canvas, (255, 255, 255), line_from, line_to, 3)
         pg.draw.rect(canvas, self.color, pg.Rect(*sv_point, cursize, cursize))
         pg.draw.rect(canvas, (c, c, c), pg.Rect(*sv_point, cursize, cursize), 1)
+        
+        return self.true_bb
     
     def set_color(self, color):
         color = pg.Color(color)
@@ -706,6 +722,8 @@ class Colorpicker:
                 self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
                 self.sv.y = 255 - min(max(ev.pos[1] - self.pos.y, 0), 255)
                 self.update()
+        if self.hovering:
+            last.hovered = self
     
     def event_MOUSEBUTTONDOWN(self, ev):
         if self.hovering and ev.button == pg.BUTTON_LEFT:
@@ -718,6 +736,7 @@ class Colorpicker:
                 self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
                 self.sv.y = 255 - min(max(ev.pos[1] - self.pos.y, 0), 255)
                 self.update()
+            last.clicked = self
     
     def event_MOUSEBUTTONUP(self, ev):
         if self.holding and ev.button == pg.BUTTON_LEFT:
