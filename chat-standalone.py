@@ -84,6 +84,8 @@ while VARS.RUNNING:
     except Exception as e:
         errors += 1
         err = e
+        e_str = traceback.format_exception_only(e)[-1].strip()
+        log(f"Unhandled exception! {e_str}")
     
     if errors == 3:
         try:
@@ -106,4 +108,3 @@ try:
     fmap["shutdown"]()
 except Exception:
     pass
-

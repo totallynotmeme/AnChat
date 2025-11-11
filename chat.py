@@ -21,6 +21,8 @@ while VARS.RUNNING:
             errors = 0
         except Exception as e:
             traceback.print_exception(e)
+            e_str = traceback.format_exception_only(e)[-1].strip()
+            log(f"Unhandled exception! {e_str}")
             errors += 1
         
         if errors == 3:
