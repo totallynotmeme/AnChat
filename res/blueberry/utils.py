@@ -17,8 +17,9 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "lang": "en",
     "font": "lucidaconsole",
     "background": "Lines",
-    "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
     "theme": "Default/base:004080/accent:0080ff/accent2:800000",
+    "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
+    "!algorithm": "Current",
 }
 DEFAULT_CONFIG_FILE = """
 # /config.txt

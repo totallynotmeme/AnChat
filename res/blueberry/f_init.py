@@ -39,6 +39,7 @@ def func():
         log("---[  INITIALIZING BLUEBERRY CLIENT  ]---")
         log("")
         VARS.show_stream_warn = True # temporary line
+        encryption.old.funcs["Current"] = encryption.xor
     
     chat_message.downloads_path = DOWNLOADS_PATH
     VARS.CLIENT_VERSION = "0.2.0-ALPHA"
@@ -75,6 +76,13 @@ def func():
     theme.load_theme(this_theme)
     for i in verbals:
         log(i)
+    # handling custom varialbes
+    alg = encryption.old.funcs.get(CONFIG.CLIENT["!algorithm"], None)
+    if alg is None:
+        log(f"Failed to load algorithm {alg}")
+        alg = encryption.xor
+    else:
+        encryption.xor = alg
     
     # getting screen resolution from config (or default)
     display_data = pg.display.Info()

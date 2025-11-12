@@ -369,6 +369,8 @@ class Options:
     option_elements = {}
     theme_elements = []
     elements = ()
+    category_elements = {}
+    category_current = "standard"
     all_fonts = {}
     font_preview = None
     # i need to refactor this smh
@@ -376,6 +378,7 @@ class Options:
     previous_bg = None
     previous_preset = None
     previous_category = None
+    previous_algorithm = None
     previous_pickerhold = False
     
     def draw(canvas):
@@ -385,8 +388,8 @@ class Options:
         # title thingy
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, theme.c["text"])
-        txt_pos_y = 60 if VARS.window_size.x < 750 else 25
-        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, txt_pos_y)))
+        txt_shift = (VARS.window_size.x < 750) * 100
+        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2 + txt_shift, 25)))
         
         # font
         this_font = Options.option_elements["font"].current
@@ -427,6 +430,14 @@ class Options:
                 preset_button.redraw()
             Options.update_preview()
         Options.previous_pickerhold = picker.holding
+        
+        # encryption algorithm
+        alg_button = Options.option_elements["alg"]
+        if Options.previous_algorithm != alg_button.current:
+            Options.previous_algorithm = alg_button.current
+            doc_string = encryption.old.funcs[alg_button.current].__doc__
+            doc_string = "Documentation notes:\n" + doc_string
+            Options.option_elements["alg_docs"].set_text(doc_string)
         
         # drawing everything
         Options.container.draw(canvas)
@@ -518,9 +529,43 @@ class Options:
             Options.container.scroll = container_scroll
             Options.container.scroll_goal = container_scroll
         
+        # option categories
+        def gen_callback(name):
+            def callback():
+                item = Options.container
+                table = Options.category_elements
+                Options.category_current = name
+                item.elements = table["base"].copy()
+                item.elements.extend(table[name])
+            return callback
+        
+        font_size = VARS.fonts[15].size(" ")[0]
+        offset = (10, 0)
+        for i in ["standard", "advanced"]:
+            display_name = VARS.lang.OPTIONS_CATEGORY_TABLE[i]
+            size = (20 + len(display_name) * font_size, 24)
+            center = (10 + len(display_name) * font_size/2, 12)
+            offset = (offset[0] + size[0]/2, offset[1])
+            last = Options.container.push(element.Button,
+                offset = offset,
+                size = size,
+                align = "midtop",
+                hover_scale = 0.05,
+                callback = gen_callback(i),
+            )
+            last.surface.fill(c_accent)
+            txt = VARS.fonts[15].render(display_name, True, c_text)
+            last.surface.blit(txt, txt.get_rect(center=center))
+            last.update_surf()
+            offset = (offset[0] + size[0]/2 + 10, -29)
+        Options.category_elements["base"] = Options.container.elements
+        Options.container.elements = []
+        
+        # start of standard category
         # language
         last = Options.container.push(element.Line,
             size_y = 30,
+            offset = (0, 55),
             color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
@@ -707,11 +752,15 @@ class Options:
             Options.theme_elements.append(last)
             offset = (400, 0)
         
-        # dev options start here
+        Options.category_elements["standard"] = Options.container.elements
+        Options.container.elements = []
+        
+        # start of advanced category (might rename later idk)
+        # dev options
         last = Options.container.push(element.Line,
-            offset = (0, 70),
+            offset = (0, 55),
             size_y = 30,
-            color = c_accenttext,
+            color = c_text,
             font = VARS.fonts[25],
             align = "topleft",
             edit = False,
@@ -776,6 +825,61 @@ class Options:
         last.surface.blit(txt, txt.get_rect(center=(60, 15)))
         last.update_surf()
         
+        # warning
+        last = Options.container.push(element.Line,
+            offset = (20, 55),
+            size_y = 40,
+            color = c_accenttext,
+            font = VARS.fonts[35],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_ADVANCED_WARN1)
+        # warning x2
+        last = Options.container.push(element.Multiline,
+            offset = (20, 0),
+            size_y = 100,
+            color = c_accenttext,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_ADVANCED_WARN2)
+        
+        # encryption function
+        last = Options.container.push(element.Line,
+            offset = (0, 55),
+            size_y = 30,
+            color = c_text,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text("Encryption function")
+        
+        last = Options.container.push(element.Optionsbutton,
+            offset = (110, 20),
+            size = (200, 30),
+            align = "center",
+            hover_scale = 0.1,
+            color = c_base,
+            font = VARS.fonts[20],
+            options = ["Current"] + list(encryption.old.funcs.keys()),
+        )
+        Options.option_elements["alg"] = last
+        
+        last = Options.container.push(element.Multiline,
+            offset = (20, -10),
+            size_y = 500,
+            color = c_text,
+            font = VARS.fonts[20],
+        )
+        Options.option_elements["alg_docs"] = last
+        
+        Options.category_elements["advanced"] = Options.container.elements
+        Options.container.elements = Options.category_elements["base"].copy()
+        Options.container.elements.extend(Options.category_elements[Options.category_current])
+        
         Options.reset_settings()
         Options.update_preview()
         Options.previous_bg = None
@@ -794,6 +898,7 @@ class Options:
             "font": Options.option_elements["font"].current,
             "background": Options.option_elements["bg"].current,
             "theme": theme_thing,
+            "!algorithm": Options.option_elements["alg"].current,
         })
         utils.save_config_file(new_config)
         VARS.RESETTING = True
@@ -813,6 +918,9 @@ class Options:
         table["colorpicker"].set_color(theme.temp[category])
         table["themepreset"].current = theme.name
         table["themepreset"].redraw()
+        table["alg"].current = CONFIG.CLIENT["!algorithm"]
+        table["alg"].redraw()
+        Options.previous_algorithm = None
     
     def toggle():
         if VARS.active == Options:
@@ -974,7 +1082,7 @@ select - select element, similar to browser devtools
                 Console.logs_multiline.active = False
                 
                 Console.run(user_command)
-                if history and user_command != history[-1]:
+                if history and user_command and user_command != history[-1]:
                     Console.history.append(user_command)
                 
                 Console.history_ind = len(Console.history)

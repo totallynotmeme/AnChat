@@ -8,6 +8,7 @@ from hashlib import sha256
 
 def xor_v1(data, salt, password):
     """
+    unique name: xor_v1
     ADDED: v0.1.0-INDEV (core version)
     DEPRECATED: v0.2.0-ALPHA (core version)
     
@@ -29,5 +30,18 @@ def xor_v1(data, salt, password):
     return bytes(map(operator.xor, data, key))
 
 
-funcs = [xor_v1]
+def no_encryption(data, salt, password):
+    """
+    unique name: no_encryption
+    ADDED: v0.2.0-ALPHA (core version)
+    
+    !!! DO NOT USE THIS FUNCTION UNLESS YOU ARE DEBUGGING !!!
+    it straight up doesn't encrypt anything and returns the data as-is
+    
+    if you're just messing with the settings, DO NOT pick this option, ever.
+    """
+    return data
+
+
+funcs = [xor_v1, no_encryption]
 funcs = {i.__name__: i for i in funcs}

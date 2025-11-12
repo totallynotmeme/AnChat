@@ -17,6 +17,15 @@ password = b""
 
 # basic encryption function
 def xor(data, salt, password):
+    """
+    unique name: xor_v2
+    ADDED: v0.2.0-ALPHA (core version)
+    
+    default encryption function with no vulnerabilities found so far.
+    
+    if you think you found a way to crack it without knowing the password,
+    please create an issue on github (same page where you got this from :P)
+    """
     hashed = sha256(password + salt).digest()
     key = [hashed]
     len_key = 32

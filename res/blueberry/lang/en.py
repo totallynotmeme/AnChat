@@ -27,6 +27,12 @@ OPTIONS_DEVELOPER = "Developer options"
 OPTIONS_APPLY = "Apply"
 OPTIONS_RESET = "Reset"
 
+OPTIONS_ADVANCED_WARN1 = "Dangerous settings!"
+OPTIONS_ADVANCED_WARN2 = """
+Below are options which can break important functions of this client
+or even completely disable the encryption of your chats. Be careful!
+""".replace("\n", " ")
+
 
 TASK_UNKNOWN = "Unknown status text '{}' for task {}"
 
@@ -78,4 +84,8 @@ THEME_TABLE = {
     "accent text": "Accent Text",
     "bubble": "Bubble",
     "bubble edge": "Bubble Edge",
+}
+OPTIONS_CATEGORY_TABLE = {
+    "standard": "Standard",
+    "advanced": "Advanced",
 }

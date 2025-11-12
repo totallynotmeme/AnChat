@@ -27,6 +27,12 @@ OPTIONS_DEVELOPER = "Настройки для разработчика"
 OPTIONS_APPLY = "Применить"
 OPTIONS_RESET = "Сбросить"
 
+OPTIONS_ADVANCED_WARN1 = "Опасные настройки!"
+OPTIONS_ADVANCED_WARN2 = """
+Ниже находятся параметры, которые могут сломать важные функции клиента
+или полностью отключить шифрование ваших переписок. Будьте осторожны!
+""".replace("\n", " ")
+
 
 TASK_UNKNOWN = "Неизвестный текст статуса '{}' для задания {}"
 
@@ -78,4 +84,8 @@ THEME_TABLE = {
     "accent text": "Акц. текст",
     "bubble": "Пузырь",
     "bubble edge": "Края Пузыря",
+}
+OPTIONS_CATEGORY_TABLE = {
+    "standard": "Стандартные",
+    "advanced": "Продвинутые",
 }

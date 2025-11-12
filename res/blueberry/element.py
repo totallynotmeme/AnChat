@@ -383,6 +383,9 @@ class Multiline:
     def set_text(self, text):
         self.lines = utils.text_to_lines(text, self.max_per_line)
         self.scroll_pos = min(self.scroll_pos, len(self.lines))
+        self.selection_start = (-1, -1)
+        self.selection_end = (-1, -1)
+        # self.cursor_pos = (len(self.lines), len(self.lines[-1]))
     
     def append_text(self, text):
         self.lines.extend(utils.text_to_lines(text, self.max_per_line))
@@ -394,6 +397,7 @@ class Multiline:
     
     
     def draw(self, canvas, offset=pg.Vector2()):
+        # to do: make offset work
         self.bounding_boxes = []
         trimmed = self.lines[self.scroll_pos: self.scroll_pos+self.max_lines]
         
@@ -417,20 +421,20 @@ class Multiline:
                 x_end = min(x_end, self.max_per_line+1) * self.font_size.x
                 
                 highlight_rect = pg.Rect(
-                    x_start + self.pos.x,
-                    line_pos,
+                    x_start + self.pos.x + offset.x,
+                    line_pos + offset.y,
                     x_end - x_start,
                     self.font_size.y,
                 )
                 pg.draw.rect(canvas, (2, 49, 146), highlight_rect)
         
         for ind, i in enumerate(trimmed):
-            if i.strip() == "":
+            if i == "":
                 self.bounding_boxes.append(self.nullrect)
                 continue
             txt = self.font.render(i, True, self.color)
-            offset = pg.Vector2(0, self.font_size.y * ind)
-            rect = txt.get_rect(**{self.align: self.pos + offset})
+            this_offset = pg.Vector2(0, self.font_size.y * ind) + offset
+            rect = txt.get_rect(**{self.align: self.pos + this_offset})
             bb = canvas.blit(txt, rect)
             self.bounding_boxes.append(bb)
         
@@ -438,12 +442,12 @@ class Multiline:
             for i in self.bounding_boxes:
                 pg.draw.rect(canvas, (255, 127, 0), i, 1)
         
-        self.true_bb.topleft = self.pos - offset
+        self.true_bb.topleft = self.pos + offset
         return self.true_bb
     
     
     def event_MOUSEMOTION(self, ev):
-        if any(bb.collidepoint(ev.pos) for bb in self.bounding_boxes):
+        if any(bb.collidepoint(ev.pos - self.pos + self.true_bb.topleft) for bb in self.bounding_boxes):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_IBEAM)
             last.hovered = self
         if self.selecting:
@@ -463,15 +467,14 @@ class Multiline:
             at_line = int((ev.pos[1] - self.pos.y) / self.font_size.y)
             if at_line >= len(self.bounding_boxes) or at_line < 0:
                 return
-            if self.bounding_boxes[at_line].collidepoint(ev.pos):
-                self.selecting = True
-                at_line += self.scroll_pos
-                at_char = int((ev.pos[0] - self.pos.x) / self.font_size.x + 0.5)
-                at_char = min(max(at_char, 0), len(self.lines[at_line]))
-                self.selection_start = (at_char, at_line)
-                self.selection_end = (at_char, at_line)
-                self.set_cursor(at_char, at_line)
-                last.clicked = self
+            self.selecting = True
+            at_line += self.scroll_pos
+            at_char = int((ev.pos[0] - self.pos.x) / self.font_size.x + 0.5)
+            at_char = min(max(at_char, 0), len(self.lines[at_line]))
+            self.selection_start = (at_char, at_line)
+            self.selection_end = (at_char, at_line)
+            self.set_cursor(at_char, at_line)
+            last.clicked = self
     
     
     def event_MOUSEBUTTONUP(self, ev):
