@@ -85,7 +85,9 @@ while VARS.RUNNING:
         errors += 1
         err = e
         e_str = traceback.format_exception_only(e)[-1].strip()
-        log(f"Unhandled exception! {e_str}")
+        e_logged = f"Unhandled exception! {e_str}"
+        log(e_logged)
+        client.task.FAILED.append([e_logged, 300])
     
     if errors == 3:
         try:

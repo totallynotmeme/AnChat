@@ -22,7 +22,9 @@ while VARS.RUNNING:
         except Exception as e:
             traceback.print_exception(e)
             e_str = traceback.format_exception_only(e)[-1].strip()
-            log(f"Unhandled exception! {e_str}")
+            e_logged = f"Unhandled exception! {e_str}"
+            log(e_logged)
+            client.task.FAILED.append([e_logged, 300])
             errors += 1
         
         if errors == 3:
