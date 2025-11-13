@@ -77,6 +77,7 @@ ERROR_CODES = {
 }
 THEME_TABLE = {
     "background": "Фон",
+    "bgdetails": "Детали Фона",
     "base": "Основа",
     "accent": "Акцент",
     "accent2": "Акцент 2",

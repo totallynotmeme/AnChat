@@ -2,7 +2,7 @@
 
 
 categories = [
-    "background", "base", "accent", "accent2",
+    "background", "bgdetails", "base", "accent", "accent2",
     "text", "accent text", "bubble", "bubble edge",
 ]
 c = {i: None for i in categories}
@@ -10,6 +10,7 @@ c = {i: None for i in categories}
 all_themes = {
     "Default": {
         "background": (0, 0, 0),
+        "bgdetails": (0, 32, 64),
         "base": (0, 64, 128),
         "accent": (0, 100, 200),
         "accent2": (128, 0, 0),
@@ -19,6 +20,7 @@ all_themes = {
         "bubble edge": (40, 60, 80),
     }, "Purpleberry": {
         "background": (10, 0, 20),
+        "bgdetails": (20, 10, 88),
         "base": (39, 20, 177),
         "accent": (18, 75, 219),
         "accent2": (163, 22, 181),
@@ -26,6 +28,16 @@ all_themes = {
         "text": (255, 255, 255),
         "bubble": (40, 28, 61),
         "bubble edge": (64, 35, 109),
+    }, "Charcoal": {
+        "background": (0, 0, 0),
+        "bgdetails": (47, 47, 47),
+        "base": (0, 0, 0),
+        "accent": (102, 102, 102),
+        "accent2": (76, 0, 0),
+        "accent text": (255, 255, 184),
+        "text": (255, 255, 255),
+        "bubble": (0, 0, 0),
+        "bubble edge": (51, 51, 51),
     }
 }
 name = "Default"

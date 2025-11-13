@@ -8,14 +8,14 @@ import random
 
 surface = pg.Surface((5, 5))
 size = pg.Vector2(5, 5)
-color = (0, 30, 60)
 
 
 class Black:
     def init():
-        surface.fill(theme.c["background"])
+        pass
     
-    step = lambda *a: 0
+    def step():
+        surface.fill(theme.c["background"])
 
 
 class Lines:
@@ -23,9 +23,7 @@ class Lines:
     line_2 = 0
     
     def init():
-        global color
-        color = tuple(i//2 for i in theme.c["base"])
-        surface.fill(theme.c["background"])
+        pass
     
     def step():
         surface.fill(theme.c["background"])
@@ -39,68 +37,59 @@ class Lines:
         for offset in range(5):
             p_from = (0, y1 + 100)
             p_to = (size.x, y1)
-            pg.draw.aaline(surface, color, p_from, p_to)
+            pg.draw.aaline(surface, theme.c["bgdetails"], p_from, p_to)
             y1 += step
         for offset in range(3):
             p_from = (0, y2 + 50)
             p_to = (size.x, y2)
-            pg.draw.aaline(surface, color, p_from, p_to)
+            pg.draw.aaline(surface, theme.c["bgdetails"], p_from, p_to)
             y2 += step*2
 
 
-"""
-# makes my fans spin too fast, need to do something about it
-# feel free to bring this back rn if you want to
-class Glow:
-    raw = pg.Surface((6, 4))
-    prev_surf = pg.Surface((6, 4))
-    this_surf = pg.Surface((6, 4))
-    colors = [0] * 6*4
+class Grid:
+    colors = [pg.Color(0) for _ in range(4*3)]
+    colors_next = [pg.Color(0) for _ in range(4*3)]
     timer = 0
+    chunk = (6, 9)
     
     def init():
-        surface.fill(theme.c["background"])
-        Glow.prev_surf = pg.Surface(size)
-        Glow.this_surf = pg.Surface(size)
-        Glow.colors = [random.random() for i in range(6*4)]
-        Glow.timer = 0
+        for i in Grid.colors_next:
+            i.update(theme.c["background"])
+        Grid.timer = 0
+        Grid.chunk = (size.x / 4, size.y / 3)
     
     def step():
-        surface.fill(theme.c["background"])
-        Glow.timer -= 2
-        if Glow.timer < 0:
-            for ind, i in enumerate(Glow.colors):
-                y, x = divmod(ind, 6)
-                Glow.raw.set_at((x, y), (0, i*31, i*63))
-            Glow.timer = 255
-            Glow.prev_surf = Glow.this_surf
-            Glow.this_surf = pg.transform.smoothscale(Glow.raw, size)
-            Glow.colors = [(i + random.random() / 2) % 1 for i in Glow.colors]
+        Grid.timer -= 2
+        if Grid.timer < 0:
+            c = pg.Color(theme.c["background"])
+            for this, next in zip(Grid.colors, Grid.colors_next):
+                this.update(next)
+                next.update(c.lerp(theme.c["bgdetails"], random.random()))
+            Grid.timer = 255
         
-        surface.blit(Glow.this_surf, (0, 0))
-        Glow.prev_surf.set_alpha(Glow.timer)
-        surface.blit(Glow.prev_surf, (0, 0))
-"""
+        for ind, (this, next) in enumerate(zip(Grid.colors, Grid.colors_next)):
+            y, x = divmod(ind, 4)
+            x *= Grid.chunk[0]
+            y *= Grid.chunk[1]
+            c = this.lerp(next, 1 - Grid.timer / 255)
+            pg.draw.rect(surface, c, pg.Rect(x, y, *Grid.chunk))
 
 
 class Rain:
     active = []
     
     def init():
-        global color
-        color = tuple(i//2 for i in theme.c["base"])
-        surface.fill(theme.c["background"])
         Rain.active = []
     
     def step():
         surface.fill(theme.c["background"])
         to_remove = []
         for ind, i in enumerate(Rain.active):
-            # 0 - X, 1 - Y, 2 - Length
             i[1] += 20
-            # to do: make this readable
-            pg.draw.line(surface, color, (i[0], i[1]), (i[0], i[1]-i[2]))
-            if i[1] - i[2] > size.y:
+            # X, Y, Length
+            x, y, l = i
+            pg.draw.line(surface, theme.c["bgdetails"], (x, y), (x, y-l))
+            if y - l > size.y:
                 to_remove.append(ind - len(to_remove))
         for i in to_remove:
             Rain.active.pop(i)
@@ -110,5 +99,5 @@ class Rain:
         ])
 
 
-bglist = [Black, Lines, Rain]#, Glow]
+bglist = [Black, Lines, Rain, Grid]
 bgmap = {i.__name__: i for i in bglist}

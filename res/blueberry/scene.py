@@ -32,7 +32,6 @@ class Main:
     
     def draw(canvas):
         Main.background.step()
-        canvas.blit(background.surface, (0, 0))
         for i in Main.elements:
             i.draw(canvas)
     
@@ -44,8 +43,6 @@ class Main:
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
-        background.surface = pg.Surface(VARS.window_size)
-        background.size = VARS.window_size
         Main.background = background.bgmap.get(CONFIG.CLIENT["background"], background.Lines)
         Main.background.init()
         origin = VARS.window_size/2
@@ -158,7 +155,6 @@ class Chat:
     
     def draw(canvas):
         Main.background.step()
-        canvas.blit(background.surface, (0, 0))
         
         Chat.scroll = (Chat.scroll * 3 + Chat.scroll_goal) / 4
         
@@ -383,7 +379,6 @@ class Options:
     
     def draw(canvas):
         Main.background.step()
-        canvas.blit(background.surface, (0, 0))
         
         # title thingy
         txt = VARS.lang.OPTIONS_TITLE
@@ -602,6 +597,7 @@ class Options:
             font = VARS.fonts[25],
             align = "topleft",
             edit = True,
+            placeholder = "1920-1080",
         )
         Options.option_elements["res"] = last
         
@@ -706,6 +702,8 @@ class Options:
             font = VARS.fonts[20],
             options = sorted(theme.all_themes.keys()),
         )
+        last.options.remove("Default")
+        last.options.insert(0, "Default")
         Options.option_elements["themepreset"] = last
         
         if is_soft:

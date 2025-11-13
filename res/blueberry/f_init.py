@@ -120,6 +120,9 @@ def func():
     # initializing elements and stuff
     pg.key.set_repeat(250, 30)
     element.Colorpicker._init()
+    background.surface = VARS.canvas
+    background.size = VARS.window_size
+    
     for i in scene.to_init:
         i.init(is_soft)
     
