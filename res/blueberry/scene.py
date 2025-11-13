@@ -738,17 +738,20 @@ class Options:
                 Options.option_elements["colorcategory"].redraw()
             return callback
         
-        offset = (400, -255)
+        offset = (320, -245)
+        font_size = VARS.fonts[20].size(" ")[0]
         for i in theme.categories:
+            length = len(VARS.lang.THEME_TABLE.get(i, i))
+            size = (20 + length * font_size, 30)
             last = Options.container.push(element.Button,
                 offset = offset,
-                size = (140, 30),
-                align = "center",
+                size = size,
+                align = "midleft",
                 hover_scale = 0.1,
                 callback = gen_callback(i.title()),
             )
             Options.theme_elements.append(last)
-            offset = (400, 0)
+            offset = (320, 0)
         
         Options.category_elements["standard"] = Options.container.elements
         Options.container.elements = []
