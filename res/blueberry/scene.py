@@ -10,6 +10,7 @@ from . import lang
 from .chat_message import ChatMessage
 import pygame as pg
 from threading import Thread
+import sys
 import os
 
 # bootstrapping cba nonsense
@@ -536,7 +537,7 @@ class Options:
         
         font_size = VARS.fonts[15].size(" ")[0]
         offset = (10, 0)
-        for i in ["standard", "advanced"]:
+        for i in ["standard", "advanced", "about"]:
             display_name = VARS.lang.OPTIONS_CATEGORY_TABLE[i]
             size = (20 + len(display_name) * font_size, 24)
             center = (10 + len(display_name) * font_size/2, 12)
@@ -756,7 +757,7 @@ class Options:
         Options.category_elements["standard"] = Options.container.elements
         Options.container.elements = []
         
-        # start of advanced category (might rename later idk)
+        # start of advanced category
         # dev options
         last = Options.container.push(element.Line,
             offset = (0, 55),
@@ -878,6 +879,45 @@ class Options:
         Options.option_elements["alg_docs"] = last
         
         Options.category_elements["advanced"] = Options.container.elements
+        Options.container.elements = []
+        
+        # start of about category
+        # with only two multilines and an image lol
+        last = Options.container.push(element.Button,
+            offset = (140, 180),
+            size = (160, 160),
+            align = "center",
+            hover_scale = 0.1,
+            callback = lambda: 0,
+        )
+        last.surface.blit(pg.transform.scale(icons.app, (160, 160)), (0, 0))
+        last.update_surf()
+        
+        font_size = 30
+        if VARS.window_size.x < 800:
+            font_size = 20
+        
+        last = Options.container.push(element.Multiline,
+            offset = (240, -245),
+            size_y = 200,
+            color = c_text,
+            font = VARS.fonts[font_size],
+        )
+        last.set_text(VARS.lang.ABOUT_TEXT.format(
+            core_ver = VARS.CORE_VERSION,
+            client_ver = VARS.CLIENT_VERSION,
+            ver = sys.version.split()[0],
+            is_exe = getattr(sys, "frozen", False),
+        ))
+        last = Options.container.push(element.Multiline,
+            offset = (60, 0),
+            size_y = 200,
+            color = c_text,
+            font = VARS.fonts[20],
+        )
+        last.set_text(VARS.lang.ABOUT_TEXT2)
+        
+        Options.category_elements["about"] = Options.container.elements
         Options.container.elements = Options.category_elements["base"].copy()
         Options.container.elements.extend(Options.category_elements[Options.category_current])
         

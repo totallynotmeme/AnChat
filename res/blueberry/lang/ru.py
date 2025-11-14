@@ -33,6 +33,21 @@ OPTIONS_ADVANCED_WARN2 = """
 или полностью отключить шифрование ваших переписок. Будьте осторожны!
 """.replace("\n", " ")
 
+ABOUT_TEXT = """
+AnChat v{client_ver}
+Клиент Blueberry v{core_ver}
+
+Используется Python {ver}
+Скомпилирован в .exe: {is_exe}
+"""[1:-1]
+ABOUT_TEXT2 = """
+Сделан людьми для людей
+Приватность - право человека.
+
+Ссылка на репозиторий проекта:
+https://github.com/totallynotmeme/AnChat
+"""[1:-1]
+
 
 TASK_UNKNOWN = "Неизвестный текст статуса '{}' для задания {}"
 
@@ -89,4 +104,5 @@ THEME_TABLE = {
 OPTIONS_CATEGORY_TABLE = {
     "standard": "Стандартные",
     "advanced": "Продвинутые",
+    "about": "О проекте",
 }

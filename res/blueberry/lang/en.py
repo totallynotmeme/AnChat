@@ -33,6 +33,21 @@ Below are options which can break important functions of this client
 or even completely disable the encryption of your chats. Be careful!
 """.replace("\n", " ")
 
+ABOUT_TEXT = """
+AnChat v{client_ver}
+Blueberry client v{core_ver}
+
+Running Python {ver}
+Compiled to .exe: {is_exe}
+"""[1:-1]
+ABOUT_TEXT2 = """
+Made by people for people
+Privacy is a human right.
+
+Link to the project repository:
+https://github.com/totallynotmeme/AnChat
+"""[1:-1]
+
 
 TASK_UNKNOWN = "Unknown status text '{}' for task {}"
 
@@ -89,4 +104,5 @@ THEME_TABLE = {
 OPTIONS_CATEGORY_TABLE = {
     "standard": "Standard",
     "advanced": "Advanced",
+    "about": "About",
 }
