@@ -48,14 +48,13 @@ class Lines:
 
 class Grid:
     colors = [pg.Color(0) for _ in range(4*3)]
-    colors_next = [pg.Color(0) for _ in range(4*3)]
+    colors_next = None
     timer = 0
     chunk = (6, 9)
     
     def init():
-        for i in Grid.colors_next:
-            i.update(theme.c["background"])
-        Grid.timer = 0
+        if Grid.colors_next is None:
+            Grid.colors_next = [pg.Color(theme.c["background"]) for _ in range(4*3)]
         Grid.chunk = (size.x / 4, size.y / 3)
     
     def step():
@@ -79,7 +78,7 @@ class Rain:
     active = []
     
     def init():
-        Rain.active = []
+        pass
     
     def step():
         surface.fill(theme.c["background"])
