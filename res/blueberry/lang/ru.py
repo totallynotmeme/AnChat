@@ -22,7 +22,7 @@ OPTIONS_RESOLUTION = "Размер окна"
 OPTIONS_FONT = "Шрифт"
 OPTIONS_FONT_WARN = "Это экспериментальная настройка"
 OPTIONS_BACKGROUND = "Стиль фона"
-OPTIONS_THEME = "Тема приложения (бета)"
+OPTIONS_THEME = "Тема приложения"
 OPTIONS_DEVELOPER = "Настройки для разработчика"
 OPTIONS_APPLY = "Применить"
 OPTIONS_RESET = "Сбросить"
@@ -32,6 +32,9 @@ OPTIONS_ADVANCED_WARN2 = """
 Ниже находятся параметры, которые могут сломать важные функции клиента
 или полностью отключить шифрование ваших переписок. Будьте осторожны!
 """.replace("\n", " ")
+
+TOOLS_SOON_TITLE = "Инструменты"
+TOOLS_SOON_DESC = "Скоро... (v0.2.1-ALPHA?)"
 
 ABOUT_TEXT = """
 AnChat v{client_ver}
@@ -104,5 +107,6 @@ THEME_TABLE = {
 OPTIONS_CATEGORY_TABLE = {
     "standard": "Стандартные",
     "advanced": "Продвинутые",
+    "tools": "Инструменты",
     "about": "О проекте",
 }

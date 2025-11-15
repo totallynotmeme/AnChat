@@ -537,7 +537,7 @@ class Options:
         
         font_size = VARS.fonts[15].size(" ")[0]
         offset = (10, 0)
-        for i in ["standard", "advanced", "about"]:
+        for i in ["standard", "advanced", "tools", "about"]:
             display_name = VARS.lang.OPTIONS_CATEGORY_TABLE[i]
             size = (20 + len(display_name) * font_size, 24)
             center = (10 + len(display_name) * font_size/2, 12)
@@ -879,6 +879,34 @@ class Options:
         Options.option_elements["alg_docs"] = last
         
         Options.category_elements["advanced"] = Options.container.elements
+        Options.container.elements = []
+        
+        # start of tools category
+        # something will be here soon, but not now
+        
+        # title
+        last = Options.container.push(element.Line,
+            offset = (0, 55),
+            size_y = 40,
+            color = c_accenttext,
+            font = VARS.fonts[35],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.TOOLS_SOON_TITLE)
+        
+        # description
+        last = Options.container.push(element.Line,
+            offset = (20, 5),
+            size_y = 30,
+            color = c_text,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.TOOLS_SOON_DESC)
+        
+        Options.category_elements["tools"] = Options.container.elements
         Options.container.elements = []
         
         # start of about category

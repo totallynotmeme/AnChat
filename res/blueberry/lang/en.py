@@ -22,7 +22,7 @@ OPTIONS_RESOLUTION = "Window size"
 OPTIONS_FONT = "Font"
 OPTIONS_FONT_WARN = "This is an experimental setting"
 OPTIONS_BACKGROUND = "Background style"
-OPTIONS_THEME = "App theme (beta)"
+OPTIONS_THEME = "App theme"
 OPTIONS_DEVELOPER = "Developer options"
 OPTIONS_APPLY = "Apply"
 OPTIONS_RESET = "Reset"
@@ -32,6 +32,9 @@ OPTIONS_ADVANCED_WARN2 = """
 Below are options which can break important functions of this client
 or even completely disable the encryption of your chats. Be careful!
 """.replace("\n", " ")
+
+TOOLS_SOON_TITLE = "Tools"
+TOOLS_SOON_DESC = "Coming soon... (v0.2.1-ALPHA?)"
 
 ABOUT_TEXT = """
 AnChat v{client_ver}
@@ -104,5 +107,6 @@ THEME_TABLE = {
 OPTIONS_CATEGORY_TABLE = {
     "standard": "Standard",
     "advanced": "Advanced",
+    "tools": "Tools",
     "about": "About",
 }
