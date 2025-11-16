@@ -11,6 +11,7 @@ from . import element
 from . import background
 from . import chat_message
 import pygame as pg
+import random
 import os
 
 # bootstrapping cba nonsense
@@ -101,7 +102,8 @@ def func():
     
     # that log() explains what this block does lol
     log("Creating pygame window")
-    pg.display.set_caption(VARS.lang.WINDOW_TITLE)
+    splash = random.choice(VARS.lang.SPLASHES)
+    pg.display.set_caption(VARS.lang.WINDOW_TITLE + splash)
     if not intentional_reset or VARS.window_size != old_size:
         VARS.canvas = pg.display.set_mode(window_size)
     VARS.clock = pg.time.Clock()

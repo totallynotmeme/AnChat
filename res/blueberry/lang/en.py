@@ -3,7 +3,7 @@
 
 
 
-WINDOW_TITLE = "AnChat - Blueberry client"
+WINDOW_TITLE = "AnChat - Blueberry client   //   "
 CORE_VERSION = "Core version: {}"
 CLIENT_VERSION = "Client version: {}"
 
@@ -110,3 +110,19 @@ OPTIONS_CATEGORY_TABLE = {
     "tools": "Tools",
     "about": "About",
 }
+
+SPLASHES = [
+    "Why does a chat app need splash texts?", # no comment
+    "Privacy? What's that? Never heard of it",
+    "Made by just one person!",
+    "Press ESC to open a Python console",
+    "Psst, have you tried right clicking the messages?",
+    "Who doesn't like cat memes?",
+    "What could go wrong?",
+    "No AI generated code!",
+    "file transfer is still broken haha (i need help)",
+    "Respect to those 2 guys who starred this",
+    "hi",
+    "who are you",
+    "insert funny splash text here",
+]
