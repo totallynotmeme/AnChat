@@ -4,6 +4,7 @@
 from . import theme
 import pygame as pg
 import random
+import math
 
 
 surface = pg.Surface((5, 5))
@@ -55,7 +56,7 @@ class Grid:
     def init():
         if Grid.colors_next is None:
             Grid.colors_next = [pg.Color(theme.c["background"]) for _ in range(4*3)]
-        Grid.chunk = (size.x / 4, size.y / 3)
+        Grid.chunk = (math.ceil(size.x / 4), math.ceil(size.y / 3))
     
     def step():
         Grid.timer -= 2
