@@ -39,7 +39,6 @@ def func():
         log("")
         log("---[  INITIALIZING BLUEBERRY CLIENT  ]---")
         log("")
-        VARS.show_stream_warn = True # temporary line
         encryption.old.funcs["Current"] = encryption.xor
     
     chat_message.downloads_path = DOWNLOADS_PATH

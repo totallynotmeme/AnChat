@@ -339,16 +339,12 @@ class Chat:
             if not os.path.isfile(ev.file):
                 return
             
-            if VARS.show_stream_warn: # temp
-                VARS.show_stream_warn = False
-                txt = VARS.lang.MESSAGE_STREAMING_WARN.encode()
-            else:
-                try:
-                    t = task.Stream(ev.file)
-                    t.run()
-                    txt = VARS.lang.MESSAGE_STREAMING_START.format(t.name).encode()
-                except Exception as e:
-                    txt = VARS.lang.MESSAGE_STREAMING_FAIL.format(e).encode()
+            try:
+                t = task.Stream(ev.file)
+                t.run()
+                txt = VARS.lang.MESSAGE_STREAMING_START.format(t.name).encode()
+            except Exception as e:
+                txt = VARS.lang.MESSAGE_STREAMING_FAIL.format(e).encode()
             
             you_msg = {b"author": b"~SYSTEM", b"content": txt}
             fmap["recvmsg"](you_msg)
