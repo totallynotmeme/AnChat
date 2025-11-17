@@ -97,7 +97,7 @@ def func():
     CONFIG.CLIENT["window_size"] = f"{window_size[0]}-{window_size[1]}"
     old_size = getattr(VARS, "window_size", None) # this is also cursed
     
-    # setting up stuff in chat_message context + old_size
+    # setting up stuff in chat_message context
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
     VARS.lang = lang.langmap.get(CONFIG.CLIENT["lang"], lang.default)
