@@ -41,6 +41,7 @@ def func():
         log("")
         encryption.old.funcs["Current"] = encryption.xor
     
+    # generic variables setup
     chat_message.downloads_path = DOWNLOADS_PATH
     VARS.CLIENT_VERSION = "0.2.0-ALPHA"
     VARS.mousepos = pg.Vector2(-1, -1)
@@ -62,7 +63,7 @@ def func():
     pg.init() # yes that's it
     
     log("Reading config and parsing themes")
-    # initializing some variables
+    # initializing path variables
     CONFIG.DEFAULTS = utils.GET_DEFAULT_CONFIG_OPTIONS()
     CONFIG.CLIENT = utils.GET_DEFAULT_CONFIG_OPTIONS()
     utils.CONFIG_FILE_PATH = os.getcwd() + "/config.txt"
@@ -71,12 +72,14 @@ def func():
     for i in utils.parse_config_file(CONFIG.CLIENT):
         log(i)
     
+    # parsing app theme from config file
     name, this_theme, verbals = theme.parse_string_theme(CONFIG.CLIENT["theme"])
     theme.name = name
     theme.load_theme(this_theme)
     for i in verbals:
         log(i)
-    # handling custom varialbes
+    
+    # handling custom variables
     alg = encryption.old.funcs.get(CONFIG.CLIENT["!algorithm"], None)
     if alg is None:
         log(f"Failed to load algorithm {alg}")
@@ -92,8 +95,9 @@ def func():
         log("Couldn't parse 'window_size' parameter, will use default")
         window_size = utils.parse_screen_res(CONFIG.DEFAULTS["window_size"], max_res)
     CONFIG.CLIENT["window_size"] = f"{window_size[0]}-{window_size[1]}"
-    
     old_size = getattr(VARS, "window_size", None) # this is also cursed
+    
+    # setting up stuff in chat_message context + old_size
     VARS.window_size = pg.Vector2(window_size)
     chat_message.window_size = window_size
     VARS.lang = lang.langmap.get(CONFIG.CLIENT["lang"], lang.default)
@@ -106,10 +110,14 @@ def func():
     if not intentional_reset or VARS.window_size != old_size:
         VARS.canvas = pg.display.set_mode(window_size)
     VARS.clock = pg.time.Clock()
+    
+    # fonts. maybe dynamic table can be used instead??
     VARS.fonts = {}
     for i in range(10, 50, 5):
         VARS.fonts[i] = pg.font.SysFont(CONFIG.CLIENT["font"], i)
     chat_message.fonts = VARS.fonts
+    
+    # drawing the thing
     txt = VARS.fonts[30].render("Initializing Blueberry client", True, (255, 255, 255))
     VARS.canvas.blit(txt, txt.get_rect(center=VARS.window_size/2))
     pg.display.flip()
@@ -131,8 +139,9 @@ def func():
     if is_soft:
         scene.Console.logs_multiline.set_text("\n".join(scene.Console.logs_raw))
     
+    # on-boot command
     if CONFIG.CLIENT["onboot"] and not CONFIG.CLIENT["onboot"].startswith("#"):
-        log("Running on-onboot command")
+        log("Running on-boot command")
         try:
             exec(CONFIG.CLIENT["onboot"])
         except Exception as e:
