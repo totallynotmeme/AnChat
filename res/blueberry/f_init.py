@@ -21,6 +21,24 @@ def bootstrap(_globals):
     globals().update(orig_globals)
 
 
+class fonts_table:
+    def __init__(self, name):
+        self.name = name
+        self.cache = {}
+    
+    def __repr__(self):
+        return f"fonts_table(name={self.name} size={len(self.cache)})"
+    
+    def __getitem__(self, size):
+        if size in self.cache:
+            return self.cache[size]
+        
+        # print(f"creating font of {size=}")
+        font = pg.font.SysFont(self.name, size)
+        self.cache[size] = font
+        return font
+
+
 # your function here
 def func():
     intentional_reset = getattr(VARS, "RESETTING", False) # this is cursed(?)
@@ -111,10 +129,8 @@ def func():
         VARS.canvas = pg.display.set_mode(window_size)
     VARS.clock = pg.time.Clock()
     
-    # fonts. maybe dynamic table can be used instead??
-    VARS.fonts = {}
-    for i in range(10, 50, 5):
-        VARS.fonts[i] = pg.font.SysFont(CONFIG.CLIENT["font"], i)
+    # creating a dynamic table for fonts
+    VARS.fonts = fonts_table(CONFIG.CLIENT["font"])
     chat_message.fonts = VARS.fonts
     
     # drawing the thing
