@@ -162,6 +162,7 @@ def func():
             exec(CONFIG.CLIENT["onboot"])
         except Exception as e:
             log(f"Exception occured: {e}")
+            task.FAILED.append([f"On-boot command exception: {e}", 300])
     
     log("Done! Showing the UI")
     VARS.RUNNING = True
