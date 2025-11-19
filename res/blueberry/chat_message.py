@@ -191,11 +191,12 @@ class ChatMessage:
                 
                 size = (len(max(texts, key=len)) * font_size.x + 10, len(texts) * font_size.y + 10)
                 ChatMessage.expanded = pg.Surface(size)
+                ChatMessage.expanded.fill(theme.c["background"])
                 for ind, i in enumerate(texts):
-                    txt = font.render(i, True, (255, 255, 255))
+                    txt = font.render(i, True, theme.c["text"])
                     ChatMessage.expanded.blit(txt, (5, ind * font_size.y + 5))
                 
-                pg.draw.rect(ChatMessage.expanded, (0, 63, 127), pg.Rect(0, 0, *size), 3)
+                pg.draw.rect(ChatMessage.expanded, theme.c["base"], pg.Rect(0, 0, *size), 2)
         if ev.button != pg.BUTTON_LEFT:
             return False
         
