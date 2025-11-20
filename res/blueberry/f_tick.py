@@ -23,6 +23,7 @@ def func():
             mods = pg.key.get_mods()
             VARS.holding_ctrl = bool(mods & pg.KMOD_CTRL)
             VARS.holding_shift = bool(mods & pg.KMOD_SHIFT)
+            VARS.is_numlock = bool(mods & pg.KMOD_NUM)
         
         if ev.type == pg.QUIT:
             VARS.RUNNING = False

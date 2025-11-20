@@ -261,7 +261,17 @@ class Line:
                 self.set_cursor(self.cursor_pos + len(pasted), no_select=True)
             return True
         
-        if ev.key == pg.K_LEFT:
+        is_left = ev.key == pg.K_LEFT
+        is_right = ev.key == pg.K_RIGHT
+        is_home = ev.key == pg.K_HOME
+        is_end = ev.key == pg.K_END
+        if not VARS.is_numlock:
+            is_left |= ev.key == pg.K_KP4
+            is_right |= ev.key == pg.K_KP6
+            is_home |= ev.key == pg.K_KP7
+            is_end |= ev.key == pg.K_KP1
+        
+        if is_left:
             new_pos = max(self.cursor_pos - 1, 0)
             if VARS.holding_ctrl:
                 new_pos = utils.find_space_left(self.text[:new_pos])
@@ -270,7 +280,7 @@ class Line:
                 self.selection_start = -1
                 self.selection_end = -1
             self.set_cursor(new_pos)
-        if ev.key == pg.K_RIGHT:
+        if is_right:
             new_pos = min(self.cursor_pos + 1, len(self.text))
             if VARS.holding_ctrl:
                 new_pos += utils.find_space_right(self.text[new_pos:])
@@ -280,13 +290,13 @@ class Line:
                 self.selection_end = -1
             self.set_cursor(new_pos)
         
-        if ev.key == pg.K_HOME:
+        if is_home:
             if not VARS.holding_shift:
                 self.selection_start = -1
                 self.selection_end = -1
             self.set_cursor(0)
             return True
-        if ev.key == pg.K_END:
+        if is_end:
             if not VARS.holding_shift:
                 self.selection_start = -1
                 self.selection_end = -1
