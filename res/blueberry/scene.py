@@ -844,6 +844,39 @@ class Options:
         )
         last.set_text(VARS.lang.OPTIONS_ADVANCED_WARN2)
         
+        # task.Stream variables (i love spaghetti)
+        last = Options.container.push(element.Line,
+            offset = (0, 55),
+            size_y = 30,
+            color = c_text,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text("task.Stream variables (chunk size KB / sleep time Seconds)")
+        
+        last = Options.container.push(element.Line,
+            offset = (10, 0),
+            size_y = 30,
+            color = c_accent,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = True,
+            placeholder = "chunk size KB (default 512)",
+        )
+        Options.option_elements["stream_chunk"] = last
+        
+        last = Options.container.push(element.Line,
+            offset = (10, 0),
+            size_y = 30,
+            color = c_accent,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = True,
+            placeholder = "sleep time Seconds (default 2.0)",
+        )
+        Options.option_elements["stream_sleep"] = last
+        
         # encryption function
         last = Options.container.push(element.Line,
             offset = (0, 55),
@@ -964,6 +997,8 @@ class Options:
             "background": Options.option_elements["bg"].current,
             "theme": theme_thing,
             "!algorithm": Options.option_elements["alg"].current,
+            "!stream-chunksize": Options.option_elements["stream_chunk"].text,
+            "!stream-sleep_for": Options.option_elements["stream_sleep"].text,
         })
         utils.save_config_file(new_config)
         VARS.RESETTING = True
@@ -985,6 +1020,8 @@ class Options:
         table["themepreset"].redraw()
         table["alg"].current = CONFIG.CLIENT["!algorithm"]
         table["alg"].redraw()
+        table["stream_chunk"].set_text(str(task.Stream.chunksize // 1024))
+        table["stream_sleep"].set_text(str(task.Stream.sleep_for))
         Options.previous_algorithm = None
     
     def toggle():

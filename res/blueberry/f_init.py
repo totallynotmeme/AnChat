@@ -99,7 +99,7 @@ def func():
     for i in verbals:
         log(i)
     
-    # handling custom variables
+    # load different encryption alg if specified
     alg_pair = encryption.old.funcs.get(CONFIG.CLIENT["!algorithm"], None)
     if alg_pair is None:
         error_msg = f"Failed to load encryption algorithm {CONFIG.CLIENT['!algorithm']}, using Current instead"
@@ -109,6 +109,27 @@ def func():
         CONFIG.CLIENT["!algorithm"] = "Current"
     else:
         encryption._f_encrypt, encryption._f_decrypt = alg_pair
+    
+    # set task.Stream values because it's currently extremely spaghetti
+    # and i want to play with the numbers until it works
+    try:
+        chunksize = int(CONFIG.CLIENT["!stream-chunksize"])
+        chunksize = min(max(chunksize, 1), 2048) # clamp to 1kb-2mb range
+    except Exception as e:
+        error_msg = f"Couldn't parse stream-chunksize: {e}"
+        log(error_msg)
+        task.FAILED.append([error_msg, 300])
+        chunksize = 512
+    task.Stream.chunksize = chunksize * 1024
+    try:
+        sleep_for = float(CONFIG.CLIENT["!stream-sleep_for"])
+        sleep_for = max(sleep_for, 0.05)
+    except Exception as e:
+        error_msg = f"Couldn't parse stream-sleep_for: {e}"
+        log(error_msg)
+        task.FAILED.append([error_msg, 300])
+        sleep_for = 2.0
+    task.Stream.sleep_for = sleep_for
     
     # getting screen resolution from config (or default)
     display_data = pg.display.Info()

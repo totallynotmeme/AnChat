@@ -27,7 +27,8 @@ def threaded(func):
 
 
 class Stream:
-    chunksize = 1024 * 512
+    chunksize = 512 * 1024
+    sleep_for = 2
     
     def __init__(self, filepath):
         dataio = open(filepath, "rb")
@@ -73,7 +74,7 @@ class Stream:
         RUNNING.append(self)
         while self.status == "running":
             if self.tick():
-                sleep(2)
+                sleep(Stream.sleep_for)
         
         if self in RUNNING:
             RUNNING.remove(self)

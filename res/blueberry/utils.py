@@ -20,6 +20,8 @@ GET_DEFAULT_CONFIG_OPTIONS = lambda: {
     "theme": "Default/base:004080/accent:0080ff/accent2:800000",
     "onboot": "# THIS WILL RUN ON STARTUP, ONLY MODIFY IF YOU KNOW WHAT YOU'RE DOING",
     "!algorithm": "Current",
+    "!stream-chunksize": "512",
+    "!stream-sleep_for": "2.0",
 }
 DEFAULT_CONFIG_FILE = """
 # /config.txt
