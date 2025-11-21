@@ -427,7 +427,7 @@ class Options:
         alg_button = Options.option_elements["alg"]
         if Options.previous_algorithm != alg_button.current:
             Options.previous_algorithm = alg_button.current
-            doc_string = encryption.old.funcs[alg_button.current].__doc__
+            doc_string = encryption.old.docs[alg_button.current]
             doc_string = "Documentation notes:\n" + doc_string
             Options.option_elements["alg_docs"].set_text(doc_string)
         

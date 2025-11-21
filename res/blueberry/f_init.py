@@ -57,7 +57,9 @@ def func():
         log("")
         log("---[  INITIALIZING BLUEBERRY CLIENT  ]---")
         log("")
-        encryption.old.funcs["Current"] = encryption.xor
+        encryption.old.funcs["Current"] = (encryption._f_encrypt, encryption._f_decrypt)
+        encryption.old.docs["Current"] = encryption._f_encrypt.__doc__ or\
+                                         encryption._f_decrypt.__doc__ or "\n    bro what\n"
     
     # generic variables setup
     chat_message.downloads_path = DOWNLOADS_PATH
@@ -98,12 +100,15 @@ def func():
         log(i)
     
     # handling custom variables
-    alg = encryption.old.funcs.get(CONFIG.CLIENT["!algorithm"], None)
-    if alg is None:
-        log(f"Failed to load algorithm {alg}")
-        alg = encryption.xor
+    alg_pair = encryption.old.funcs.get(CONFIG.CLIENT["!algorithm"], None)
+    if alg_pair is None:
+        error_msg = f"Failed to load encryption algorithm {CONFIG.CLIENT['!algorithm']}, using Current instead"
+        log(error_msg)
+        task.FAILED.append([error_msg, 300])
+        alg_pair = (encryption._f_encrypt, encryption._f_decrypt)
+        CONFIG.CLIENT["!algorithm"] = "Current"
     else:
-        encryption.xor = alg
+        encryption._f_encrypt, encryption._f_decrypt = alg_pair
     
     # getting screen resolution from config (or default)
     display_data = pg.display.Info()

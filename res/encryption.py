@@ -37,22 +37,26 @@ def xor(data, salt, password):
     key = b"".join(key)
     return bytes(map(operator.xor, data, key))
 
+# xor works both ways so we can just use it for both encryption/decryption
+_f_encrypt = xor
+_f_decrypt = xor
+
 def process_salt(salt):
     return bytes(map(operator.xor, salt, SALT_MASK))
 
 
-# main encryptor/decryptor
+# main encryptor/decryptor functions that are used in the code
 def encrypt(raw):
     salt = os.urandom(SALT_BYTES)
-    return process_salt(salt) + xor(raw, salt, password)
+    return process_salt(salt) + _f_encrypt(raw, salt, password)
 
 def decrypt(raw):
     salt = process_salt(raw[:SALT_BYTES])
     raw = raw[SALT_BYTES:]
-    return xor(raw, salt, password)
+    return _f_decrypt(raw, salt, password)
 
 
-# validate salt to prevent packet duping attack
+# throw away packets with salt that has already been used
 def validate(raw):
     salt = raw[:SALT_BYTES]
     if salt in USED_SALT:
@@ -62,7 +66,13 @@ def validate(raw):
 
 
 
-"""
+""" UNUSED CONCEPT
+talking to the server without it having to know the password.
+could be useful in some cases like server-side commands (ex: ?membercount),
+but idk, the server code is already spaghetti enough.
+looking back, i have no idea what i was doing when writing this lol
+
+
 # client 2 server encryption (commands)
 SERVER_KEYS_BYTES = 64
 SERVER_INIT_PRIVATE = None

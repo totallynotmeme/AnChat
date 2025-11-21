@@ -43,5 +43,13 @@ def no_encryption(data, salt, password):
     return data
 
 
-funcs = [xor_v1, no_encryption]
-funcs = {i.__name__: i for i in funcs}
+funcs = {
+    # "name": (f_encrypt, f_decrypt),
+    "xor_v1": (xor_v1, xor_v1),
+    "no_encryption": (no_encryption, no_encryption),
+}
+docs = {}
+for key, val in funcs.items():
+    docs[key] = val[0].__doc__ or val[1].__doc__ or f"""
+    function {key} doesn't have a docstring
+    """
