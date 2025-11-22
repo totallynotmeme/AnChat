@@ -85,6 +85,7 @@ MESSAGE_HELP = """
 CHATBOX_FIELD = "Type your message here"
 CHAT_DISCONNECT = "Disconnect"
 CONNECTION_ERROR = "Connection error: {}"
+RECEIVING_BYTES = "Receiving message: {}/{} bytes in queue"
 
 ERROR_CODES = {
     b"BADPACKET": "Received invalid message packet",

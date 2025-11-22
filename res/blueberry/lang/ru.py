@@ -85,6 +85,7 @@ MESSAGE_HELP = """
 CHATBOX_FIELD = "Напишите своё сообщение здесь"
 CHAT_DISCONNECT = "Отключиться"
 CONNECTION_ERROR = "Ошибка соединения: {}"
+RECEIVING_BYTES = "Получение сообщения: {}/{} байт в очереди"
 
 ERROR_CODES = {
     b"BADPACKET": "Получен неправильный пакет сообщения",

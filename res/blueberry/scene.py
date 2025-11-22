@@ -174,6 +174,11 @@ class Chat:
         if not connection.ALIVE:
             txt = VARS.fonts[15].render(connection.EXIT_CODE, True, (255, 127, 127))
             canvas.blit(txt, Chat.status_text_pos)
+        elif connection.State.packet:
+            txt = VARS.lang.RECEIVING_BYTES.format(len(connection.State.packet),
+                                                   connection.State.expected_len)
+            txt = VARS.fonts[15].render(txt, True, (127, 127, 127))
+            canvas.blit(txt, Chat.status_text_pos)
     
     def push(msg):
         if len(Chat.messages) == 0:
