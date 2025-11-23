@@ -16,7 +16,7 @@ password = b""
 
 
 # basic encryption function
-def xor(data, salt, password):
+def xor_v2(data, salt, password):
     """
     unique name: xor_v2
     ADDED: v0.2.0-ALPHA (core version)
@@ -38,8 +38,8 @@ def xor(data, salt, password):
     return bytes(map(operator.xor, data, key))
 
 # xor works both ways so we can just use it for both encryption/decryption
-_f_encrypt = xor
-_f_decrypt = xor
+_f_encrypt = xor_v2
+_f_decrypt = xor_v2
 
 def process_salt(salt):
     return bytes(map(operator.xor, salt, SALT_MASK))

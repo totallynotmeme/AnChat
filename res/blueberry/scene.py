@@ -64,6 +64,20 @@ class Main:
         button.update_surf()
         Main.elements.append(button)
         
+        alg_text = element.Line(
+            pos = (5, VARS.window_size.y - 5),
+            size = (580, 30),
+            color = c_accenttext,
+            font = VARS.fonts[15],
+            align = "bottomleft",
+            edit = False,
+        )
+        alg_text.set_text(VARS.lang.LOADED_ALG_TEXT.format(
+            encryption._f_encrypt.__name__,
+            encryption._f_decrypt.__name__
+        ))
+        Main.elements.append(alg_text)
+        
         if is_soft:
             username = Main.field_username.text
             address = Main.field_address.text
@@ -102,8 +116,12 @@ class Main:
             placeholder = VARS.lang.FIELD_ADDRESS,
         )
         Main.elements.append(Main.field_address)
+        
+        ypos = 170
+        if VARS.window_size.y <= 440:
+            ypos = 150
         Main.field_status = element.Line(
-            pos = origin + pg.Vector2(0, 170),
+            pos = origin + pg.Vector2(0, ypos),
             size = (VARS.window_size.x-25, 25),
             color = c_accenttext,
             font = VARS.fonts[20],

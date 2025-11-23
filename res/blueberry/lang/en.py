@@ -10,6 +10,7 @@ CLIENT_VERSION = "Client version: {}"
 FIELD_USERNAME = "Your username (Anon)"
 FIELD_ADDRESS = "Server address"
 CONNECT_BUTTON = "Connect"
+LOADED_ALG_TEXT = "Using encryption functions {}/{}"
 
 STATUS_TEXT_DEFAULT = "Fill in the fields and press Connect"
 STATUS_TEXT_TRYING = "Trying to connect, please wait..."

@@ -10,6 +10,7 @@ CLIENT_VERSION = "Версия клиента: {}"
 FIELD_USERNAME = "Ваше имя (Anon)"
 FIELD_ADDRESS = "Адрес сервера"
 CONNECT_BUTTON = "Подключиться"
+LOADED_ALG_TEXT = "Используются функции шифрования {}/{}"
 
 STATUS_TEXT_DEFAULT = "Заполните поля и нажмите Подключиться"
 STATUS_TEXT_TRYING = "Пытаемся подключиться, подождите..."
