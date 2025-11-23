@@ -1203,8 +1203,10 @@ select - select element, similar to browser devtools
             
             if ev.key == pg.K_RETURN:
                 user_command = Console.prompt_line.text
-                Console.prompt_line.active = True
-                Console.logs_multiline.active = False
+                if not Console.prompt_line.active:
+                    Console.prompt_line.active = True
+                    Console.logs_multiline.active = False
+                    return
                 
                 Console.run(user_command)
                 if history and user_command and user_command != history[-1]:
