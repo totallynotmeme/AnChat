@@ -934,8 +934,6 @@ class Options:
         Options.container.elements = []
         
         # start of tools category
-        # something will be here soon, but not now
-        
         # title
         last = Options.container.push(element.Line,
             offset = (0, 55),
@@ -945,18 +943,76 @@ class Options:
             align = "topleft",
             edit = False,
         )
-        last.set_text(VARS.lang.TOOLS_SOON_TITLE)
+        last.set_text(VARS.lang.OPTIONS_TOOLS_TITLE)
         
-        # description
-        last = Options.container.push(element.Line,
-            offset = (20, 5),
-            size_y = 30,
-            color = c_text,
-            font = VARS.fonts[25],
-            align = "topleft",
-            edit = False,
-        )
-        last.set_text(VARS.lang.TOOLS_SOON_DESC)
+        def gen_callback(func, result_obj, *arg_objs):
+            def callback():
+                try:
+                    args = [i.text for i in arg_objs]
+                    res = func(*args)
+                    if type(res) is not str:
+                        res = repr(res)
+                except Exception as e:
+                    res = str(e)
+                result_obj.set_text(res)
+            return callback
+        for name, func in tools._all.items():
+            args = tools._args[name]
+            # tool title
+            last = Options.container.push(element.Line,
+                offset = (5, 50),
+                size_y = 35,
+                color = c_text,
+                font = VARS.fonts[30],
+                align = "topleft",
+                edit = False,
+            )
+            last.set_text(name.title())
+            # tool docstring
+            docs = func.__doc__ or f"No docstring defined for {name}()"
+            docs = "Documentation notes:\n" + docs
+            last = Options.container.push(element.Multiline,
+                offset = (20, 5),
+                size_y = docs.count("\n") * 20 + 25, # pls no long lines
+                color = c_text,
+                font = VARS.fonts[20],
+            )
+            last.set_text(docs)
+            # creating a line for each argument
+            arg_objs = []
+            for i in args:
+                last = Options.container.push(element.Line,
+                    offset = (10, 5),
+                    size_y = 25,
+                    color = c_accent,
+                    font = VARS.fonts[20],
+                    align = "topleft",
+                    edit = True,
+                    placeholder = i.title(),
+                )
+                arg_objs.append(last)
+            # tool output
+            last = Options.container.push(element.Line,
+                offset = (5, 15),
+                size_y = 30,
+                color = c_text,
+                font = VARS.fonts[25],
+                align = "topleft",
+                edit = True,
+                placeholder = "None",
+            )
+            # run button
+            last = Options.container.push(element.Button,
+                offset = (70, 20),
+                size = (120, 30),
+                align = "center",
+                hover_scale = 0.04,
+                callback = gen_callback(func, last, *arg_objs),
+            )
+            last.surface.fill(c_base)
+            txt = VARS.fonts[15].render(VARS.lang.OPTIONS_TOOLS_RUN, True, c_text)
+            last.surface.blit(txt, txt.get_rect(center=(60, 15)))
+            last.update_surf()
         
         Options.category_elements["tools"] = Options.container.elements
         Options.container.elements = []

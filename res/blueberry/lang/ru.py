@@ -34,8 +34,9 @@ OPTIONS_ADVANCED_WARN2 = """
 или полностью отключить шифрование ваших переписок. Будьте осторожны!
 """.replace("\n", " ")
 
-TOOLS_SOON_TITLE = "Инструменты"
-TOOLS_SOON_DESC = "Скоро... (v0.2.1-ALPHA?)"
+OPTIONS_TOOLS_TITLE = "Инструменты"
+OPTIONS_TOOLS_RUN = "Запустить"
+OPTIONS_TOOLS_OUT = "Вывод: "
 
 ABOUT_TEXT = """
 AnChat v{client_ver}

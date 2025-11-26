@@ -25,6 +25,7 @@ from . import message
 from . import encryption
 from . import connection
 from . import wordip
+from . import tools
 import time
 import sys
 

@@ -34,8 +34,9 @@ Below are options which can break important functions of this client
 or even completely disable the encryption of your chats. Be careful!
 """.replace("\n", " ")
 
-TOOLS_SOON_TITLE = "Tools"
-TOOLS_SOON_DESC = "Coming soon... (v0.2.1-ALPHA?)"
+OPTIONS_TOOLS_TITLE = "Tools"
+OPTIONS_TOOLS_RUN = "Run"
+OPTIONS_TOOLS_OUT = "Output: "
 
 ABOUT_TEXT = """
 AnChat v{client_ver}
