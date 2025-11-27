@@ -390,6 +390,12 @@ class Multiline:
         self.bounding_boxes = []
         self.true_bb = pg.Rect(self.pos, self.size)
     
+    def get_ysize_for(text, size_x, font):
+        font_size = font.size(" ")
+        max_per_line = int(size_x / font_size[0])
+        lines = utils.text_to_lines(text, max_per_line)
+        return int(len(lines) * font_size[1] + 1)
+    
     def set_text(self, text):
         self.lines = utils.text_to_lines(text, self.max_per_line)
         self.scroll_pos = min(self.scroll_pos, len(self.lines))
@@ -407,7 +413,6 @@ class Multiline:
     
     
     def draw(self, canvas, offset=pg.Vector2()):
-        # to do: make offset work
         self.bounding_boxes = []
         trimmed = self.lines[self.scroll_pos: self.scroll_pos+self.max_lines]
         
@@ -417,7 +422,9 @@ class Multiline:
                 key = lambda x: x[1] * 999 + x[0]
             )
             
-            for line_ind in range(start_line[1], end_line[1]+1):
+            range_start = max(start_line[1], self.scroll_pos)
+            range_end = min(end_line[1], self.scroll_pos + self.max_lines - 1)
+            for line_ind in range(range_start, range_end+1):
                 line_pos = (line_ind - self.scroll_pos) * self.font_size.y + self.pos.y
                 
                 x_start = 0
@@ -493,6 +500,10 @@ class Multiline:
     
     
     def event_KEYDOWN(self, ev):
+        if last.clicked != self:
+            # make sure we only handle this if it's active.
+            # using jank to fix jank
+            return
         if ev.unicode == ctrl_a:
             self.selection_start = (0, 0)
             self.selection_end = (len(self.lines[-1]), len(self.lines) - 1)

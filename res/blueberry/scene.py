@@ -971,9 +971,13 @@ class Options:
             # tool docstring
             docs = func.__doc__ or f"No docstring defined for {name}()"
             docs = "Documentation notes:\n" + docs
+            size_y = element.Multiline.get_ysize_for(
+                text = docs,
+                size_x = VARS.window_size[0] - 30,
+                font = VARS.fonts[20])
             last = Options.container.push(element.Multiline,
                 offset = (20, 5),
-                size_y = docs.count("\n") * 20 + 25, # pls no long lines
+                size_y = size_y,
                 color = c_text,
                 font = VARS.fonts[20],
             )
