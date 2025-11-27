@@ -196,7 +196,6 @@ class Line:
             last.hovered = self
         return False
     
-    
     def event_MOUSEBUTTONDOWN(self, ev):
         if ev.button == pg.BUTTON_LEFT:
             self.active = False
@@ -214,11 +213,9 @@ class Line:
                 last.clicked = self
         return False
     
-    
     def event_MOUSEBUTTONUP(self, ev):
         if ev.button == pg.BUTTON_LEFT:
             self.selecting = False
-    
     
     def event_KEYDOWN(self, ev):
         if not self.active:
@@ -339,7 +336,6 @@ class Line:
             self.set_cursor(self.cursor_pos)
         return True
     
-    
     def event_TEXTINPUT(self, ev):
         if not self.active:
             return False
@@ -355,6 +351,13 @@ class Line:
         self.set_cursor(self.cursor_pos + 1, no_select=True)
         return True
     
+    def event_DROPFILE(self, ev):
+        if not self.active:
+            return False
+        
+        if not self.edit:
+            return True
+        self.set_text(ev.file)
     
     handle_event = handle_event
     evmap = {
@@ -363,6 +366,7 @@ class Line:
         pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
         pg.KEYDOWN: event_KEYDOWN,
         pg.TEXTINPUT: event_TEXTINPUT,
+        pg.DROPFILE: event_DROPFILE,
     }
 
 
@@ -476,7 +480,6 @@ class Multiline:
             self.selection_end = (at_char, at_line)
             self.set_cursor(at_char, at_line)
     
-    
     def event_MOUSEBUTTONDOWN(self, ev):
         if ev.button == pg.BUTTON_LEFT:
             self.selection_start = (-1, -1)
@@ -493,11 +496,9 @@ class Multiline:
             self.set_cursor(at_char, at_line)
             last.clicked = self
     
-    
     def event_MOUSEBUTTONUP(self, ev):
         if ev.button == pg.BUTTON_LEFT:
             self.selecting = False
-    
     
     def event_KEYDOWN(self, ev):
         if last.clicked != self:
@@ -536,7 +537,6 @@ class Multiline:
     def event_MOUSEWHEEL(self, ev):
         limit = len(self.lines) - 1
         self.scroll_pos = min(max(self.scroll_pos - ev.y * 3, 0), limit)
-    
     
     handle_event = handle_event
     evmap = {
@@ -606,7 +606,6 @@ class Button:
         if self.hovering:
             last.hovered = self
     
-    
     def event_MOUSEBUTTONDOWN(self, ev):
         if self.hovering and ev.button == pg.BUTTON_LEFT:
             # double check just in case
@@ -616,20 +615,12 @@ class Button:
                 last.clicked = self
                 return True
     
-    
     def event_MOUSEBUTTONUP(self, ev):
         if self.holding and self.hovering and ev.button == pg.BUTTON_LEFT:
             self.holding = False
             self.callback()
             return True
         self.holding = False
-    
-    
-    def event_KEYDOWN(self, ev):
-        return False
-    
-    def event_TEXTINPUT(self, ev):
-        return False
     
     handle_event = handle_event
     evmap = {
@@ -767,23 +758,11 @@ class Colorpicker:
             self.holding = False
             self.holding_hue = False
     
-    def event_KEYDOWN(self, ev):
-        return False
-    
-    def event_TEXTINPUT(self, ev):
-        return False
-    
-    def event_MOUSEWHEEL(self, ev):
-        return False
-    
     handle_event = handle_event
     evmap = {
         pg.MOUSEMOTION: event_MOUSEMOTION,
         pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
         pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
-        pg.KEYDOWN: event_KEYDOWN,
-        pg.TEXTINPUT: event_TEXTINPUT,
-        pg.MOUSEWHEEL: event_MOUSEWHEEL,
     }
 
 
@@ -836,32 +815,17 @@ class Container:
         offset = pg.Vector2(self.rect.topleft)
         offset.y -= self.scroll
         ev.pos = pg.Vector2(ev.pos) - offset
-        res = any(i.event_MOUSEMOTION(ev) for i in self.elements)
+        res = any(i.handle_event(ev) for i in self.elements)
         ev.pos += offset
         return res
     
-    def event_MOUSEBUTTONDOWN(self, ev):
+    def event_MOUSEBUTTON(self, ev):
         offset = pg.Vector2(self.rect.topleft)
         offset.y -= self.scroll
         ev.pos = pg.Vector2(ev.pos) - offset
-        res = any(i.event_MOUSEBUTTONDOWN(ev) for i in self.elements)
-        ev.pos += offset
-        # if res:
-        #     return
-    
-    def event_MOUSEBUTTONUP(self, ev):
-        offset = pg.Vector2(self.rect.topleft)
-        offset.y -= self.scroll
-        ev.pos = pg.Vector2(ev.pos) - offset
-        res = any(i.event_MOUSEBUTTONUP(ev) for i in self.elements)
+        res = any(i.handle_event(ev) for i in self.elements)
         ev.pos += offset
         return res
-    
-    def event_KEYDOWN(self, ev):
-        return any(i.event_KEYDOWN(ev) for i in self.elements)
-    
-    def event_TEXTINPUT(self, ev):
-        return any(i.event_TEXTINPUT(ev) for i in self.elements)
     
     def event_MOUSEWHEEL(self, ev):
         if len(self.elements) == 0:
@@ -873,12 +837,16 @@ class Container:
         self.scroll_goal = min(max(self.scroll_goal, 0), limit)
         self.scroll -= ev.precise_y * self.scroll_step / 2
     
+    def handle_event(self, ev):
+        func = self.evmap.get(ev.type, None)
+        if func is None:
+            return any(i.handle_event(ev) for i in self.elements)
+        return func(self, ev)
+    
     handle_event = handle_event
     evmap = {
         pg.MOUSEMOTION: event_MOUSEMOTION,
-        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTONDOWN,
-        pg.MOUSEBUTTONUP: event_MOUSEBUTTONUP,
-        pg.KEYDOWN: event_KEYDOWN,
-        pg.TEXTINPUT: event_TEXTINPUT,
+        pg.MOUSEBUTTONDOWN: event_MOUSEBUTTON,
+        pg.MOUSEBUTTONUP: event_MOUSEBUTTON,
         pg.MOUSEWHEEL: event_MOUSEWHEEL,
     }
