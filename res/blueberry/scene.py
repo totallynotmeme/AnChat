@@ -1263,9 +1263,8 @@ select - select element, similar to browser devtools
             
             if ev.key == pg.K_RETURN:
                 user_command = Console.prompt_line.text
-                if not Console.prompt_line.active:
-                    Console.prompt_line.active = True
-                    Console.logs_multiline.active = False
+                if Console.prompt_line != element.last.clicked:
+                    element.last.clicked = Console.prompt_line
                     return
                 
                 Console.run(user_command)

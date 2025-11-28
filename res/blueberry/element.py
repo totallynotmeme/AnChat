@@ -80,7 +80,6 @@ class Line:
         true_pos = 2*self.pos - pg.Vector2(getattr(bb, align))
         self.bounding_box = pg.Rect(true_pos, self.size)
         self.true_bb = pg.Rect(0, 0, 0, 0)
-        self.active = False
     
     def _delete_selection(self):
         points = (self.selection_start, self.selection_end)
@@ -120,6 +119,7 @@ class Line:
     
     
     def draw(self, canvas, offset=pg.Vector2()):
+        active = self == last.clicked
         to_render = self.text or self.placeholder or " "
         if self.text == "":
             color = self.placeholder_color
@@ -153,17 +153,17 @@ class Line:
                 display_bb = pg.Vector2(self.bounding_box.topleft) + offset
                 display_bb = pg.Rect(display_bb, self.bounding_box.size)
                 color = (255, 0, 127)
-                if self.active:
+                if active:
                     color = (0, 255, 127)
                 pg.draw.rect(canvas, color, display_bb, 1)
             else:
                 color = (255, 0, 0)
-                if self.active:
+                if active:
                     color = (0, 255, 0)
                 pg.draw.rect(canvas, color, self.bounding_box, 1)
             pg.draw.rect(canvas, (127, 0, 0), self.true_bb, 1)
         
-        if self.active and self.edit:
+        if active and self.edit:
             offset_x = (self.cursor_pos - self.scroll_pos) * self.font_size.x
             cursor_height = int(VARS.frame % 40 >= 20) * self.font_size.y // 5
             cursor_origin = rect.topleft + pg.Vector2(offset_x, 2 + cursor_height)
@@ -198,12 +198,10 @@ class Line:
     
     def event_MOUSEBUTTONDOWN(self, ev):
         if ev.button == pg.BUTTON_LEFT:
-            self.active = False
             self.selection_start = -1
             self.selection_end = -1
             
             if self.bounding_box.collidepoint(ev.pos):
-                self.active = True
                 self.selecting = True
                 at_char = int((ev.pos[0] - self.true_bb.x) / self.font_size.x + 0.5) + self.scroll_pos
                 at_char = min(max(at_char, 0), len(self.text))
@@ -218,7 +216,7 @@ class Line:
             self.selecting = False
     
     def event_KEYDOWN(self, ev):
-        if not self.active:
+        if self != last.clicked:
             return False
         
         if not self.edit:
@@ -337,7 +335,7 @@ class Line:
         return True
     
     def event_TEXTINPUT(self, ev):
-        if not self.active:
+        if self != last.clicked:
             return False
         
         if not self.edit:
@@ -352,7 +350,7 @@ class Line:
         return True
     
     def event_DROPFILE(self, ev):
-        if not self.active:
+        if self != last.clicked:
             return False
         
         if not self.edit:
@@ -484,9 +482,10 @@ class Multiline:
         if ev.button == pg.BUTTON_LEFT:
             self.selection_start = (-1, -1)
             self.selection_end = (-1, -1)
-            at_line = int((ev.pos[1] - self.pos.y) / self.font_size.y)
+            at_line = (ev.pos[1] - self.pos.y) / self.font_size.y
             if at_line >= len(self.bounding_boxes) or at_line < 0:
                 return
+            at_line = int(at_line)
             self.selecting = True
             at_line += self.scroll_pos
             at_char = int((ev.pos[0] - self.pos.x) / self.font_size.x + 0.5)
@@ -559,7 +558,6 @@ class Button:
         self.callback = callback
         self.scale_factor = 1
         self.hover_scale = hover_scale
-        self.hovering = False
         self.holding = False
         self.surface = pg.Surface(self.size)
         self.surf_hovering = self.surface.copy()
@@ -576,10 +574,11 @@ class Button:
         self.surf_holding.fill((25, 25, 25), special_flags=pg.BLEND_RGB_SUB)
     
     def draw(self, canvas, offset=pg.Vector2()):
+        hovering = self == last.hovered
         if self.holding:
             scale_factor_goal = 1 - self.hover_scale
             surf = self.surf_holding
-        elif self.hovering:
+        elif hovering:
             scale_factor_goal = 1 + self.hover_scale
             surf = self.surf_hovering
         else:
@@ -596,27 +595,25 @@ class Button:
         if VARS.debug:
             if self.holding:
                 pg.draw.rect(canvas, (255, 127, 0), self.true_bb, 2)
-            if self.hovering:
+            if hovering:
                 pg.draw.rect(canvas, (255, 0, 127), self.true_bb, 1)
         return self.true_bb
     
     
     def event_MOUSEMOTION(self, ev):
-        self.hovering = self.bounding_box.collidepoint(ev.pos)
-        if self.hovering:
+        if self.bounding_box.collidepoint(ev.pos):
             last.hovered = self
     
     def event_MOUSEBUTTONDOWN(self, ev):
-        if self.hovering and ev.button == pg.BUTTON_LEFT:
+        if self == last.hovered and ev.button == pg.BUTTON_LEFT:
             # double check just in case
-            self.hovering = self.bounding_box.collidepoint(ev.pos)
-            if self.hovering:
+            if self.bounding_box.collidepoint(ev.pos):
                 self.holding = True
                 last.clicked = self
                 return True
     
     def event_MOUSEBUTTONUP(self, ev):
-        if self.holding and self.hovering and ev.button == pg.BUTTON_LEFT:
+        if self.holding and self == last.hovered and ev.button == pg.BUTTON_LEFT:
             self.holding = False
             self.callback()
             return True
@@ -683,7 +680,6 @@ class Colorpicker:
         self.color = pg.Color(255, 0, 0)
         self.hue = 0
         self.sv = pg.Vector2(0, 255)
-        self.hovering = False
         self.holding = False
         self.holding_hue = False
         self.bounding_box = pg.Rect(self.pos, self.size)

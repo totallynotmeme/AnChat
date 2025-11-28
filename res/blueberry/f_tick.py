@@ -3,6 +3,7 @@
 
 from . import task
 from . import utils
+from . import element
 import pygame as pg
 
 # bootstrapping cba nonsense
@@ -18,6 +19,10 @@ def func():
     for ev in pg.event.get():
         if ev.type == pg.MOUSEMOTION:
             VARS.mousepos = pg.Vector2(pg.mouse.get_pos())
+            element.last.hovered = None
+        
+        if ev.type == pg.MOUSEBUTTONDOWN and ev.button == pg.BUTTON_LEFT:
+            element.last.clicked = None
         
         if ev.type == pg.KEYDOWN:
             mods = pg.key.get_mods()
