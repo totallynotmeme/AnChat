@@ -27,12 +27,10 @@ class Main:
     field_username = None
     field_address = None
     field_status = None
-    background = None
     line_1 = 0
     line_2 = 0
     
     def draw(canvas):
-        Main.background.step()
         for i in Main.elements:
             i.draw(canvas)
     
@@ -44,8 +42,8 @@ class Main:
         c_accent = theme.c["accent"]
         c_accent2 = theme.c["accent2"]
         
-        Main.background = background.bgmap.get(CONFIG.CLIENT["background"], background.Lines)
-        Main.background.init()
+        background.active = background.bgmap.get(CONFIG.CLIENT["background"], background.Lines)
+        background.active.init()
         origin = VARS.window_size/2
         
         Main.elements = []
@@ -173,8 +171,6 @@ class Chat:
     elements = []
     
     def draw(canvas):
-        Main.background.step()
-        
         Chat.scroll = (Chat.scroll * 3 + Chat.scroll_goal) / 4
         
         for i in Chat.messages:
@@ -319,7 +315,7 @@ class Chat:
                 Console.toggle()
                 return
             elif ev.key == pg.K_RETURN:
-                if Chat.input_box.active and Chat.input_box.text:
+                if Chat.input_box == element.last.clicked and Chat.input_box.text:
                     prompt = Chat.input_box.text
                     Chat.input_box.set_text("")
                     if Chat.parse_command(prompt.strip()):
@@ -333,7 +329,7 @@ class Chat:
                 else:
                     # this causes a bug when you press enter with text selected
                     # doesn't affect anything and gets fixed with one click so eh
-                    Chat.input_box.active = True
+                    element.last.clicked = Chat.input_box
                 return
         
         if ev.type == pg.MOUSEWHEEL:
@@ -398,8 +394,6 @@ class Options:
     previous_pickerhold = False
     
     def draw(canvas):
-        Main.background.step()
-        
         # title thingy
         txt = VARS.lang.OPTIONS_TITLE
         txt = VARS.fonts[35].render(txt, True, theme.c["text"])
@@ -418,8 +412,8 @@ class Options:
             Options.previous_bg = this_bg
         if Options.previous_bg != this_bg:
             Options.previous_bg = this_bg
-            Main.background = background.bgmap.get(this_bg, background.Black)
-            Main.background.init()
+            background.active = background.bgmap.get(this_bg, background.Black)
+            background.active.init()
         
         # themes
         this_category = Options.option_elements["colorcategory"].current.lower()

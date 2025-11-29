@@ -4,6 +4,7 @@
 from . import task
 from . import utils
 from . import element
+from . import background
 import pygame as pg
 
 # bootstrapping cba nonsense
@@ -53,6 +54,7 @@ def func():
         fmap["recvmsg"](msg)
     
     fmap["handle_log"]()
+    background.active.step()
     VARS.active.draw(VARS.canvas)
     
     
