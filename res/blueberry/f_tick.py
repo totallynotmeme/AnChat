@@ -3,6 +3,7 @@
 
 from . import task
 from . import utils
+from . import scene
 from . import element
 from . import background
 import pygame as pg
@@ -26,6 +27,10 @@ def func():
             element.last.clicked = None
         
         if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                scene.Console.toggle()
+                scene.Console.is_selecting = False
+                return
             mods = pg.key.get_mods()
             VARS.holding_ctrl = bool(mods & pg.KMOD_CTRL)
             VARS.holding_shift = bool(mods & pg.KMOD_SHIFT)

@@ -142,17 +142,9 @@ class Main:
     
     
     def handle_event(ev):
-        if ev.type == pg.KEYDOWN:
-            if ev.key == pg.K_ESCAPE:
-                Console.toggle()
-            elif Main.connecting:
+        if Main.connecting:
+            if ev.type in (pg.KEYDOWN, pg.TEXTINPUT, pg.MOUSEBUTTONDOWN):
                 return
-        
-        if ev.type == pg.TEXTINPUT and Main.connecting:
-            return
-        
-        if ev.type == pg.MOUSEBUTTONDOWN and Main.connecting:
-            return
         
         if ev.type == pg.MOUSEMOTION:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
@@ -310,27 +302,23 @@ class Chat:
     
     
     def handle_event(ev):
-        if ev.type == pg.KEYDOWN:
-            if ev.key == pg.K_ESCAPE:
-                Console.toggle()
-                return
-            elif ev.key == pg.K_RETURN:
-                if Chat.input_box == element.last.clicked and Chat.input_box.text:
-                    prompt = Chat.input_box.text
-                    Chat.input_box.set_text("")
-                    if Chat.parse_command(prompt.strip()):
-                        return
-                    
-                    t = task.Sendmsg(
-                        author = CONFIG.OWN_NAME.encode(),
-                        content = prompt.encode()
-                    )
-                    t.run()
-                else:
-                    # this causes a bug when you press enter with text selected
-                    # doesn't affect anything and gets fixed with one click so eh
-                    element.last.clicked = Chat.input_box
-                return
+        if ev.type == pg.KEYDOWN and ev.key == pg.K_RETURN:
+            if Chat.input_box == element.last.clicked and Chat.input_box.text:
+                prompt = Chat.input_box.text
+                Chat.input_box.set_text("")
+                if Chat.parse_command(prompt.strip()):
+                    return
+                
+                t = task.Sendmsg(
+                    author = CONFIG.OWN_NAME.encode(),
+                    content = prompt.encode()
+                )
+                t.run()
+            else:
+                # this causes a bug when you press enter with text selected
+                # doesn't affect anything and gets fixed with one click so eh
+                element.last.clicked = Chat.input_box
+            return
         
         if ev.type == pg.MOUSEWHEEL:
             if len(Chat.messages) == 0:
@@ -1113,11 +1101,6 @@ class Options:
     def handle_event(ev):
         if ev.type == pg.MOUSEMOTION:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-    
-        if ev.type == pg.KEYDOWN:
-            if ev.key == pg.K_ESCAPE:
-                Console.toggle()
-                return
         
         # handle overlay buttons first, then the rest
         if any(i.handle_event(ev) for i in Options.elements):
@@ -1247,12 +1230,6 @@ select - select element, similar to browser devtools
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         
         if ev.type == pg.KEYDOWN:
-            if ev.key == pg.K_ESCAPE:
-                if Console.is_selecting:
-                    Console.is_selecting = False
-                    return
-                Console.toggle()
-                return
             history = Console.history or [""]
             
             if ev.key == pg.K_RETURN:
