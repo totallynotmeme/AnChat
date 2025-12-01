@@ -404,7 +404,7 @@ class Options:
             background.active.init()
         
         # themes
-        this_category = Options.option_elements["colorcategory"].current.lower()
+        this_category = Options.option_elements["colorcategory"].current
         picker = Options.option_elements["colorpicker"]
         preset_button = Options.option_elements["themepreset"]
         
@@ -711,7 +711,7 @@ class Options:
         if is_soft:
             category = Options.option_elements["colorcategory"].current
         else:
-            category = theme.categories[0].title()
+            category = theme.categories[0]
         
         last = Options.container.push(element.Optionsbutton,
             offset = (85, 20),
@@ -720,7 +720,8 @@ class Options:
             hover_scale = 0.1,
             color = c_base,
             font = VARS.fonts[20],
-            options = list(map(str.title, theme.categories)),
+            options = theme.categories,
+            display_table = VARS.lang.THEME_TABLE,
         )
         last.current = category
         last.redraw()

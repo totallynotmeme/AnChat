@@ -628,13 +628,16 @@ class Button:
 
 
 class Optionsbutton(Button):
-    def __init__(self, *a, color=(0, 0, 0), font=None, options=("Undefined",), **kwa):
+    def __init__(self, *a, color=(0, 0, 0), font=None, options=("Undefined",), display_table=None, **kwa):
         super().__init__(*a, **kwa)
         self.options = options
         self.current = options[-1]
         self.color = color
         self.font = font
         self.callback = self.f_callback
+        if display_table is None:
+            display_table = {}
+        self.display_table = display_table
         self.redraw()
     
     def f_callback(self):
@@ -650,7 +653,8 @@ class Optionsbutton(Button):
         
     def redraw(self):
         self.surface.fill(self.color)
-        txt = self.font.render(self.current, True, theme.c["text"])
+        txt = self.display_table.get(self.current, self.current)
+        txt = self.font.render(txt, True, theme.c["text"])
         self.surface.blit(txt, txt.get_rect(center=self.size / 2))
         self.update_surf()
 
