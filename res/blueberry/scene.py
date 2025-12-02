@@ -755,7 +755,7 @@ class Options:
                 size = size,
                 align = "midleft",
                 hover_scale = 0.1,
-                callback = gen_callback(i.title()),
+                callback = gen_callback(i),
             )
             Options.theme_elements.append(last)
             offset = (320, 0)
