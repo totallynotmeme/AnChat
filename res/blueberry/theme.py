@@ -38,6 +38,16 @@ all_themes = {
         "text": (255, 255, 255),
         "bubble": (0, 0, 0),
         "bubble edge": (51, 51, 51),
+    }, "Default alt": {
+        "background": (0, 0, 0),
+        "bgdetails": (0, 34, 53),
+        "base": (1, 83, 126),
+        "accent": (0, 106, 198),
+        "accent2": (154, 7, 25),
+        "text": (255, 255, 255),
+        "accent text": (255, 255, 127),
+        "bubble": (0, 24, 37),
+        "bubble edge": (1, 60, 88),
     }
 }
 name = "Default"
@@ -73,3 +83,19 @@ def parse_string_theme(raw):
             except Exception as e:
                 verbals.append(f"Error occured on theme parsing: {e} (@ {i})")
     return name, theme, verbals
+
+
+if __name__ == "__main__":
+    # run theme.py directly and paste your custom theme value from config.txt to
+    # easily turn it into a built-in theme. i'm def the only one who's gonna use this lol
+    print("""
+    Theme parser!
+    Open config.txt and copy the value of your theme field,
+    paste it here to turn it into a Python dictionary
+    """)
+    raw = input(": ")
+    name, theme_dict, _ = parse_string_theme(raw)
+    print("    " + repr(name) + ": {")
+    for key, val in theme_dict.items():
+        print(f"        {repr(key)}: {repr(val)},")
+    print("    }")

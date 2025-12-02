@@ -704,6 +704,10 @@ class Options:
             font = VARS.fonts[20],
             options = sorted(theme.all_themes.keys()),
         )
+        # putting all Default's in the front. [::-1] because i love spaghetti code
+        for i in filter(lambda x: "default" in x.lower(), last.options[::-1]):
+            last.options.remove(i)
+            last.options.insert(0, i)
         last.options.remove("Default")
         last.options.insert(0, "Default")
         Options.option_elements["themepreset"] = last
