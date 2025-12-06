@@ -57,7 +57,7 @@ def handle_con(con, user_id):
     try:
         while True:
             packet = con.recv(16384)
-            print(f"#{user_id}: {packet}")
+            print(f"#{user_id}: {len(packet)} bytes")
             if packet == b"":
                 break
             PACKET_QUEUE[user_id] = PACKET_QUEUE.get(user_id, b"") + packet
