@@ -961,7 +961,8 @@ class Options:
             size_y = element.Multiline.get_ysize_for(
                 text = docs,
                 size_x = VARS.window_size[0] - 30,
-                font = VARS.fonts[20])
+                font = VARS.fonts[20]
+            )
             last = Options.container.push(element.Multiline,
                 offset = (20, 5),
                 size_y = size_y,
@@ -1278,4 +1279,76 @@ select - select element, similar to browser devtools
         any(i.handle_event(ev) for i in Console.elements)
 
 
-to_init = (Main, Chat, Options, Console)
+class About:
+    container = None
+    backbutton = None
+    
+    def draw(canvas):
+        txt = VARS.lang.HELP_TITLE
+        txt = VARS.fonts[35].render(txt, True, theme.c["text"])
+        canvas.blit(txt, txt.get_rect(center=(VARS.window_size.x/2, 25)))
+        
+        About.container.draw(canvas)
+        About.backbutton.draw(canvas)
+        Options.button.draw(canvas)
+    
+    def init(is_soft):
+        c_base = theme.c["base"]
+        c_background = theme.c["background"]
+        c_text = theme.c["text"]
+        c_accenttext = theme.c["accent text"]
+        c_accent = theme.c["accent"]
+        c_accent2 = theme.c["accent2"]
+        
+        txt = VARS.lang.HELP_BUTTON
+        button_size_x = VARS.fonts[20].size(txt)[0] + 25
+        button = element.Button(
+            pos = VARS.window_size - (10, 10),
+            size = (button_size_x, 30),
+            align = "bottomright",
+            callback = About.switch,
+            hover_scale = 0.1,
+        )
+        button.surface.fill(c_base)
+        txt = VARS.fonts[20].render(txt, True, c_text)
+        button.surface.blit(txt, txt.get_rect(center=(button_size_x // 2, 15)))
+        button.update_surf()
+        About.backbutton = button
+        Main.elements.append(button)
+        
+        About.container = element.Container(
+            pos = (0, 50),
+            size = (VARS.window_size.x, VARS.window_size.y - 50),
+        )
+        
+        size_y = element.Multiline.get_ysize_for(
+            text = VARS.lang.HELP_TEXT,
+            size_x = VARS.window_size[0] - 30,
+            font = VARS.fonts[25]
+        )
+        last = About.container.push(element.Multiline,
+            offset = (20, -10),
+            size_y = size_y,
+            color = c_text,
+            font = VARS.fonts[25],
+        )
+        last.set_text(VARS.lang.HELP_TEXT)
+    
+    def switch():
+        if VARS.active == About:
+            VARS.active = Main
+        else:
+            VARS.active = About
+    
+    def handle_event(ev):
+        if ev.type == pg.MOUSEMOTION:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
+        
+        if About.backbutton.handle_event(ev):
+            return
+        if Options.button.handle_event(ev):
+            return
+        About.container.handle_event(ev)
+
+
+to_init = (Main, Chat, Options, Console, About)

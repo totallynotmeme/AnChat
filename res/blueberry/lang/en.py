@@ -69,6 +69,81 @@ TASK_SENDMSG_DONE = "Success!"
 TASK_SENDMSG_FAILED = "Failed to send a message"
 
 
+HELP_TITLE = "Help / basic information"
+HELP_BUTTON = "Wat??"
+HELP_TEXT = """
+Hi there, and welcome to AnChat!
+(you can scroll down, use your mouse wheel)
+
+work in progress, things might change
+
+
+If you're reading this, you're probably seeing this app for the first time.\
+ In short, this is a simple project that uses end-to-end encryption so only\
+ people with the passphrase can read messages you send in the chat room
+
+Before you continue reading, feel free to change some of the options, such as\
+ Language or Window size. Click the button in the top-left corner, you can\
+ figure out the rest!
+
+
+
+> But other messenger apps already do that, like DMs on Discord!!
+
+Sure, no other USER might be able to see your messages, but they are decrypted\
+ server-side to store your years-long message history. That's completely\
+ normal and it probably won't affect you... unless you get hacked.\
+ Feel free to use Discord or other apps if you don't need extreme levels\
+ of privacy
+
+
+
+> Then why shouldn't I use Kleopatra for true end-to-end encryption?
+
+If you can, use it! This project was made as a more convenient alternative\
+ for people who don't want to click through text menus and manage their keys.\
+ Of course, it still can't be as simple as "a few clicks and you're done", but\
+ copying a one-time passphrase ONCE is (in my opinion) much more user-friendly\
+ rather than pasting and decrypting each individual message
+
+
+
+> How do I let my friend connect to me?
+
+Sadly, because this app is still being developed, it's not as easy and requires\
+ some technical knowledge. Currently, the server host has to install Python\
+ on their system and download a server script from the GitHub repository where\
+ you got this app from. To set up a temporary server without too much trouble,\
+ you can:
+
+1. Download 2 files from the project repo:
+  - hosting/server-http.py
+  - hosting/forward-localhostdotrun.py
+2. Open the 2nd file in your code editor to make sure the settings are right
+3. Run both scripts
+
+You should now have two windows, one saying:
+  - server listening on 127.0.0.1:65333
+and the other one asking you to press Enter to run the ssh command.\
+ Do it, make sure it works, type "y" if needed. Finally, it should show:
+  - Tunnel reset, new URL: (https link)
+  - New passphrase: (a bunch of words)
+Send these words to your friend, pick HTTP protocol on connection screen,\
+ and now you can finally connect!
+
+Keep in mind that the server will only last a short amount of time, around\
+ 5-10 minutes. If you want to host a server for much longer, I recommend using\
+ Radmin VPN (or a similar tool) to directly connect to each other. If you don't\
+ know how, you can follow a guide like "how to play minecraft via radmin".\
+ In that case, you only need one hosting script: server-socket.py
+(built-in "run server" button is planned in future updates)
+
+
+
+the end.
+"""[1:-1]
+
+
 MESSAGE_CONNECTED = "Connected to the server, send /disconnect to get back to menu"
 MESSAGE_DISCONNECTED = "Disconnected from the server"
 MESSAGE_DUMPED = "Dumped message history into {}"
