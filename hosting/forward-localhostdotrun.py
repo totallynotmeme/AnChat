@@ -8,7 +8,8 @@ import core
 # [===== START OF SETTINGS =====]
 
 # put something between "quotes" to add a passphrase suffix.
-# is optional, does not affect the passphrase generation at all
+# is optional but VERY RECOMMENDED, please set this to something
+# to make your passphrase a whole lot harder to guess. example:
 # suffix = "very silly suffix here"
 suffix = ""
 
