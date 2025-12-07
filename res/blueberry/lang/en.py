@@ -122,7 +122,7 @@ Sadly, because this app is still being developed, it's not as easy and requires\
   - hosting/core.py
 2. Open "forward-localhostdotrun.py" in your code editor to make sure the\
  settings are right
-3. Run both scripts
+3. Run "server-..." and "forward-..." scripts
 
 You should now have two windows, one saying:
   - server listening on 127.0.0.1:65333
