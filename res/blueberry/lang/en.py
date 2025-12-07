@@ -119,7 +119,9 @@ Sadly, because this app is still being developed, it's not as easy and requires\
 1. Download 2 files from the project repo:
   - hosting/server-http.py
   - hosting/forward-localhostdotrun.py
-2. Open the 2nd file in your code editor to make sure the settings are right
+  - hosting/core.py
+2. Open "forward-localhostdotrun.py" in your code editor to make sure the\
+ settings are right
 3. Run both scripts
 
 You should now have two windows, one saying:
@@ -135,7 +137,8 @@ Keep in mind that the server will only last a short amount of time, around\
  5-10 minutes. If you want to host a server for much longer, I recommend using\
  Radmin VPN (or a similar tool) to directly connect to each other. If you don't\
  know how, you can follow a guide like "how to play minecraft via radmin".\
- In that case, you only need one hosting script: server-socket.py
+ In that case, you only need one script: server-socket.py (to connect, you can\
+ use a passphrase of format "{lol anything i want}@{ip}:{port}", without {})
 (built-in "run server" button is planned in future updates)
 
 
