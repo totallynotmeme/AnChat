@@ -373,12 +373,7 @@ class Options:
     category_current = "standard"
     all_fonts = {}
     font_preview = None
-    # i need to refactor this smh
-    previous_font = None
-    previous_bg = None
-    previous_preset = None
-    previous_category = None
-    previous_algorithm = None
+    tracker = utils.Tracker()
     previous_pickerhold = False
     
     def draw(canvas):
@@ -390,16 +385,12 @@ class Options:
         
         # font
         this_font = Options.option_elements["font"].current
-        if Options.previous_font != this_font:
-            Options.previous_font = this_font
+        if Options.tracker.update(font=this_font):
             Options.font_preview.font = Options.all_fonts[this_font]
         
         # background
         this_bg = Options.option_elements["bg"].current
-        if Options.previous_bg is None:
-            Options.previous_bg = this_bg
-        if Options.previous_bg != this_bg:
-            Options.previous_bg = this_bg
+        if Options.tracker.update(bg=this_bg, init=False):
             background.active = background.bgmap.get(this_bg, background.Black)
             background.active.init()
         
@@ -408,14 +399,12 @@ class Options:
         picker = Options.option_elements["colorpicker"]
         preset_button = Options.option_elements["themepreset"]
         
-        if Options.previous_preset != preset_button.current:
-            Options.previous_preset = preset_button.current
-            Options.previous_category = None
+        if Options.tracker.update(preset=preset_button.current):
+            Options.tracker.update(category=None) # force update category
             if preset_button.current != "Custom":
                 theme.temp = theme.all_themes[preset_button.current].copy()
         
-        if Options.previous_category != this_category:
-            Options.previous_category = this_category
+        if Options.tracker.update(category=this_category):
             color = theme.temp[this_category]
             picker.set_color(color)
             Options.update_preview()

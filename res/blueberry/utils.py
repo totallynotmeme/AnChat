@@ -160,3 +160,36 @@ def text_to_lines(text, max_length):
 def is_monospace(font, sample="iW ,"):
     goal = font.size(sample[0])
     return all(font.size(i) == goal for i in sample[1:])
+
+
+class Tracker:
+    """
+    Simple class for tracking variable changes. For example, instead of:
+    > if previous_var != var:
+    >     previous_var = var
+    >     do_funny()
+    you can write:
+    > if tracker.update(var=var):
+    >     do_funny()
+    """
+    def __init__(self):
+        self.elements = {}
+    
+    def __repr__(self):
+        return f"Tracker(<{len(self.elements)} elements>)"
+    
+    def update(self, init=True, **kwargs):
+        if len(kwargs) != 1:
+            raise ValueError(f"Tracker only supports one name per update (got {len(kwargs)})")
+        name, val = tuple(*kwargs.items()) # a tiny bit of spaghetti??
+        
+        if name not in self.elements:
+            self.elements[name] = val
+            return init
+        
+        if self.elements[name] == val:
+            # no changes, boring
+            return False
+        # the value is different!!!
+        self.elements[name] = val
+        return True

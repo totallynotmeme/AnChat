@@ -728,7 +728,6 @@ class Colorpicker:
     
     
     def event_MOUSEMOTION(self, ev):
-        self.hovering = self.bounding_box.collidepoint(ev.pos)
         if self.holding:
             if self.holding_hue:
                 self.hue = (ev.pos[1] - self.pos.y) % 255
@@ -737,11 +736,11 @@ class Colorpicker:
                 self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
                 self.sv.y = 255 - min(max(ev.pos[1] - self.pos.y, 0), 255)
                 self.update()
-        if self.hovering:
+        if self.bounding_box.collidepoint(ev.pos):
             last.hovered = self
     
     def event_MOUSEBUTTONDOWN(self, ev):
-        if self.hovering and ev.button == pg.BUTTON_LEFT:
+        if self == last.hovered and ev.button == pg.BUTTON_LEFT:
             self.holding = True
             if ev.pos[0] - self.pos.x > 255:
                 self.holding_hue = True
