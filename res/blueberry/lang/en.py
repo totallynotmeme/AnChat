@@ -60,13 +60,21 @@ TASK_STREAM_RUNNING = "Streaming file {} (#{}/{} chunks  {}%)"
 TASK_STREAM_DONE = "Finished streaming file {} ({} chunks)"
 TASK_STREAM_FAILED = "Streaming failed at chunk #{}/{} (check console for more info)"
 
-TASK_CONNECT_RUNNING = "Trying to connect to the server"
-TASK_CONNECT_DONE = "Connected successfully!"
-TASK_CONNECT_FAILED = "Connection failed"
-
-TASK_SENDMSG_RUNNING = "Sending your message..."
-TASK_SENDMSG_DONE = "Success!"
-TASK_SENDMSG_FAILED = "Failed to send a message"
+TASK_CONNECT = {
+    "running": "Trying to connect to the server",
+    "done": "Connected successfully!",
+    "failed": "Connection failed",
+}
+TASK_SENDMSG = {
+    "running": "Sending your message...",
+    "done": "Success!",
+    "failed": "Failed to send a message",
+}
+TASK_TOOL = {
+    "running": "{} is running...",
+    "done": "{} finished!",
+    "failed": "{} exited with an error",
+}
 
 
 HELP_TITLE = "Help / basic information"

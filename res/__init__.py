@@ -38,7 +38,7 @@ LAST_SLEEP = 0
 LOGS = []
 
 class VARS:
-    CORE_VERSION = "0.2.0-ALPHA"
+    CORE_VERSION = "0.2.1-ALPHA"
     RUNNING = False
 
 class CONFIG:

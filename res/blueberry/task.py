@@ -134,18 +134,10 @@ class Connect:
         return f"Connect(raw=<...> protocol={self.protocol} [{self.status}])"
     
     def __str__(self):
-        # can be replaced with a dictionary but im too lazy.
-        # if you're reading this, go ahead, do it
-        if self.status == "running":
-            return VARS.lang.TASK_CONNECT_RUNNING
-        
-        if self.status == "done":
-            return VARS.lang.TASK_CONNECT_DONE
-        
-        if self.status == "failed":
-            return VARS.lang.TASK_CONNECT_FAILED
-        
-        return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+        res = VARS.lang.TASK_CONNECT.get(self.status, None)
+        if res is None:
+            return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+        return res
     
     @threaded
     def run(self):
@@ -217,19 +209,10 @@ class Sendmsg:
         return f"Sendmsg(<{len(self.message)} attributes>  [{self.status}])"
     
     def __str__(self):
-        # can be replaced with a dictionary but im too lazy.
-        # if you're reading this, go ahead, do it
-        # and yes, this section was copied from Connect task.
-        if self.status == "running":
-            return VARS.lang.TASK_SENDMSG_RUNNING
-        
-        if self.status == "done":
-            return VARS.lang.TASK_SENDMSG_DONE
-        
-        if self.status == "failed":
-            return VARS.lang.TASK_SENDMSG_FAILED
-        
-        return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+        res = VARS.lang.TASK_SENDMSG.get(self.status, None)
+        if res is None:
+            return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+        return res
     
     @threaded
     def run(self):
@@ -270,3 +253,59 @@ class Sendmsg:
                     chatmsg.status = -1
                 except Exception as e:
                     LOGS.append(f"Error when setting message status: {e}")
+
+
+class Tool:
+    def __init__(self, func, output_line, button_el, args):
+        self.func = func
+        self.output_line = output_line
+        self.button_el = button_el
+        self.args = args
+        self.status = "ready"
+        self.details = "Ready to run"
+    
+    def __repr__(self):
+        return f"Tool({self.func.__name__}(<{len(self.args)} args>)  [{self.status}])"
+    
+    def __str__(self):
+        res = VARS.lang.TASK_TOOL.get(self.status, None)
+        if res is None:
+            return VARS.lang.TASK_UNKNOWN.format(self.status, repr(self))
+        return res.format(self.func.__name__)
+    
+    @threaded
+    def run(self):
+        if self.status != "ready":
+            LOGS.append(f"Tried to run a non-ready task {repr(self)}")
+            return
+        
+        self.button_el.active = False
+        self.status = "running"
+        self.details = "Running..."
+        res = "`res` was unset for some reason"
+        RUNNING.append(self)
+        try:
+            res = self.func(*self.args)
+            if type(res) is not str:
+                res = repr(res)
+            self.output_line.set_text(res)
+        except Exception as e:
+            LOGS.append(f"Error in tool {self.func.__name__}: {e}")
+            RUNNING.remove(self)
+            FAILED.append([self, 240])
+            self.button_el.active = True
+            self.status = "failed"
+            try:
+                res = f"{type(e).__name__}: {e}"
+            except:
+                # who knows what spaghetti needs to happen to throw an error here
+                res = str(e)
+            self.output_line.set_text(res)
+            return
+        RUNNING.remove(self)
+        FINISHED.append([self, 240])
+        self.button_el.active = True
+        self.status = "done"
+        if type(res) is not str:
+            res = repr(res)
+        self.details = res

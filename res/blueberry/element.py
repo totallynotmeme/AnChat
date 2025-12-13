@@ -556,6 +556,7 @@ class Button:
         self.size = pg.Vector2(size)
         self.align = align
         self.callback = callback
+        self.active = True
         self.scale_factor = 1
         self.hover_scale = hover_scale
         self.holding = False
@@ -575,7 +576,7 @@ class Button:
     
     def draw(self, canvas, offset=pg.Vector2()):
         hovering = self == last.hovered
-        if self.holding:
+        if self.holding or not self.active:
             scale_factor_goal = 1 - self.hover_scale
             surf = self.surf_holding
         elif hovering:
@@ -605,6 +606,8 @@ class Button:
             last.hovered = self
     
     def event_MOUSEBUTTONDOWN(self, ev):
+        if not self.active:
+            return False
         if self == last.hovered and ev.button == pg.BUTTON_LEFT:
             # double check just in case
             if self.bounding_box.collidepoint(ev.pos):

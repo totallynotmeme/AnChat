@@ -921,17 +921,13 @@ class Options:
         )
         last.set_text(VARS.lang.OPTIONS_TOOLS_TITLE)
         
-        def gen_callback(func, result_obj, *arg_objs):
+        def gen_callback(func, result_obj, button_obj, *arg_objs):
             def callback():
-                try:
-                    args = [i.text for i in arg_objs]
-                    res = func(*args)
-                    if type(res) is not str:
-                        res = repr(res)
-                except Exception as e:
-                    res = str(e)
-                result_obj.set_text(res)
+                args = [i.text for i in arg_objs]
+                t = task.Tool(func, result_obj, button_obj, args)
+                t.run()
             return callback
+        
         for name, func in tools._all.items():
             args = tools._args[name]
             # tool title
@@ -982,14 +978,15 @@ class Options:
                 edit = True,
                 placeholder = "None",
             )
+            result_obj = last
             # run button
             last = Options.container.push(element.Button,
                 offset = (70, 20),
                 size = (120, 30),
                 align = "center",
                 hover_scale = 0.04,
-                callback = gen_callback(func, last, *arg_objs),
             )
+            last.callback = gen_callback(func, result_obj, last, *arg_objs)
             last.surface.fill(c_base)
             txt = VARS.fonts[15].render(VARS.lang.OPTIONS_TOOLS_RUN, True, c_text)
             last.surface.blit(txt, txt.get_rect(center=(60, 15)))

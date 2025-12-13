@@ -63,7 +63,7 @@ def func():
     
     # generic variables setup
     chat_message.downloads_path = DOWNLOADS_PATH
-    VARS.CLIENT_VERSION = "0.2.0-ALPHA"
+    VARS.CLIENT_VERSION = "0.2.1-ALPHA"
     VARS.mousepos = pg.Vector2(-1, -1)
     VARS.frame = 0
     VARS.holding_ctrl = False
