@@ -369,6 +369,7 @@ class Options:
     option_elements = {}
     theme_elements = []
     elements = ()
+    category_buttons = {}
     category_elements = {}
     category_current = "standard"
     all_fonts = {}
@@ -419,8 +420,7 @@ class Options:
         
         # encryption algorithm
         alg_button = Options.option_elements["alg"]
-        if Options.previous_algorithm != alg_button.current:
-            Options.previous_algorithm = alg_button.current
+        if Options.tracker.update(alg=alg_button.current):
             doc_string = encryption.old.docs[alg_button.current]
             doc_string = "Documentation notes:\n" + doc_string
             Options.option_elements["alg_docs"].set_text(doc_string)
@@ -521,6 +521,8 @@ class Options:
                 item = Options.container
                 table = Options.category_elements
                 Options.category_current = name
+                for button_name, button in Options.category_buttons.items():
+                    button.active = button_name != name
                 item.elements = table["base"].copy()
                 item.elements.extend(table[name])
             return callback
@@ -543,6 +545,8 @@ class Options:
             txt = VARS.fonts[15].render(display_name, True, c_text)
             last.surface.blit(txt, txt.get_rect(center=center))
             last.update_surf()
+            last.active = i != Options.category_current
+            Options.category_buttons[i] = last
             offset = (offset[0] + size[0]/2 + 10, -29)
         Options.category_elements["base"] = Options.container.elements
         Options.container.elements = []
