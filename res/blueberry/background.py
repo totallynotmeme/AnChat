@@ -99,5 +99,41 @@ class Rain:
         ])
 
 
-bglist = [Black, Lines, Rain, Grid]
+class Snow:
+    surf = None
+    active = []
+    cooldown = 0
+    
+    def init():
+        Snow.surf = pg.Surface(size)
+        Snow.surf.fill(theme.c["background"])
+        # drawing the ground
+        for x in range(0, int(size.x)+1, 50):
+            r = math.sin(x / 100) * 5 + 75
+            pg.draw.circle(Snow.surf, theme.c["bgdetails"], (x, size.y), r)
+    
+    def step():
+        surface.blit(Snow.surf, (0, 0))
+        to_remove = []
+        for ind, i in enumerate(Snow.active):
+            # X, Y, speed
+            x, y, s = i
+            i[0] += s
+            i[1] += 2
+            i[2] += random.random() - 0.5
+            i[2] /= 1.1
+            pg.draw.circle(surface, theme.c["bgdetails"], (x, y), 5)
+            if y > size.y - 60:
+                to_remove.append(ind - len(to_remove))
+        for i in to_remove:
+            Snow.active.pop(i)
+        
+        Snow.cooldown -= 1
+        if Snow.cooldown < 0:
+            Snow.cooldown = 10
+            Snow.active.append([random.randint(0, int(size.x)), 0, 0])
+
+
+bglist = [Black, Lines, Rain, Grid, Snow]
 bgmap = {i.__name__: i for i in bglist}
+
