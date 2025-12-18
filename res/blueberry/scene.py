@@ -909,6 +909,7 @@ class Options:
             font = VARS.fonts[20],
         )
         Options.option_elements["alg_docs"] = last
+        Options.tracker.update(alg=None) # force text to actually show up
         
         Options.category_elements["advanced"] = Options.container.elements
         Options.container.elements = []
@@ -1342,3 +1343,4 @@ class About:
 
 
 to_init = (Main, Chat, Options, Console, About)
+
