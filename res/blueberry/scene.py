@@ -1102,8 +1102,7 @@ class Options:
     
     def handle_event(ev):
         Options.container.handle_event(ev)
-        for i in Options.elements:
-            i.handle_event(ev)
+        any(i.handle_event(ev) for i in Options.elements)
 
 
 

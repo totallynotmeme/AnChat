@@ -733,7 +733,7 @@ class Colorpicker:
     def event_MOUSEMOTION(self, ev):
         if self.holding:
             if self.holding_hue:
-                self.hue = (ev.pos[1] - self.pos.y) % 255
+                self.hue = min(max(ev.pos[1] - self.pos.y, 0), 255)
                 self.update()
             else:
                 self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
@@ -747,7 +747,7 @@ class Colorpicker:
             self.holding = True
             if ev.pos[0] - self.pos.x > 255:
                 self.holding_hue = True
-                self.hue = (ev.pos[1] - self.pos.y) % 255
+                self.hue = min(max(ev.pos[1] - self.pos.y, 0), 255)
                 self.update()
             else:
                 self.sv.x = 255 - min(max(ev.pos[0] - self.pos.x, 0), 255)
