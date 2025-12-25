@@ -136,4 +136,3 @@ class Snow:
 
 bglist = [Black, Lines, Rain, Grid, Snow]
 bgmap = {i.__name__: i for i in bglist}
-

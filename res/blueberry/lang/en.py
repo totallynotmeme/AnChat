@@ -36,7 +36,10 @@ or even completely disable the encryption of your chats. Be careful!
 
 OPTIONS_TOOLS_TITLE = "Tools"
 OPTIONS_TOOLS_RUN = "Run"
-OPTIONS_TOOLS_OUT = "Output: "
+OPTIONS_TOOLS_DESC = """
+A set of simple tools that can be used outside of chatting!
+To paste path to a file: click on the text line and drag your file into this window
+"""[1:-1]
 
 ABOUT_TEXT = """
 AnChat v{client_ver}

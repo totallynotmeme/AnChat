@@ -22,6 +22,7 @@ def func():
         if ev.type == pg.MOUSEMOTION:
             VARS.mousepos = pg.Vector2(pg.mouse.get_pos())
             element.last.hovered = None
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         
         if ev.type == pg.MOUSEBUTTONDOWN and ev.button == pg.BUTTON_LEFT:
             element.last.clicked = None

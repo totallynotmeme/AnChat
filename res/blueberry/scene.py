@@ -146,9 +146,6 @@ class Main:
             if ev.type in (pg.KEYDOWN, pg.TEXTINPUT, pg.MOUSEBUTTONDOWN):
                 return
         
-        if ev.type == pg.MOUSEMOTION:
-            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        
         any(i.handle_event(ev) for i in Main.elements)
 
 
@@ -330,9 +327,6 @@ class Chat:
             Chat.scroll_goal = min(max(Chat.scroll_goal, -200), limit)
             Chat.scroll -= ev.precise_y * Chat.scroll_step / 10
             return
-        
-        if ev.type == pg.MOUSEMOTION:
-            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
         
         if ev.type == pg.MOUSEBUTTONDOWN and ev.button == pg.BUTTON_RIGHT:
             # MORE SPAGHETTI OHNOES
@@ -908,8 +902,8 @@ class Options:
             color = c_text,
             font = VARS.fonts[20],
         )
-        Options.option_elements["alg_docs"] = last
         Options.tracker.update(alg=None) # force text to actually show up
+        Options.option_elements["alg_docs"] = last
         
         Options.category_elements["advanced"] = Options.container.elements
         Options.container.elements = []
@@ -925,6 +919,17 @@ class Options:
             edit = False,
         )
         last.set_text(VARS.lang.OPTIONS_TOOLS_TITLE)
+        
+        # description
+        last = Options.container.push(element.Multiline,
+            offset = (20, 0),
+            size_y = 100,
+            color = c_text,
+            font = VARS.fonts[25],
+            align = "topleft",
+            edit = False,
+        )
+        last.set_text(VARS.lang.OPTIONS_TOOLS_DESC)
         
         def gen_callback(func, result_obj, button_obj, *arg_objs):
             def callback():
@@ -981,7 +986,7 @@ class Options:
                 font = VARS.fonts[25],
                 align = "topleft",
                 edit = True,
-                placeholder = "None",
+                placeholder = "Output...",
             )
             result_obj = last
             # run button
@@ -1096,13 +1101,9 @@ class Options:
     
     
     def handle_event(ev):
-        if ev.type == pg.MOUSEMOTION:
-            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        
-        # handle overlay buttons first, then the rest
-        if any(i.handle_event(ev) for i in Options.elements):
-            return
         Options.container.handle_event(ev)
+        for i in Options.elements:
+            i.handle_event(ev)
 
 
 
@@ -1223,9 +1224,6 @@ select - select element, similar to browser devtools
     def handle_event(ev):
         global _
         
-        if ev.type == pg.MOUSEMOTION:
-            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        
         if ev.type == pg.KEYDOWN:
             history = Console.history or [""]
             
@@ -1332,9 +1330,6 @@ class About:
             VARS.active = About
     
     def handle_event(ev):
-        if ev.type == pg.MOUSEMOTION:
-            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
-        
         if About.backbutton.handle_event(ev):
             return
         if Options.button.handle_event(ev):
@@ -1343,4 +1338,3 @@ class About:
 
 
 to_init = (Main, Chat, Options, Console, About)
-
