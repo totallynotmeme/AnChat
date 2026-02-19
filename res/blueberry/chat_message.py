@@ -33,7 +33,9 @@ error_codes = {}
 
 class ChatMessage:
     corners = (25, 10, 15, 10)
+    system_corners = (25, 10, 10, 25)
     expanded = pg.Surface((0, 0))
+    
     def __init__(self, raw):
         #print("="*40, *raw.keys(), "="*40, sep="\n")
         self.raw = raw
@@ -65,18 +67,20 @@ class ChatMessage:
         
         author_color = (255, 255, 255)
         
-        if self.author in ("[YOU]", "[SYSTEM]"):
+        if self.author == "[YOU]":
             self.align = "topright"
             self.x_pos = window_size[0] - 25
             self.corners = ChatMessage.corners[::-1]
             author_color = (255, 255, 127)
+        elif self.author == "[SYSTEM]":
+            self.align = "midtop"
+            self.x_pos = window_size[0] // 2
+            self.corners = ChatMessage.system_corners
+            author_color = (127, 190, 255)
         else:
             self.align = "topleft"
             self.x_pos = 25
             self.corners = ChatMessage.corners
-        
-        if self.author == "[SYSTEM]":
-            author_color = (127, 190, 255)
         
         # drawing the message
         author_font = fonts[25]
@@ -123,12 +127,15 @@ class ChatMessage:
         self.text_element.color = colors[self.status]
         self.surface.fill((0, 0, 0, 0))
         surf_rect = self.surface.get_rect()
+        
         pg.draw.rect(self.surface, theme.c["bubble"], surf_rect, 0, *self.corners)
         pg.draw.rect(self.surface, theme.c["bubble edge"], surf_rect, 2, *self.corners)
         self.author_element.draw(self.surface)
         self.text_element.draw(self.surface)
+        
         true_offset = int(self.offset - scroll_offset)
         self.rect = self.surface.get_rect(**{self.align: (self.x_pos, true_offset)})
+        
         if self.expand:
             highlight = self.rect.copy()
             highlight.x -= 1
@@ -141,6 +148,8 @@ class ChatMessage:
     def reinit(self):
         if self.align == "topright":
             self.x_pos = window_size[0] - 25
+        if self.align == "midtop":
+            self.x_pos = window_size[0] // 2
         # janky code to make messages resize when user changes screen res
         # should be refactored later ig
         text_font = fonts[20]
